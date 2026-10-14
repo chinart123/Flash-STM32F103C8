@@ -1,0 +1,13 @@
+.\objects\main.o: main.c
+.\objects\main.o: .\Drivers\stm32f1xx.h
+.\objects\main.o: .\Drivers\stm32f103xb.h
+.\objects\main.o: .\Drivers\core_cm3.h
+.\objects\main.o: C:\Users\ASUS\AppData\Local\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\main.o: .\Drivers\cmsis_version.h
+.\objects\main.o: .\Drivers\cmsis_compiler.h
+.\objects\main.o: .\Drivers\cmsis_armcc.h
+.\objects\main.o: .\Drivers\system_stm32f1xx.h
+.\objects\main.o: .\Drivers\stm32f1xx_ll_bus.h
+.\objects\main.o: .\Drivers\stm32f1xx_ll_gpio.h
+.\objects\main.o: .\Drivers\stm32f1xx_ll_rcc.h
+.\objects\main.o: .\Drivers\stm32f1xx_ll_system.h

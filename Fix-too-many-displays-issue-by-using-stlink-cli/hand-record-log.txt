@@ -1,0 +1,370 @@
+Quy trình như sau:
+
+
+Tab Utilities
+Bật nút "Use Debug Driver" --> Mục đích là để nó chiếm quyền trước STlink(Kể cả built in lẫn ở ngoài):
+Terminal báo lỗi "Too many errors displays!"
+Add thêm file .ini vào và flash lại -> dòng 72Mhz hiện lên
+Thử exclude file .ini ra và flash lạ -> "Too many errors displays!"
+==> Tới đây chứng minh được là "Use Debug Driver" đang chứa cái gì đó khiến cho lỗi flash không thành công.
+
+Trong tab Utilities, bỏ tick "Use Debug Driver", chọn ô "ST-Link Debugger"
+Lúc này do ảnh hưởng của "Use Debug Driver", nên "ST-Link Debugger" báo lỗi "Too many errors displays!"
+Thử add lại .ini và quả nhiên, thằng 72Mhz đã trở lại.
+
+Flash wait states (LATENCY) = 0
+SYSCLK = PLL x9 = 72 MHz
+ResetClocks();
+RCC_CR=0x00008583 HSERDY=0 PLLON=0 PLLRDY=0
+ShowClocks();
+RCC_CFGR=0x001D0000  FLASH_ACR=0x00000000
+Flash wait states (LATENCY) = 0
+SYSCLK = HSI = 8 MHz
+
+Thử kiểm nghiệm lại với thằng "Use Debug Driver" xem nó có flash ra 72Mhz không? 
+Giữ nguyên file .ini, kết quả ra như sau:
+RCC_CFGR=0x001D0000  FLASH_ACR=0x00000000
+Flash wait states (LATENCY) = 0
+SYSCLK = HSI = 8 MHz
+ResetClocks();
+RCC_CR=0x00008583 HSERDY=0 PLLON=0 PLLRDY=0
+ShowClocks();
+RCC_CFGR=0x00000000  FLASH_ACR=0x00000000
+Flash wait states (LATENCY) = 0
+SYSCLK = HSI = 8 MHz
+
+==> Thử nhiều lần vẫn ra Flash wait states (LATENCY) = 0; SYSCLK = HSI = 8 MHz
+==> Vậy là file .ini khá mạnh khi có thể sửa được việc fix cứng 72Mhz của nó vào trong chip 
+Sau đó bỏ file .ini và tiếp tục build bằng KeilC(Sử dụng cả "Use Debug Driver" lẫn built in STlink bên trong settings) thì báo "Too many errors displays!"
+Lúc này thử STLink Utility bên ngoài, connect:
+==> Có thể thấy, sau khi không nạp file .ini, các địa chỉ bị xáo trộn: [3]
+0x08000000: 08000179	0800016D	20000660	08000177 HOẶC nếu live update 0x08000000: 08000175	0800016D	20000660	08000177
+0x08000004: 08000177	20000660	08000177	08000175 HOẶC nếu live update 0x08000004: 0800017B	20000660	08000177	08000175
+0x08000008: 0800017D	08000177	08000175	0800017B HOẶC nếu live update 0x08000008: 08000179	08000177	08000175	0800017B
+0x0800000C: 0800017B	08000175	0800017B	08000179 HOẶC nếu live update 0x0800000C: 00000000	08000175	0800017B	08000179
+0x08000010: :08000179	0800017B	08000179	00000000 HOẶC nếu live update 0x08000010: 0800017D	0800017B	08000179	00000000
+
+
+Thấy rõ sau khi nạp lại file .ini, tần số ngay lúc bị crash đã bị vọt lên 72Mhz(không biết lí do là gì?)
+
+RCC_CFGR=0x001D040A  FLASH_ACR=0x00000000
+Flash wait states (LATENCY) = 0
+SYSCLK = PLL x9 = 72 MHz
+ResetClocks();
+RCC_CR=0x00008583 HSERDY=0 PLLON=0 PLLRDY=0
+ShowClocks();
+RCC_CFGR=0x001D0000  FLASH_ACR=0x00000000
+Flash wait states (LATENCY) = 0
+SYSCLK = HSI = 8 MHz
+
+--> Vậy suy ra, flash chỉ lỗi khi mà chúng ta xóa file .ini trong tab Utilities, Tắt và mở lại KeilC(bước này rất quna trọng, néu không nó sẽ lưu cấu hình cũ và tiếp tục flash với tần số ổn định 8Mhz), sau đó flash lại:
+*** Đây là kết quả khi mà chúng ta không Tắt và mở lại KeilC. [1]
+Chip báo flash xong nhưng có một dòng báo là "Application running ..." khá đáng ngờ.
+Liên tục flash lại nhiều lần cũng như vậy.
+
+Build started: Project: STM32F103C8
+*** Using Compiler 'V5.06 update 7 (build 960)', folder: 'C:\Users\ASUS\AppData\Local\Keil_v5\ARM\ARMCC\Bin'
+Build target 'Target_1'
+".\Objects\STM32F103C8.axf" - 0 Error(s), 0 Warning(s).
+Build Time Elapsed:  00:00:00
+Load "C:\\Users\\ASUS\\Desktop\\LED_PC13_LL\\Objects\\STM32F103C8.axf" 
+Full Chip Erase Done.
+Programming Done.
+Verify OK.
+Application running ...
+Flash Load finished at 21:14:16
+
+Khi vào STLink Utility(bên ngoài), thì nó vẫn hoàn toàn nhận dạng đúng
+==> Vấn đề là ta không thể xác định nó đang flash với tần số bao nhiêu? [2]
+0x08000000: 20000660	0800016D	08000175	08000177
+0x08000004: 0800016D	08000175	08000177	08000179
+0x08000008: 08000175	08000177	08000179	0800017B
+0x0800000C: 08000177	08000179	0800017B	0800017D
+0x08000010: 08000179	0800017B	0800017D	00000000
+
+***Chúng ta để nguyên KeilC, và flash lần nữa.
+Sau đó chúng ta vào STLink Utility để Erase Full Chip
+Có một lỗi mới hoàn toàn.
+
+21:22:55 : Error occured during flash mass erase!
+21:23:04 : Error occured during flash mass erase!
+
+==> Vậy là có thể thấy nếu không tắt mở KeilC, "bộ nhớ flash của phần mềm KeilC" sẽ ghi đè/ flash thêm một lần nữa lên cái đoạn [1] 
+==> Hậu quả là không thể xóa được, mặc dù địa chỉ đúng như  [2]
+Nếu như bạn cần thêm thông tin thì đây là hiển thị trong STLink Utility:
+
+21:26:40 : ST-LINK SN : 2C001B00112D373637365744
+21:26:40 : V2J48S7
+21:26:40 : Connected via SWD.
+21:26:40 : SWD Frequency = 4,0 MHz.
+21:26:40 : Connection mode : Connect Under Reset.
+21:26:40 : Debug in Low Power mode enabled.
+21:26:40 : Device ID:0x410 
+21:26:40 : Device flash Size : 128KBytes
+21:26:40 : Device family :STM32F10xx Medium-density
+
+Và đúng như mình nghĩ , do bộ nhớ flash của dòng STM32F103C8T6 quá nhỏ, chỉ cần vào KeilC flash thêm vài lần nữa là lại bị lỗi "Too many errors display"
+***Nhưng chỗ này rất đánh lừa
+=> Ngay khi vào lại STlink Utility(tất nhiên nó sẽ bị lỗi sai địa chỉ giống  [3]
+Nếu chúng ta bấm Erase Full Chip trong STlink Utility, ngay lập tức địa chỉ sai ở [3] được fix lại đúng 
+=> Và từ đó chúng ta liên tục gặp lỗi "Error occured during flash mass erase!"(nhưng địa chỉ vẫn đúng nhé, lần Erase đầu tiên đã set địa chỉ chip về đúng)
+***Ngay lúc này, chúng ta thử qua KeilC, sau đó flash thì nó lại hiện cái form mập mờ ban nãy:
+
+Programming Done.
+Verify OK.
+Application running ...
+
+Lúc này flash lại nhiều lần bằng KeilC sẽ không bao giờ bị lỗi, vẫn hiện lỗi mập mờ
+Nhưng STLink Utility lại không bao giờ xóa được flash, lỗi "Error occured during flash mass erase!" liên tục xuất hiện: [4]
+Vậy thì chúng ta thử dụng KeilC -> Erase thì mới được
+Sau đó chúng ta flash vô tư số lần vào chip(với cái lỗi mập mờ)
+Lúc này STlink Utility đã có thể tự Erase flash được
+
+Ở một viễn cảnh khác, tôi thử dùng file .hex đã ra để nạp bằng STLink xem tình huống có diễn ra tương tự như bên KeilC(không tắt mở lại) không?
+Kết quả cho thấy STLink hoàn toàn bình thường, flash đè lên hàng trăm lần vẫn không bị lỗi "Error occured during flash mass erase!:
+
+
+Qua kết quả kiểm nghiệm cho thấy:
+KeilC đang cấu hình ngầm gì đó bên dưới khiến mọi thứ đảo lộn
+Nếu ta không tắt mở lại, nó sẽ đôi lúc chạy được một cách vu vơ, nhưng đôi lúc lại chạy toàn lỗi.
+Tuy nhiên, chức năng Erase(Không biết là full chip của KeilC có thể giải quyết được lỗi "Error occured during flash mass erase!" của STLink Utility
+File .ini quyền lực:
+. Ép chip chạy 8Mhz nếu flash nhiều lần
+. Là một trong những nhân tố gây ra lỗi mập mờ "Application running ..."
+. Nếu trước đó đã nạp file .ini, mà không tắt mở lại KeilC, thì nếu xóa file .ini, chắc chắn sẽ gây ra lỗi mập mờ(Dù là cấu hình "Use Debug Driver" hay built-in "STLink Debugger")
+
+***Phát hiện mới:
+Nếu đã flash vào bằng file .hex từ ST-Link Utility, và flash lại bằng KeilC(xóa file .ini và không tắt mở lại) thì ngay lập tức lỗi "Too many errors displays!" sẽ xuất hiện lại. Như vậy, bằng việc ghi đè lên flash chúng ta có thể phát hiện lỗi mập mờ "Application running ...".
+Địa chỉ trong ô sai y chang nhau(lúc mà KeilC bị đơ) nhé 
+
+Vấn đề là tôi lặp quy trình tương tự thì không tài nào kiếm ra được trường hợp này ở 72MHz:
+. FLASH_ACR=0x00000032
+. Flash wait states (LATENCY) = 2
+
+Giống như bên dưới:
+RCC_CFGR=0x001D040A  FLASH_ACR=0x00000032
+Flash wait states (LATENCY) = 2
+SYSCLK = PLL x9 = 72 MHz
+ResetClocks();
+RCC_CR=0x00008583 HSERDY=0 PLLON=0 PLLRDY=0
+ShowClocks();
+RCC_CFGR=0x001D0000  FLASH_ACR=0x00000032
+Flash wait states (LATENCY) = 2
+SYSCLK = HSI = 8 MHz
+
+***À, đây rồi, đúng là hiện tượng bị flash chồng chập mà:
+Quy trình như sau:
+Hãy làm sao cho nó ra lỗi "Too many errors display"
+Nạp file .hex bên STLink Utility trước, sau đó tắt mở lại KeilC và flash chồng lên(có kèm file .ini nhé)
+Lúc này kết quả ra được 
+
+RCC_CFGR=0x001D040A  FLASH_ACR=0x00000032
+Flash wait states (LATENCY) = 2
+SYSCLK = PLL x9 = 72 MHz
+ResetClocks();
+RCC_CR=0x00008583 HSERDY=0 PLLON=0 PLLRDY=0
+ShowClocks();
+RCC_CFGR=0x001D0000  FLASH_ACR=0x00000032
+Flash wait states (LATENCY) = 2
+SYSCLK = HSI = 8 MHz
+Full Chip Erase Done.
+
+Lúc này thử flash dồn dập bên STLink Utility, thì khi qua KeilC(có kèm file .ini nhưng không tắt mở), bằng chứng là lỗi mập mờ đã xuất hiện kèm theo dòng 72Mhz, FLASH_ACR=0x00000032.
+
+RCC_CFGR=0x001D040A  FLASH_ACR=0x00000032
+Flash wait states (LATENCY) = 2
+SYSCLK = PLL x9 = 72 MHz
+ResetClocks();
+RCC_CR=0x00008583 HSERDY=0 PLLON=0 PLLRDY=0
+ShowClocks();
+RCC_CFGR=0x001D0000  FLASH_ACR=0x00000032
+Flash wait states (LATENCY) = 2
+SYSCLK = HSI = 8 MHz
+Full Chip Erase Done.
+Programming Done.
+Verify OK.
+Application running ...
+
+Nếu theo như lỗi Erase flash không được như hồi nãy thì bây giờ chúng ta sẽ làm ngược lại cho KeilC.
+Vào KeilC -> bấm Erase
+Kết quả là vì file .ini không bị tắt mở KeilC reset lại, nó chạy luôn cả file đó vào log.
+
+RCC_CFGR=0x001D0000  FLASH_ACR=0x00000000
+Flash wait states (LATENCY) = 0
+SYSCLK = HSI = 8 MHz
+ResetClocks();
+RCC_CR=0x00008583 HSERDY=0 PLLON=0 PLLRDY=0
+ShowClocks();
+RCC_CFGR=0x00000000  FLASH_ACR=0x00000000
+Flash wait states (LATENCY) = 0
+SYSCLK = HSI = 8 MHz
+Full Chip Erase Done.
+
+Mặc dù "Full Chip Erase Done." đã hiện ra [5], nhưng chúng ta sẽ vào STLink Utility check 1 lần nữa:
+Lần này, chip đã bị xóa. 
+==> Rút ra kết luận Erase bên KeilC khá mạnh, can thiệp sâu vào nhiều tầng hơn so với STlink(hoặc là do mọi thứ đang được sắp xếp dựa trên macro và cấu hình của nó) [4]
+
+***Cố một điểm đáng chú ý:
+Mặc dù lần này thông số 8MHz đã đúng, nhưng khi không tắt mở và flash đè bằng KeilC,giá trị thanh ghi lại có sự thay đổi, và có kèm theo lỗi mập mờ:
+
+RCC_CFGR=0x00000000  FLASH_ACR=0x00000000
+Flash wait states (LATENCY) = 0
+SYSCLK = HSI = 8 MHz
+ResetClocks();
+RCC_CR=0x00008583 HSERDY=0 PLLON=0 PLLRDY=0
+ShowClocks();
+RCC_CFGR=0x00000000  FLASH_ACR=0x00000000
+Flash wait states (LATENCY) = 0
+SYSCLK = HSI = 8 MHz
+Full Chip Erase Done.
+Programming Done.
+Verify OK.
+Application running ...
+
+Lúc này ngay lập tức khi chúng ta tắt mở lại KeilC và flash, tần số đã thực sự bị thay đổi(dù .ini chưa hề bị xóa)
+RCC_CFGR=0x001D040A  FLASH_ACR=0x00000002
+Flash wait states (LATENCY) = 2
+SYSCLK = PLL x9 = 72 MHz
+ResetClocks();
+RCC_CR=0x00008583 HSERDY=0 PLLON=0 PLLRDY=0
+ShowClocks();
+RCC_CFGR=0x001D0000  FLASH_ACR=0x00000002
+Flash wait states (LATENCY) = 2
+SYSCLK = HSI = 8 MHz
+Full Chip Erase Done.
+Programming Done.
+Verify OK.
+Application running ...
+
+Bấm flash thêm lần nữa trong KeilC, mọi thứ đã quay về như cũ(file .ini tiếp tục thể hiện sức mạnh của nó):
+RCC_CFGR=0x001D0000  FLASH_ACR=0x00000000
+Flash wait states (LATENCY) = 0
+SYSCLK = HSI = 8 MHz
+ResetClocks();
+RCC_CR=0x00008583 HSERDY=0 PLLON=0 PLLRDY=0
+ShowClocks();
+RCC_CFGR=0x00000000  FLASH_ACR=0x00000000
+Flash wait states (LATENCY) = 0
+SYSCLK = HSI = 8 MHz
+Full Chip Erase Done.
+Programming Done.
+Verify OK.
+Application running ...
+
+
+
+
+
+
+LỖI MASS Erase trong stlink utility ,vào keilc errase -> RCC_CFGR=0x00000000:
+
+RCC_CFGR=0x00000000  FLASH_ACR=0x00000030
+Flash wait states (LATENCY) = 0
+SYSCLK = HSI = 8 MHz
+ResetClocks();
+RCC_CR=0x00008583 HSERDY=0 PLLON=0 PLLRDY=0
+ShowClocks();
+RCC_CFGR=0x00000000  FLASH_ACR=0x00000030
+Flash wait states (LATENCY) = 0
+SYSCLK = HSI = 8 MHz
+
+Sau khi Erase được thì về RCC_CFGR=0x00000000  FLASH_ACR=0x00000000
+RCC_CFGR=0x00000000  FLASH_ACR=0x00000000
+Flash wait states (LATENCY) = 0
+SYSCLK = HSI = 8 MHz
+ResetClocks();
+RCC_CR=0x00008583 HSERDY=0 PLLON=0 PLLRDY=0
+ShowClocks();
+RCC_CFGR=0x00000000  FLASH_ACR=0x00000000
+Flash wait states (LATENCY) = 0
+SYSCLK = HSI = 8 MHz
+
+=> Tuy nhiên, vẫn không thể erase trong STLINK Utility với RCC_CFGR=0x00000000  FLASH_ACR=0x00000000:
+==>Có nghĩa lúc này, bộ nhớ flash đã bị ghi đè.
+
+Cách để biết chính xác khi nào là 72MHz [7]:
+Erase chip trước -> Vào STLink Utility flash file .hex vào -> disconnect STLINK UTILITY  -> vào keilC(có .ini) ERASE  -> Lúc này thấy nó đang có 72Mhz, vừa có Erase
+kết quả:
+
+RCC_CFGR=0x001D040A  FLASH_ACR=0x00000032
+Flash wait states (LATENCY) = 2
+SYSCLK = PLL x9 = 72 MHz
+ResetClocks();
+RCC_CR=0x00008583 HSERDY=0 PLLON=0 PLLRDY=0
+ShowClocks();
+RCC_CFGR=0x001D0000  FLASH_ACR=0x00000032
+Flash wait states (LATENCY) = 2
+SYSCLK = HSI = 8 MHz
+Full Chip Erase Done.
+Programming Done.
+Verify OK.
+Application running ...
+
+Không tắt KeilC, xóa file .init để cho nó flash thành công nhưng hiện lỗi mập mờ. 
+vào stlink utility flash đề file .hex lên -> disconnect
+bấm erase trong keil c -> lúc này nó đồng thời cập nhật file .ini -> flash vào phát nữa  -> lỗi "Too many errors display" [6]
+==> [6] Đây chính xac là hiện tượng bị ghi đè, nhưng vẫn chưa tìm được cách dể tái hiện "Error occured during flash mass erase!"
+
+Như vậy, nhìn vào [7] đã biết cách tái hiện 72MHz ở 2 wait states và FLASH_ACR = 0x00000032:
+RCC_CFGR=0x001D040A  FLASH_ACR=0x00000032
+Flash wait states (LATENCY) = 2
+SYSCLK = PLL x9 = 72 MHz
+ResetClocks();
+RCC_CR=0x00008583 HSERDY=0 PLLON=0 PLLRDY=0
+ShowClocks();
+RCC_CFGR=0x001D0000  FLASH_ACR=0x00000032
+Flash wait states (LATENCY) = 2
+SYSCLK = HSI = 8 MHz
+Full Chip Erase Done.
+Programming Done.
+Verify OK.
+Application running ...
+
+Tiếp tục F8 trong KeilC để nó ghi đè, lúc này 72Mhz sẽ khác FLASH_ACR=0x00000002:
+RCC_CFGR=0x001D040A  FLASH_ACR=0x00000002
+Flash wait states (LATENCY) = 2
+SYSCLK = PLL x9 = 72 MHz
+ResetClocks();
+RCC_CR=0x00008583 HSERDY=0 PLLON=0 PLLRDY=0
+ShowClocks();
+RCC_CFGR=0x001D0000  FLASH_ACR=0x00000002
+Flash wait states (LATENCY) = 2
+SYSCLK = HSI = 8 MHz
+Full Chip Erase Done.
+Programming Done.
+Verify OK.
+Application running ...
+
+Ghi đè tới lần nữa thì nó ra 8Mhz, FLASH_ACR=0x00000000, 0 wait state:
+
+RCC_CFGR=0x001D0000  FLASH_ACR=0x00000000
+Flash wait states (LATENCY) = 0
+SYSCLK = HSI = 8 MHz
+ResetClocks();
+RCC_CR=0x00008583 HSERDY=0 PLLON=0 PLLRDY=0
+ShowClocks();
+RCC_CFGR=0x00000000  FLASH_ACR=0x00000000
+Flash wait states (LATENCY) = 0
+SYSCLK = HSI = 8 MHz
+Full Chip Erase Done.
+Programming Done.
+Verify OK.
+Application running ...
+
+
+Thêm lần nữa thì 8Mhz, FRCC_CFGR=0x00000000, 0 wait state:
+RCC_CFGR=0x00000000  FLASH_ACR=0x00000000
+Flash wait states (LATENCY) = 0
+SYSCLK = HSI = 8 MHz
+ResetClocks();
+RCC_CR=0x00008583 HSERDY=0 PLLON=0 PLLRDY=0
+ShowClocks();
+RCC_CFGR=0x00000000  FLASH_ACR=0x00000000
+Flash wait states (LATENCY) = 0
+SYSCLK = HSI = 8 MHz
+Full Chip Erase Done.
+Programming Done.
+Verify OK.
+
+===>Tuy nhiên vẫn không thể tìm ra lỗi mass erase
+===>Điều đặc biệt nữa là nếu flash với KeilC thì không thể nào cho chip liền ngay sau khi nạp code(dù đã bật các tính năng connect under reset và hardware reset và reset after connect trong KeilC rồi), STLink Utility thì flash phát vào chương trình luôn(mỗi thằng đều có ưu điểm: KielC thì giúp debug code, STlink Utility thì giúp flash code một cách siêu nhanh đỡ phải bấm reset)

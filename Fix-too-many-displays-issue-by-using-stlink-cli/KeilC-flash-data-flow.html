@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Sơ đồ luồng nạp Flash KeilC - Interactive</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: radial-gradient(ellipse at top, #1a1f35 0%, #0a0e1a 60%, #05070d 100%);
+    color: #e6edf7;
+    min-height: 100vh;
+    padding: 24px;
+    overflow-x: auto;
+  }
+
+  /* ===== HEADER ===== */
+  .header {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  .header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    background: linear-gradient(90deg, #4fc3f7, #7e57ff, #ff4fa3);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 0.5px;
+  }
+  .header p {
+    color: #7a8ba8;
+    font-size: 13px;
+    margin-top: 6px;
+  }
+
+  /* ===== CONTROLS ===== */
+  .controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    background: rgba(79, 195, 247, 0.08);
+    border: 1px solid rgba(79, 195, 247, 0.35);
+    color: #4fc3f7;
+    padding: 9px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    font-family: inherit;
+  }
+  .btn:hover {
+    background: rgba(79, 195, 247, 0.18);
+    box-shadow: 0 0 18px rgba(79, 195, 247, 0.3);
+    transform: translateY(-1px);
+  }
+  .btn.active {
+    background: rgba(79, 195, 247, 0.25);
+    box-shadow: 0 0 22px rgba(79, 195, 247, 0.5);
+  }
+  .btn.danger { border-color: rgba(255, 79, 163, 0.5); color: #ff4fa3; }
+  .btn.danger:hover { background: rgba(255, 79, 163, 0.15); box-shadow: 0 0 18px rgba(255, 79, 163, 0.35); }
+
+  /* ===== PHASE TABS ===== */
+  .phases {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+  }
+  .phase-tab {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #7a8ba8;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s;
+    font-family: inherit;
+    white-space: nowrap;
+  }
+  .phase-tab:hover { color: #b8c5d9; border-color: rgba(255,255,255,0.2); }
+  .phase-tab.active {
+    color: #fff;
+    background: linear-gradient(135deg, rgba(79,195,247,0.25), rgba(126,87,255,0.25));
+    border-color: rgba(126,87,255,0.6);
+    box-shadow: 0 0 15px rgba(126,87,255,0.35);
+  }
+
+  /* ===== DIAGRAM ===== */
+  .diagram {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  /* Column headers */
+  .col-head {
+    text-align: center;
+    padding: 14px 10px;
+    border-radius: 12px;
+    background: linear-gradient(180deg, rgba(79,195,247,0.12), rgba(79,195,247,0.03));
+    border: 1px solid rgba(79,195,247,0.25);
+    margin-bottom: 16px;
+  }
+  .col-head.mid {
+    background: linear-gradient(180deg, rgba(255,193,7,0.12), rgba(255,193,7,0.03));
+    border-color: rgba(255,193,7,0.3);
+  }
+  .col-head.right {
+    background: linear-gradient(180deg, rgba(255,79,163,0.12), rgba(255,79,163,0.03));
+    border-color: rgba(255,79,163,0.3);
+  }
+  .col-head .title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .col-head .sub {
+    font-size: 11px;
+    color: #8ba0bd;
+    margin-top: 3px;
+  }
+  .col-head.mid .title { color: #ffc107; }
+  .col-head.right .title { color: #ff4fa3; }
+
+  /* Step boxes */
+  .step {
+    background: rgba(255,255,255,0.035);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-left: 3px solid #4fc3f7;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    transition: all 0.35s ease;
+    opacity: 0.35;
+    transform: translateX(-6px);
+  }
+  .step .num {
+    display: inline-block;
+    background: rgba(79,195,247,0.18);
+    color: #4fc3f7;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-bottom: 6px;
+  }
+  .step .txt {
+    font-size: 12.5px;
+    color: #c9d5e8;
+    line-height: 1.5;
+  }
+  .step .note {
+    font-size: 11px;
+    color: #ffc107;
+    margin-top: 6px;
+    font-style: italic;
+  }
+
+  .step.visible {
+    opacity: 1;
+    transform: translateX(0);
+    border-left-color: #4fc3f7;
+    box-shadow: 0 0 20px rgba(79,195,247,0.12);
+  }
+
+  .step.highlight {
+    background: rgba(79,195,247,0.1);
+    border-color: rgba(79,195,247,0.6);
+    box-shadow: 0 0 28px rgba(79,195,247,0.35);
+    transform: translateX(0) scale(1.02);
+  }
+
+  /* Warning step */
+  .step.warn { border-left-color: #ff4fa3; }
+  .step.warn .num { background: rgba(255,79,163,0.2); color: #ff4fa3; }
+  .step.warn.visible { border-left-color: #ff4fa3; box-shadow: 0 0 20px rgba(255,79,163,0.15); }
+  .step.warn.highlight {
+    background: rgba(255,79,163,0.12);
+    border-color: rgba(255,79,163,0.7);
+    box-shadow: 0 0 32px rgba(255,79,163,0.5);
+    animation: pulseWarn 1.2s infinite;
+  }
+  @keyframes pulseWarn {
+    0%,100% { box-shadow: 0 0 32px rgba(255,79,163,0.4); }
+    50% { box-shadow: 0 0 48px rgba(255,79,163,0.75); }
+  }
+
+  /* RAM chip box */
+  .chip-box {
+    background: linear-gradient(135deg, rgba(126,87,255,0.15), rgba(79,195,247,0.08));
+    border: 1px dashed rgba(126,87,255,0.5);
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 12px;
+    font-size: 11.5px;
+    color: #b39dff;
+    text-align: center;
+    font-weight: 600;
+    transition: all 0.4s;
+    opacity: 0.35;
+  }
+  .chip-box.visible {
+    opacity: 1;
+    animation: glow 1.8s infinite;
+  }
+  @keyframes glow {
+    0%,100% { box-shadow: 0 0 12px rgba(126,87,255,0.25); }
+    50% { box-shadow: 0 0 24px rgba(126,87,255,0.55); }
+  }
+
+  /* ===== ARROW LAYER (overlay) ===== */
+  .arrow-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: visible;
+    z-index: 5;
+  }
+
+  /* ===== INFO PANEL ===== */
+  .info-panel {
+    max-width: 1100px;
+    margin: 28px auto 0;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 20px 24px;
+    min-height: 90px;
+    transition: all 0.35s;
+  }
+  .info-panel.danger {
+    background: rgba(255,79,163,0.06);
+    border-color: rgba(255,79,163,0.4);
+    box-shadow: 0 0 30px rgba(255,79,163,0.15);
+  }
+  .info-panel h3 {
+    font-size: 15px;
+    color: #4fc3f7;
+    margin-bottom: 8px;
+  }
+  .info-panel.danger h3 { color: #ff4fa3; }
+  .info-panel p {
+    font-size: 13px;
+    color: #b8c5d9;
+    line-height: 1.65;
+  }
+  .info-panel code {
+    background: rgba(79,195,247,0.12);
+    color: #4fc3f7;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+
+  /* ===== LEGEND ===== */
+  .legend {
+    max-width: 1100px;
+    margin: 18px auto 0;
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+    font-size: 11.5px;
+    color: #7a8ba8;
+  }
+  .legend span { display: flex; align-items: center; gap: 6px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  /* Mobile */
+  @media (max-width: 780px) {
+    .diagram { grid-template-columns: 1fr; }
+    .col-head { display: none; }
+    .step { opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>⚡ SƠ ĐỒ LUỒNG NẠP FLASH KEILC (UV4.exe)</h1>
+  <p>Vai trò của file <b>.FLM</b> &amp; nguyên nhân lỗi <b>"Contents mismatch"</b></p>
+</div>
+
+<div class="controls">
+  <button class="btn" id="btn-play">▶ Chạy tự động</button>
+  <button class="btn" id="btn-prev">◀ Bước trước</button>
+  <button class="btn" id="btn-next">Bước tiếp ▶</button>
+  <button class="btn danger" id="btn-reset">⟲ Reset</button>
+</div>
+
+<div class="phases" id="phases">
+  <button class="phase-tab active" data-phase="0">1. Kết nối</button>
+  <button class="phase-tab" data-phase="1">2. Bơm thuật toán</button>
+  <button class="phase-tab" data-phase="2">3. Thực thi FLM</button>
+  <button class="phase-tab" data-phase="3">4. Verify &amp; Reset</button>
+</div>
+
+<div class="diagram" id="diagram">
+  <!-- Cột 1: PC -->
+  <div class="col" id="col-pc">
+    <div class="col-head">
+      <div class="title">💻 MÁY TÍNH</div>
+      <div class="sub">UV4.exe — KeilC</div>
+    </div>
+    <div class="step" data-step="1"><span class="num">BƯỚC 1</span><div class="txt">Khởi tạo kết nối &amp; yêu cầu Debug</div></div>
+    <div class="step" data-step="3"><span class="num">BƯỚC 3</span><div class="txt">Chạy <code>flash_init.ini</code> (nếu có)</div><div class="note">⚠ Nơi DUY NHẤT có thể dập xung 72 MHz</div></div>
+    <div class="step" data-step="4"><span class="num">BƯỚC 4</span><div class="txt">Đọc file <code>STM32F10x_128.FLM</code> trên ổ cứng</div><div class="note">→ Lấy mã nhị phân thuật toán nạp</div></div>
+    <div class="step" data-step="5"><span class="num">BƯỚC 5</span><div class="txt">Đẩy toàn bộ mã nhị phân FLM vào RAM chip</div></div>
+    <div class="step" data-step="6"><span class="num">BƯỚC 6</span><div class="txt">Lệnh: "CPU, chạy hàm <code>Init()</code> của khối FLM trong RAM!"</div></div>
+    <div class="step" data-step="7"><span class="num">BƯỚC 7</span><div class="txt">Bơm mã Firmware của bạn vào RAM chip</div></div>
+    <div class="step" data-step="8"><span class="num">BƯỚC 8</span><div class="txt">Lệnh: "CPU, chạy hàm <code>ProgramPage()</code> của FLM!"</div></div>
+    <div class="step" data-step="9"><span class="num">BƯỚC 9</span><div class="txt">Verify: "CPU gửi nội dung Flash vừa ghi về đây!"</div></div>
+    <div class="step warn" data-step="9w"><span class="num">⚠ CẢNH BÁO</span><div class="txt">Nếu chip đang ở 72 MHz → <b>LỖI CONTENTS MISMATCH!</b> Dữ liệu gửi về bị SAI.</div></div>
+    <div class="step" data-step="10"><span class="num">BƯỚC 10</span><div class="txt">Ra lệnh Reset &amp; Chạy (Resume)</div></div>
+  </div>
+
+  <!-- Cột 2: ST-Link -->
+  <div class="col" id="col-stlink">
+    <div class="col-head mid">
+      <div class="title">🔌 MẠCH NẠP</div>
+      <div class="sub">ST-Link</div>
+    </div>
+    <div class="step" data-step="2"><span class="num">BƯỚC 2</span><div class="txt">Gửi tín hiệu SWD đến chip</div></div>
+    <div class="step" data-step="3b"><span class="num">BƯỚC 3</span><div class="txt">Mạch nạp ghi thanh ghi RCC</div></div>
+  </div>
+
+  <!-- Cột 3: Chip -->
+  <div class="col" id="col-chip">
+    <div class="col-head right">
+      <div class="title">🧠 CHIP STM32F103</div>
+      <div class="sub">Đang chạy 72 MHz từ trước</div>
+    </div>
+    <div class="step" data-step="2b"><span class="num">BƯỚC 2</span><div class="txt">⏸ Halt CPU</div></div>
+    <div class="step" data-step="3c"><span class="num">BƯỚC 3</span><div class="txt">🔄 Chip về lại 8 MHz</div></div>
+    <div class="chip-box" data-step="5b">📦 RAM (SRAM)<br/>[ Khối mã FLM ]</div>
+    <div class="step" data-step="6b"><span class="num">BƯỚC 6</span><div class="txt">▶ CPU chạy <code>FLM_Init()</code><br/>└─► Ép <code>FLASH_ACR = 0</code></div></div>
+    <div class="chip-box" data-step="7b">📦 RAM (SRAM)<br/>[ Buffer Firmware ]</div>
+    <div class="step" data-step="8b"><span class="num">BƯỚC 8</span><div class="txt">▶ CPU chạy <code>ProgramPage()</code><br/>└─► Ghi RAM → Flash</div></div>
+    <div class="step" data-step="9b"><span class="num">BƯỚC 9</span><div class="txt">▶ CPU đọc lại Flash (ACR=0)</div></div>
+    <div class="step" data-step="10b"><span class="num">BƯỚC 10</span><div class="txt">🔄 Chip khởi động lại</div></div>
+  </div>
+</div>
+
+<div class="info-panel" id="info">
+  <h3>👋 Hướng dẫn</h3>
+  <p>Nhấn <b>▶ Chạy tự động</b> hoặc <b>Bước tiếp ▶</b> để xem từng bước. Nhấn vào các <b>Phase</b> ở trên để nhảy đến giai đoạn tương ứng. Nhấn <b>Reset</b> để xem lại từ đầu.</p>
+</div>
+
+<div class="legend">
+  <span><span class="dot" style="background:#4fc3f7"></span> PC / KeilC</span>
+  <span><span class="dot" style="background:#ffc107"></span> ST-Link</span>
+  <span><span class="dot" style="background:#ff4fa3"></span> Chip STM32</span>
+  <span><span class="dot" style="background:#7e57ff"></span> Vùng RAM</span>
+</div>
+
+<script>
+/* ============ DATA ============ */
+const STEPS = [
+  // Phase 0 - Kết nối
+  { ids:['1'], phase:0, title:'Bước 1 — Khởi tạo kết nối', text:'KeilC (UV4.exe) khởi tạo kết nối với mạch nạp ST-Link và yêu cầu chế độ Debug.' },
+  { ids:['2'], phase:0, title:'Bước 2 — Gửi tín hiệu SWD', text:'ST-Link gửi tín hiệu SWD đến chip STM32F103, sau đó ra lệnh <code>Halt CPU</code> để tạm dừng chip.' },
+  { ids:['3','3b','3c'], phase:0, title:'Bước 3 — Chạy flash_init.ini', text:'Script <code>flash_init.ini</code> (nếu có) chạy: mạch nạp ghi trực tiếp thanh ghi RCC để <b>hạ chip từ 72 MHz về 8 MHz</b>. Đây là <b>nơi duy nhất</b> có thể "dập" xung 72 MHz trước khi FLM được nạp vào RAM.' },
+
+  // Phase 1 - Bơm thuật toán
+  { ids:['4'], phase:1, title:'Bước 4 — Đọc file .FLM', text:'KeilC đọc file <code>STM32F10x_128.FLM</code> từ ổ cứng — đây là mã nhị phân chứa thuật toán nạp Flash cho dòng STM32F10x.' },
+  { ids:['5','5b'], phase:1, title:'Bước 5 — Đẩy FLM vào RAM chip', text:'Toàn bộ mã nhị phân của file <code>.FLM</code> được đẩy qua ST-Link vào RAM (SRAM) của chip STM32F103.' },
+
+  // Phase 2 - Thực thi FLM
+  { ids:['6','6b'], phase:2, title:'Bước 6 — Chạy FLM_Init()', text:'KeilC ra lệnh cho CPU chạy hàm <code>Init()</code> của khối FLM trong RAM. Hàm này <b>ép FLASH_ACR = 0</b> (0 wait state) để phù hợp với tần số 8 MHz.' },
+  { ids:['7','7b'], phase:2, title:'Bước 7 — Bơm Firmware vào RAM', text:'Firmware của bạn được đẩy vào RAM chip dưới dạng buffer chờ ghi vào Flash.' },
+  { ids:['8','8b'], phase:2, title:'Bước 8 — Chạy ProgramPage()', text:'CPU chạy hàm <code>ProgramPage()</code> của FLM để ghi dữ liệu từ RAM vào Flash của STM32F103.' },
+
+  // Phase 3 - Verify & Reset
+  { ids:['9','9b'], phase:3, title:'Bước 9 — Verify Flash', text:'KeilC yêu cầu CPU đọc lại nội dung Flash vừa ghi để kiểm tra. CPU đọc Flash với <code>ACR = 0</code> (điều kiện tần số 8 MHz).' },
+  { ids:['9w'], phase:3, warn:true, title:'⚠ LỖI CONTENTS MISMATCH', text:'Nếu chip <b>vẫn đang chạy ở 72 MHz</b> (do <code>flash_init.ini</code> không chạy hoặc không hạ xung), thì với <code>ACR = 0</code> CPU sẽ đọc sai dữ liệu Flash → KeilC so sánh với dữ liệu gốc và báo lỗi <b>"Contents mismatch"</b>.' },
+  { ids:['10','10b'], phase:3, title:'Bước 10 — Reset & Chạy', text:'KeilC ra lệnh Reset chip và Resume để chip khởi động lại và chạy firmware mới.' }
+];
+
+/* ============ STATE ============ */
+let current = -1;
+let playing = false;
+let playTimer = null;
+
+const infoPanel = document.getElementById('info');
+const phaseTabs = document.querySelectorAll('.phase-tab');
+const allSteps = document.querySelectorAll('.step, .chip-box');
+
+/* ============ RENDER ============ */
+function render() {
+  allSteps.forEach(el => el.classList.remove('visible','highlight'));
+  allSteps.forEach(el => {
+    el.style.borderLeftColor = '';
+  });
+
+  if (current < 0) {
+    infoPanel.classList.remove('danger');
+    infoPanel.innerHTML = `<h3>👋 Hướng dẫn</h3>
+      <p>Nhấn <b>▶ Chạy tự động</b> hoặc <b>Bước tiếp ▶</b> để xem từng bước. Nhấn vào các <b>Phase</b> ở trên để nhảy đến giai đoạn tương ứng. Nhấn <b>Reset</b> để xem lại từ đầu.</p>`;
+    phaseTabs.forEach(t => t.classList.remove('active'));
+    phaseTabs[0].classList.add('active');
+    return;
+  }
+
+  const step = STEPS[current];
+
+  // hiện tất cả step từ đầu đến current
+  for (let i = 0; i <= current; i++) {
+    STEPS[i].ids.forEach(id => {
+      const el = document.querySelector(`[data-step="${id}"]`);
+      if (el) el.classList.add('visible');
+    });
+  }
+
+  // highlight bước hiện tại
+  step.ids.forEach(id => {
+    const el = document.querySelector(`[data-step="${id}"]`);
+    if (el) el.classList.add('highlight');
+  });
+
+  // info panel
+  infoPanel.classList.toggle('danger', !!step.warn);
+  infoPanel.innerHTML = `<h3>${step.warn ? '⚠ ' : ''}${step.title}</h3><p>${step.text}</p>`;
+
+  // phase tabs
+  phaseTabs.forEach(t => t.classList.toggle('active', +t.dataset.phase === step.phase));
+}
+
+function next() {
+  if (current < STEPS.length - 1) {
+    current++;
+    render();
+  } else {
+    stopPlay();
+  }
+}
+function prev() {
+  if (current > -1) {
+    current--;
+    render();
+  }
+}
+function reset() {
+  stopPlay();
+  current = -1;
+  render();
+}
+
+/* ============ PLAY ============ */
+function play() {
+  if (playing) { stopPlay(); return; }
+  playing = true;
+  document.getElementById('btn-play').textContent = '⏸ Tạm dừng';
+  document.getElementById('btn-play').classList.add('active');
+  if (current >= STEPS.length - 1) current = -1;
+  playTimer = setInterval(() => {
+    if (current < STEPS.length - 1) {
+      current++;
+      render();
+    } else {
+      stopPlay();
+    }
+  }, 2200);
+}
+function stopPlay() {
+  playing = false;
+  clearInterval(playTimer);
+  document.getElementById('btn-play').textContent = '▶ Chạy tự động';
+  document.getElementById('btn-play').classList.remove('active');
+}
+
+/* ============ EVENTS ============ */
+document.getElementById('btn-next').onclick = () => { stopPlay(); next(); };
+document.getElementById('btn-prev').onclick = () => { stopPlay(); prev(); };
+document.getElementById('btn-reset').onclick = reset;
+document.getElementById('btn-play').onclick = play;
+
+phaseTabs.forEach(tab => {
+  tab.onclick = () => {
+    stopPlay();
+    const p = +tab.dataset.phase;
+    // tìm index step đầu tiên của phase đó
+    const idx = STEPS.findIndex(s => s.phase === p);
+    current = idx;
+    render();
+  };
+});
+
+/* keyboard */
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') { stopPlay(); next(); }
+  if (e.key === 'ArrowLeft')  { stopPlay(); prev(); }
+  if (e.key === ' ') { e.preventDefault(); play(); }
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+/* init */
+render();
+</script>
+</body>
+</html>

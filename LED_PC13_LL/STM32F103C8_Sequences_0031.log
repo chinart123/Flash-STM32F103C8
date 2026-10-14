@@ -1,0 +1,1030 @@
+/*
+ *  CMSIS Pack Debug Access Sequence Log
+ *  File        : C:\Users\ASUS\Desktop\LED_PC13_LL\STM32F103C8_Sequences_0031.log
+ *  Created     : 21:54:25 (12/10/2026)
+ *  Device      : STM32F103C8
+ *  PDSC File   : C:/Users/ASUS/AppData/Local/Arm/Packs/Keil/STM32F1xx_DFP/2.4.1/Keil.STM32F1xx_DFP.pdsc
+ *  Config File : C:\Users\ASUS\Desktop\LED_PC13_LL\DebugConfig\Target_1_STM32F103C8_1.0.0.dbgconf
+ *
+ */
+
+[21:54:25.355]  **********  Sequence "DebugDeviceUnlock"  (Context="Connect", Pname="", info="")
+[21:54:25.355]  
+[21:54:25.356]  <debugvars>
+[21:54:25.357]    // Pre-defined
+[21:54:25.358]    __protocol=0x00010002      (Protocol="SWD", SWJ-DP="True")
+[21:54:25.358]    __connection=0x00010102    (Connection Type="Flash", Reset Type="Hardware Reset", Connection Under HW Reset)
+[21:54:25.359]    __dp=0x00000000
+[21:54:25.359]    __ap=0x00000000
+[21:54:25.359]    __traceout=0x00000000      (Trace Disabled)
+[21:54:25.359]    __errorcontrol=0x00000000  (Skip Errors="False")
+[21:54:25.360]    __FlashAddr=0x00000000
+[21:54:25.360]    __FlashLen=0x00000000
+[21:54:25.360]    __FlashArg=0x00000000
+[21:54:25.360]    __FlashOp=0x00000000
+[21:54:25.361]    __Result=0x00000000
+[21:54:25.361]    
+[21:54:25.361]    // User-defined
+[21:54:25.361]    DbgMCU_CR=0x00000007
+[21:54:25.361]  </debugvars>
+[21:54:25.361]  
+[21:54:25.362]  <sequence name="DebugDeviceUnlock" Pname="" disable="false" info="">
+[21:54:25.362]    <block atomic="false" info="">
+[21:54:25.362]      Sequence("CheckID");
+[21:54:25.362]        <sequence name="CheckID" Pname="" disable="false" info="">
+[21:54:25.363]          <block atomic="false" info="">
+[21:54:25.363]            __var pidr1 = 0;
+[21:54:25.363]              // -> [pidr1 <= 0x00000000]
+[21:54:25.363]            __var pidr2 = 0;
+[21:54:25.364]              // -> [pidr2 <= 0x00000000]
+[21:54:25.364]            __var jep106id = 0;
+[21:54:25.364]              // -> [jep106id <= 0x00000000]
+[21:54:25.365]            __var ROMTableBase = 0;
+[21:54:25.365]              // -> [ROMTableBase <= 0x00000000]
+[21:54:25.365]            __ap = 0;      // AHB-AP
+[21:54:25.365]              // -> [__ap <= 0x00000000]
+[21:54:25.365]            ROMTableBase = ReadAP(0xF8) & ~0x3;
+[21:54:25.367]              // -> [ReadAP(0x000000F8) => 0xE00FF003]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:25.367]              // -> [ROMTableBase <= 0xE00FF000]
+[21:54:25.367]            pidr1 = Read32(ROMTableBase + 0x0FE4);
+[21:54:25.371]              // -> [Read32(0xE00FFFE4) => 0x00000004]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:25.371]              // -> [pidr1 <= 0x00000004]
+[21:54:25.371]            pidr2 = Read32(ROMTableBase + 0x0FE8);
+[21:54:25.375]              // -> [Read32(0xE00FFFE8) => 0x0000000A]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:25.375]              // -> [pidr2 <= 0x0000000A]
+[21:54:25.375]            jep106id = ((pidr2 & 0x7) << 4 ) | ((pidr1 >> 4) & 0xF);
+[21:54:25.376]              // -> [jep106id <= 0x00000020]
+[21:54:25.376]          </block>
+[21:54:25.376]          <control if="jep106id != 0x20" while="" timeout="0" info="">
+[21:54:25.376]            // if-block "jep106id != 0x20"
+[21:54:25.377]              // =>  FALSE
+[21:54:25.377]            // skip if-block "jep106id != 0x20"
+[21:54:25.377]          </control>
+[21:54:25.377]        </sequence>
+[21:54:25.378]    </block>
+[21:54:25.378]  </sequence>
+[21:54:25.378]  
+[21:54:25.378]  **********  Sequence "DebugCoreStart"  (Context="Connect", Pname="", info="")
+[21:54:25.378]  
+[21:54:25.379]  <debugvars>
+[21:54:25.379]    // Pre-defined
+[21:54:25.379]    __protocol=0x00010002      (Protocol="SWD", SWJ-DP="True")
+[21:54:25.379]    __connection=0x00010102    (Connection Type="Flash", Reset Type="Hardware Reset", Connection Under HW Reset)
+[21:54:25.379]    __dp=0x00000000
+[21:54:25.379]    __ap=0x00000000
+[21:54:25.379]    __traceout=0x00000000      (Trace Disabled)
+[21:54:25.379]    __errorcontrol=0x00000000  (Skip Errors="False")
+[21:54:25.379]    __FlashAddr=0x00000000
+[21:54:25.379]    __FlashLen=0x00000000
+[21:54:25.379]    __FlashArg=0x00000000
+[21:54:25.379]    __FlashOp=0x00000000
+[21:54:25.379]    __Result=0x00000000
+[21:54:25.379]    
+[21:54:25.379]    // User-defined
+[21:54:25.379]    DbgMCU_CR=0x00000007
+[21:54:25.379]  </debugvars>
+[21:54:25.379]  
+[21:54:25.379]  <sequence name="DebugCoreStart" Pname="" disable="false" info="">
+[21:54:25.380]    <block atomic="false" info="">
+[21:54:25.380]      Write32(0xE000EDF0, 0xA05F0001);                                        // Enable Core Debug via DHCSR
+[21:54:25.383]        // -> [Write32(0xE000EDF0, 0xA05F0001)]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:25.383]      Write32(0xE0042004, DbgMCU_CR);                                         // DBGMCU_CR: Configure MCU Debug
+[21:54:25.386]        // -> [Write32(0xE0042004, 0x00000007)]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:25.387]    </block>
+[21:54:25.387]  </sequence>
+[21:54:25.387]  
+[21:54:33.070]  **********  Sequence "DebugDeviceUnlock"  (Context="Connect", Pname="", info="")
+[21:54:33.070]  
+[21:54:33.072]  <debugvars>
+[21:54:33.072]    // Pre-defined
+[21:54:33.072]    __protocol=0x00010002      (Protocol="SWD", SWJ-DP="True")
+[21:54:33.073]    __connection=0x00010102    (Connection Type="Flash", Reset Type="Hardware Reset", Connection Under HW Reset)
+[21:54:33.073]    __dp=0x00000000
+[21:54:33.073]    __ap=0x00000000
+[21:54:33.073]    __traceout=0x00000000      (Trace Disabled)
+[21:54:33.074]    __errorcontrol=0x00000000  (Skip Errors="False")
+[21:54:33.074]    __FlashAddr=0x00000000
+[21:54:33.074]    __FlashLen=0x00000000
+[21:54:33.075]    __FlashArg=0x00000000
+[21:54:33.075]    __FlashOp=0x00000000
+[21:54:33.075]    __Result=0x00000000
+[21:54:33.075]    
+[21:54:33.075]    // User-defined
+[21:54:33.075]    DbgMCU_CR=0x00000007
+[21:54:33.075]  </debugvars>
+[21:54:33.075]  
+[21:54:33.075]  <sequence name="DebugDeviceUnlock" Pname="" disable="false" info="">
+[21:54:33.075]    <block atomic="false" info="">
+[21:54:33.075]      Sequence("CheckID");
+[21:54:33.075]        <sequence name="CheckID" Pname="" disable="false" info="">
+[21:54:33.075]          <block atomic="false" info="">
+[21:54:33.075]            __var pidr1 = 0;
+[21:54:33.075]              // -> [pidr1 <= 0x00000000]
+[21:54:33.076]            __var pidr2 = 0;
+[21:54:33.076]              // -> [pidr2 <= 0x00000000]
+[21:54:33.076]            __var jep106id = 0;
+[21:54:33.076]              // -> [jep106id <= 0x00000000]
+[21:54:33.076]            __var ROMTableBase = 0;
+[21:54:33.076]              // -> [ROMTableBase <= 0x00000000]
+[21:54:33.076]            __ap = 0;      // AHB-AP
+[21:54:33.076]              // -> [__ap <= 0x00000000]
+[21:54:33.076]            ROMTableBase = ReadAP(0xF8) & ~0x3;
+[21:54:33.078]              // -> [ReadAP(0x000000F8) => 0xE00FF003]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:33.078]              // -> [ROMTableBase <= 0xE00FF000]
+[21:54:33.078]            pidr1 = Read32(ROMTableBase + 0x0FE4);
+[21:54:33.082]              // -> [Read32(0xE00FFFE4) => 0x00000004]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:33.083]              // -> [pidr1 <= 0x00000004]
+[21:54:33.083]            pidr2 = Read32(ROMTableBase + 0x0FE8);
+[21:54:33.085]              // -> [Read32(0xE00FFFE8) => 0x0000000A]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:33.086]              // -> [pidr2 <= 0x0000000A]
+[21:54:33.087]            jep106id = ((pidr2 & 0x7) << 4 ) | ((pidr1 >> 4) & 0xF);
+[21:54:33.087]              // -> [jep106id <= 0x00000020]
+[21:54:33.087]          </block>
+[21:54:33.087]          <control if="jep106id != 0x20" while="" timeout="0" info="">
+[21:54:33.088]            // if-block "jep106id != 0x20"
+[21:54:33.088]              // =>  FALSE
+[21:54:33.088]            // skip if-block "jep106id != 0x20"
+[21:54:33.088]          </control>
+[21:54:33.088]        </sequence>
+[21:54:33.088]    </block>
+[21:54:33.088]  </sequence>
+[21:54:33.089]  
+[21:54:33.089]  **********  Sequence "DebugCoreStart"  (Context="Connect", Pname="", info="")
+[21:54:33.089]  
+[21:54:33.089]  <debugvars>
+[21:54:33.089]    // Pre-defined
+[21:54:33.089]    __protocol=0x00010002      (Protocol="SWD", SWJ-DP="True")
+[21:54:33.089]    __connection=0x00010102    (Connection Type="Flash", Reset Type="Hardware Reset", Connection Under HW Reset)
+[21:54:33.090]    __dp=0x00000000
+[21:54:33.090]    __ap=0x00000000
+[21:54:33.090]    __traceout=0x00000000      (Trace Disabled)
+[21:54:33.090]    __errorcontrol=0x00000000  (Skip Errors="False")
+[21:54:33.090]    __FlashAddr=0x00000000
+[21:54:33.091]    __FlashLen=0x00000000
+[21:54:33.091]    __FlashArg=0x00000000
+[21:54:33.091]    __FlashOp=0x00000000
+[21:54:33.091]    __Result=0x00000000
+[21:54:33.091]    
+[21:54:33.091]    // User-defined
+[21:54:33.091]    DbgMCU_CR=0x00000007
+[21:54:33.091]  </debugvars>
+[21:54:33.091]  
+[21:54:33.091]  <sequence name="DebugCoreStart" Pname="" disable="false" info="">
+[21:54:33.091]    <block atomic="false" info="">
+[21:54:33.091]      Write32(0xE000EDF0, 0xA05F0001);                                        // Enable Core Debug via DHCSR
+[21:54:33.094]        // -> [Write32(0xE000EDF0, 0xA05F0001)]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:33.094]      Write32(0xE0042004, DbgMCU_CR);                                         // DBGMCU_CR: Configure MCU Debug
+[21:54:33.098]        // -> [Write32(0xE0042004, 0x00000007)]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:33.098]    </block>
+[21:54:33.098]  </sequence>
+[21:54:33.098]  
+[21:54:36.915]  **********  Sequence "DebugDeviceUnlock"  (Context="Connect", Pname="", info="")
+[21:54:36.915]  
+[21:54:36.953]  <debugvars>
+[21:54:36.954]    // Pre-defined
+[21:54:36.955]    __protocol=0x00010002      (Protocol="SWD", SWJ-DP="True")
+[21:54:36.958]    __connection=0x00010102    (Connection Type="Flash", Reset Type="Hardware Reset", Connection Under HW Reset)
+[21:54:36.959]    __dp=0x00000000
+[21:54:36.960]    __ap=0x00000000
+[21:54:36.960]    __traceout=0x00000000      (Trace Disabled)
+[21:54:36.961]    __errorcontrol=0x00000000  (Skip Errors="False")
+[21:54:36.961]    __FlashAddr=0x00000000
+[21:54:36.962]    __FlashLen=0x00000000
+[21:54:36.962]    __FlashArg=0x00000000
+[21:54:36.963]    __FlashOp=0x00000000
+[21:54:36.963]    __Result=0x00000000
+[21:54:36.964]    
+[21:54:36.964]    // User-defined
+[21:54:36.964]    DbgMCU_CR=0x00000007
+[21:54:36.965]  </debugvars>
+[21:54:36.965]  
+[21:54:36.966]  <sequence name="DebugDeviceUnlock" Pname="" disable="false" info="">
+[21:54:36.966]    <block atomic="false" info="">
+[21:54:36.966]      Sequence("CheckID");
+[21:54:36.966]        <sequence name="CheckID" Pname="" disable="false" info="">
+[21:54:36.966]          <block atomic="false" info="">
+[21:54:36.966]            __var pidr1 = 0;
+[21:54:36.967]              // -> [pidr1 <= 0x00000000]
+[21:54:36.967]            __var pidr2 = 0;
+[21:54:36.967]              // -> [pidr2 <= 0x00000000]
+[21:54:36.968]            __var jep106id = 0;
+[21:54:36.968]              // -> [jep106id <= 0x00000000]
+[21:54:36.968]            __var ROMTableBase = 0;
+[21:54:36.968]              // -> [ROMTableBase <= 0x00000000]
+[21:54:36.968]            __ap = 0;      // AHB-AP
+[21:54:36.969]              // -> [__ap <= 0x00000000]
+[21:54:36.969]            ROMTableBase = ReadAP(0xF8) & ~0x3;
+[21:54:36.971]              // -> [ReadAP(0x000000F8) => 0xE00FF003]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:36.972]              // -> [ROMTableBase <= 0xE00FF000]
+[21:54:36.972]            pidr1 = Read32(ROMTableBase + 0x0FE4);
+[21:54:36.977]              // -> [Read32(0xE00FFFE4) => 0x00000004]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:36.977]              // -> [pidr1 <= 0x00000004]
+[21:54:36.977]            pidr2 = Read32(ROMTableBase + 0x0FE8);
+[21:54:36.980]              // -> [Read32(0xE00FFFE8) => 0x0000000A]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:36.981]              // -> [pidr2 <= 0x0000000A]
+[21:54:36.981]            jep106id = ((pidr2 & 0x7) << 4 ) | ((pidr1 >> 4) & 0xF);
+[21:54:36.981]              // -> [jep106id <= 0x00000020]
+[21:54:36.981]          </block>
+[21:54:36.982]          <control if="jep106id != 0x20" while="" timeout="0" info="">
+[21:54:36.982]            // if-block "jep106id != 0x20"
+[21:54:36.982]              // =>  FALSE
+[21:54:36.982]            // skip if-block "jep106id != 0x20"
+[21:54:36.982]          </control>
+[21:54:36.982]        </sequence>
+[21:54:36.982]    </block>
+[21:54:36.982]  </sequence>
+[21:54:36.982]  
+[21:54:36.983]  **********  Sequence "DebugCoreStart"  (Context="Connect", Pname="", info="")
+[21:54:36.983]  
+[21:54:36.983]  <debugvars>
+[21:54:36.983]    // Pre-defined
+[21:54:36.983]    __protocol=0x00010002      (Protocol="SWD", SWJ-DP="True")
+[21:54:36.983]    __connection=0x00010102    (Connection Type="Flash", Reset Type="Hardware Reset", Connection Under HW Reset)
+[21:54:36.984]    __dp=0x00000000
+[21:54:36.985]    __ap=0x00000000
+[21:54:36.985]    __traceout=0x00000000      (Trace Disabled)
+[21:54:36.985]    __errorcontrol=0x00000000  (Skip Errors="False")
+[21:54:36.986]    __FlashAddr=0x00000000
+[21:54:36.986]    __FlashLen=0x00000000
+[21:54:36.986]    __FlashArg=0x00000000
+[21:54:36.986]    __FlashOp=0x00000000
+[21:54:36.987]    __Result=0x00000000
+[21:54:36.987]    
+[21:54:36.987]    // User-defined
+[21:54:36.987]    DbgMCU_CR=0x00000007
+[21:54:36.987]  </debugvars>
+[21:54:36.987]  
+[21:54:36.988]  <sequence name="DebugCoreStart" Pname="" disable="false" info="">
+[21:54:36.988]    <block atomic="false" info="">
+[21:54:36.988]      Write32(0xE000EDF0, 0xA05F0001);                                        // Enable Core Debug via DHCSR
+[21:54:36.991]        // -> [Write32(0xE000EDF0, 0xA05F0001)]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:36.991]      Write32(0xE0042004, DbgMCU_CR);                                         // DBGMCU_CR: Configure MCU Debug
+[21:54:36.994]        // -> [Write32(0xE0042004, 0x00000007)]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:36.995]    </block>
+[21:54:36.995]  </sequence>
+[21:54:36.995]  
+[21:54:40.834]  **********  Sequence "DebugDeviceUnlock"  (Context="Connect", Pname="", info="")
+[21:54:40.834]  
+[21:54:40.836]  <debugvars>
+[21:54:40.837]    // Pre-defined
+[21:54:40.837]    __protocol=0x00010002      (Protocol="SWD", SWJ-DP="True")
+[21:54:40.838]    __connection=0x00010102    (Connection Type="Flash", Reset Type="Hardware Reset", Connection Under HW Reset)
+[21:54:40.838]    __dp=0x00000000
+[21:54:40.838]    __ap=0x00000000
+[21:54:40.839]    __traceout=0x00000000      (Trace Disabled)
+[21:54:40.839]    __errorcontrol=0x00000000  (Skip Errors="False")
+[21:54:40.839]    __FlashAddr=0x00000000
+[21:54:40.840]    __FlashLen=0x00000000
+[21:54:40.841]    __FlashArg=0x00000000
+[21:54:40.841]    __FlashOp=0x00000000
+[21:54:40.841]    __Result=0x00000000
+[21:54:40.842]    
+[21:54:40.842]    // User-defined
+[21:54:40.842]    DbgMCU_CR=0x00000007
+[21:54:40.842]  </debugvars>
+[21:54:40.842]  
+[21:54:40.843]  <sequence name="DebugDeviceUnlock" Pname="" disable="false" info="">
+[21:54:40.843]    <block atomic="false" info="">
+[21:54:40.843]      Sequence("CheckID");
+[21:54:40.843]        <sequence name="CheckID" Pname="" disable="false" info="">
+[21:54:40.844]          <block atomic="false" info="">
+[21:54:40.844]            __var pidr1 = 0;
+[21:54:40.844]              // -> [pidr1 <= 0x00000000]
+[21:54:40.844]            __var pidr2 = 0;
+[21:54:40.845]              // -> [pidr2 <= 0x00000000]
+[21:54:40.845]            __var jep106id = 0;
+[21:54:40.845]              // -> [jep106id <= 0x00000000]
+[21:54:40.845]            __var ROMTableBase = 0;
+[21:54:40.846]              // -> [ROMTableBase <= 0x00000000]
+[21:54:40.846]            __ap = 0;      // AHB-AP
+[21:54:40.846]              // -> [__ap <= 0x00000000]
+[21:54:40.846]            ROMTableBase = ReadAP(0xF8) & ~0x3;
+[21:54:40.848]              // -> [ReadAP(0x000000F8) => 0xE00FF003]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:40.849]              // -> [ROMTableBase <= 0xE00FF000]
+[21:54:40.849]            pidr1 = Read32(ROMTableBase + 0x0FE4);
+[21:54:40.853]              // -> [Read32(0xE00FFFE4) => 0x00000004]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:40.853]              // -> [pidr1 <= 0x00000004]
+[21:54:40.853]            pidr2 = Read32(ROMTableBase + 0x0FE8);
+[21:54:40.857]              // -> [Read32(0xE00FFFE8) => 0x0000000A]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:40.857]              // -> [pidr2 <= 0x0000000A]
+[21:54:40.857]            jep106id = ((pidr2 & 0x7) << 4 ) | ((pidr1 >> 4) & 0xF);
+[21:54:40.858]              // -> [jep106id <= 0x00000020]
+[21:54:40.858]          </block>
+[21:54:40.858]          <control if="jep106id != 0x20" while="" timeout="0" info="">
+[21:54:40.858]            // if-block "jep106id != 0x20"
+[21:54:40.858]              // =>  FALSE
+[21:54:40.859]            // skip if-block "jep106id != 0x20"
+[21:54:40.859]          </control>
+[21:54:40.859]        </sequence>
+[21:54:40.859]    </block>
+[21:54:40.859]  </sequence>
+[21:54:40.860]  
+[21:54:40.860]  **********  Sequence "DebugCoreStart"  (Context="Connect", Pname="", info="")
+[21:54:40.860]  
+[21:54:40.860]  <debugvars>
+[21:54:40.860]    // Pre-defined
+[21:54:40.860]    __protocol=0x00010002      (Protocol="SWD", SWJ-DP="True")
+[21:54:40.861]    __connection=0x00010102    (Connection Type="Flash", Reset Type="Hardware Reset", Connection Under HW Reset)
+[21:54:40.861]    __dp=0x00000000
+[21:54:40.862]    __ap=0x00000000
+[21:54:40.862]    __traceout=0x00000000      (Trace Disabled)
+[21:54:40.862]    __errorcontrol=0x00000000  (Skip Errors="False")
+[21:54:40.862]    __FlashAddr=0x00000000
+[21:54:40.862]    __FlashLen=0x00000000
+[21:54:40.862]    __FlashArg=0x00000000
+[21:54:40.862]    __FlashOp=0x00000000
+[21:54:40.862]    __Result=0x00000000
+[21:54:40.862]    
+[21:54:40.862]    // User-defined
+[21:54:40.862]    DbgMCU_CR=0x00000007
+[21:54:40.862]  </debugvars>
+[21:54:40.862]  
+[21:54:40.862]  <sequence name="DebugCoreStart" Pname="" disable="false" info="">
+[21:54:40.862]    <block atomic="false" info="">
+[21:54:40.862]      Write32(0xE000EDF0, 0xA05F0001);                                        // Enable Core Debug via DHCSR
+[21:54:40.866]        // -> [Write32(0xE000EDF0, 0xA05F0001)]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:40.866]      Write32(0xE0042004, DbgMCU_CR);                                         // DBGMCU_CR: Configure MCU Debug
+[21:54:40.870]        // -> [Write32(0xE0042004, 0x00000007)]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:40.870]    </block>
+[21:54:40.870]  </sequence>
+[21:54:40.870]  
+[21:54:44.715]  **********  Sequence "DebugDeviceUnlock"  (Context="Connect", Pname="", info="")
+[21:54:44.715]  
+[21:54:44.717]  <debugvars>
+[21:54:44.717]    // Pre-defined
+[21:54:44.718]    __protocol=0x00010002      (Protocol="SWD", SWJ-DP="True")
+[21:54:44.719]    __connection=0x00010102    (Connection Type="Flash", Reset Type="Hardware Reset", Connection Under HW Reset)
+[21:54:44.719]    __dp=0x00000000
+[21:54:44.720]    __ap=0x00000000
+[21:54:44.720]    __traceout=0x00000000      (Trace Disabled)
+[21:54:44.720]    __errorcontrol=0x00000000  (Skip Errors="False")
+[21:54:44.721]    __FlashAddr=0x00000000
+[21:54:44.721]    __FlashLen=0x00000000
+[21:54:44.722]    __FlashArg=0x00000000
+[21:54:44.722]    __FlashOp=0x00000000
+[21:54:44.722]    __Result=0x00000000
+[21:54:44.723]    
+[21:54:44.723]    // User-defined
+[21:54:44.723]    DbgMCU_CR=0x00000007
+[21:54:44.723]  </debugvars>
+[21:54:44.723]  
+[21:54:44.724]  <sequence name="DebugDeviceUnlock" Pname="" disable="false" info="">
+[21:54:44.724]    <block atomic="false" info="">
+[21:54:44.724]      Sequence("CheckID");
+[21:54:44.724]        <sequence name="CheckID" Pname="" disable="false" info="">
+[21:54:44.724]          <block atomic="false" info="">
+[21:54:44.725]            __var pidr1 = 0;
+[21:54:44.725]              // -> [pidr1 <= 0x00000000]
+[21:54:44.725]            __var pidr2 = 0;
+[21:54:44.725]              // -> [pidr2 <= 0x00000000]
+[21:54:44.725]            __var jep106id = 0;
+[21:54:44.726]              // -> [jep106id <= 0x00000000]
+[21:54:44.726]            __var ROMTableBase = 0;
+[21:54:44.726]              // -> [ROMTableBase <= 0x00000000]
+[21:54:44.726]            __ap = 0;      // AHB-AP
+[21:54:44.727]              // -> [__ap <= 0x00000000]
+[21:54:44.727]            ROMTableBase = ReadAP(0xF8) & ~0x3;
+[21:54:44.729]              // -> [ReadAP(0x000000F8) => 0xE00FF003]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:44.730]              // -> [ROMTableBase <= 0xE00FF000]
+[21:54:44.730]            pidr1 = Read32(ROMTableBase + 0x0FE4);
+[21:54:44.734]              // -> [Read32(0xE00FFFE4) => 0x00000004]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:44.734]              // -> [pidr1 <= 0x00000004]
+[21:54:44.734]            pidr2 = Read32(ROMTableBase + 0x0FE8);
+[21:54:44.737]              // -> [Read32(0xE00FFFE8) => 0x0000000A]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:44.738]              // -> [pidr2 <= 0x0000000A]
+[21:54:44.738]            jep106id = ((pidr2 & 0x7) << 4 ) | ((pidr1 >> 4) & 0xF);
+[21:54:44.738]              // -> [jep106id <= 0x00000020]
+[21:54:44.738]          </block>
+[21:54:44.739]          <control if="jep106id != 0x20" while="" timeout="0" info="">
+[21:54:44.739]            // if-block "jep106id != 0x20"
+[21:54:44.739]              // =>  FALSE
+[21:54:44.739]            // skip if-block "jep106id != 0x20"
+[21:54:44.739]          </control>
+[21:54:44.740]        </sequence>
+[21:54:44.740]    </block>
+[21:54:44.740]  </sequence>
+[21:54:44.740]  
+[21:54:44.740]  **********  Sequence "DebugCoreStart"  (Context="Connect", Pname="", info="")
+[21:54:44.740]  
+[21:54:44.741]  <debugvars>
+[21:54:44.741]    // Pre-defined
+[21:54:44.741]    __protocol=0x00010002      (Protocol="SWD", SWJ-DP="True")
+[21:54:44.741]    __connection=0x00010102    (Connection Type="Flash", Reset Type="Hardware Reset", Connection Under HW Reset)
+[21:54:44.741]    __dp=0x00000000
+[21:54:44.742]    __ap=0x00000000
+[21:54:44.742]    __traceout=0x00000000      (Trace Disabled)
+[21:54:44.742]    __errorcontrol=0x00000000  (Skip Errors="False")
+[21:54:44.742]    __FlashAddr=0x00000000
+[21:54:44.742]    __FlashLen=0x00000000
+[21:54:44.742]    __FlashArg=0x00000000
+[21:54:44.743]    __FlashOp=0x00000000
+[21:54:44.743]    __Result=0x00000000
+[21:54:44.743]    
+[21:54:44.743]    // User-defined
+[21:54:44.743]    DbgMCU_CR=0x00000007
+[21:54:44.743]  </debugvars>
+[21:54:44.744]  
+[21:54:44.744]  <sequence name="DebugCoreStart" Pname="" disable="false" info="">
+[21:54:44.744]    <block atomic="false" info="">
+[21:54:44.744]      Write32(0xE000EDF0, 0xA05F0001);                                        // Enable Core Debug via DHCSR
+[21:54:44.747]        // -> [Write32(0xE000EDF0, 0xA05F0001)]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:44.747]      Write32(0xE0042004, DbgMCU_CR);                                         // DBGMCU_CR: Configure MCU Debug
+[21:54:44.751]        // -> [Write32(0xE0042004, 0x00000007)]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:44.751]    </block>
+[21:54:44.751]  </sequence>
+[21:54:44.752]  
+[21:54:48.596]  **********  Sequence "DebugDeviceUnlock"  (Context="Connect", Pname="", info="")
+[21:54:48.596]  
+[21:54:48.599]  <debugvars>
+[21:54:48.599]    // Pre-defined
+[21:54:48.600]    __protocol=0x00010002      (Protocol="SWD", SWJ-DP="True")
+[21:54:48.600]    __connection=0x00010102    (Connection Type="Flash", Reset Type="Hardware Reset", Connection Under HW Reset)
+[21:54:48.601]    __dp=0x00000000
+[21:54:48.601]    __ap=0x00000000
+[21:54:48.602]    __traceout=0x00000000      (Trace Disabled)
+[21:54:48.602]    __errorcontrol=0x00000000  (Skip Errors="False")
+[21:54:48.603]    __FlashAddr=0x00000000
+[21:54:48.603]    __FlashLen=0x00000000
+[21:54:48.604]    __FlashArg=0x00000000
+[21:54:48.604]    __FlashOp=0x00000000
+[21:54:48.604]    __Result=0x00000000
+[21:54:48.604]    
+[21:54:48.604]    // User-defined
+[21:54:48.605]    DbgMCU_CR=0x00000007
+[21:54:48.605]  </debugvars>
+[21:54:48.605]  
+[21:54:48.605]  <sequence name="DebugDeviceUnlock" Pname="" disable="false" info="">
+[21:54:48.606]    <block atomic="false" info="">
+[21:54:48.606]      Sequence("CheckID");
+[21:54:48.606]        <sequence name="CheckID" Pname="" disable="false" info="">
+[21:54:48.606]          <block atomic="false" info="">
+[21:54:48.607]            __var pidr1 = 0;
+[21:54:48.607]              // -> [pidr1 <= 0x00000000]
+[21:54:48.607]            __var pidr2 = 0;
+[21:54:48.607]              // -> [pidr2 <= 0x00000000]
+[21:54:48.607]            __var jep106id = 0;
+[21:54:48.608]              // -> [jep106id <= 0x00000000]
+[21:54:48.608]            __var ROMTableBase = 0;
+[21:54:48.608]              // -> [ROMTableBase <= 0x00000000]
+[21:54:48.608]            __ap = 0;      // AHB-AP
+[21:54:48.608]              // -> [__ap <= 0x00000000]
+[21:54:48.608]            ROMTableBase = ReadAP(0xF8) & ~0x3;
+[21:54:48.611]              // -> [ReadAP(0x000000F8) => 0xE00FF003]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:48.611]              // -> [ROMTableBase <= 0xE00FF000]
+[21:54:48.611]            pidr1 = Read32(ROMTableBase + 0x0FE4);
+[21:54:48.615]              // -> [Read32(0xE00FFFE4) => 0x00000004]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:48.615]              // -> [pidr1 <= 0x00000004]
+[21:54:48.616]            pidr2 = Read32(ROMTableBase + 0x0FE8);
+[21:54:48.619]              // -> [Read32(0xE00FFFE8) => 0x0000000A]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:48.619]              // -> [pidr2 <= 0x0000000A]
+[21:54:48.620]            jep106id = ((pidr2 & 0x7) << 4 ) | ((pidr1 >> 4) & 0xF);
+[21:54:48.620]              // -> [jep106id <= 0x00000020]
+[21:54:48.620]          </block>
+[21:54:48.620]          <control if="jep106id != 0x20" while="" timeout="0" info="">
+[21:54:48.620]            // if-block "jep106id != 0x20"
+[21:54:48.621]              // =>  FALSE
+[21:54:48.621]            // skip if-block "jep106id != 0x20"
+[21:54:48.621]          </control>
+[21:54:48.621]        </sequence>
+[21:54:48.621]    </block>
+[21:54:48.622]  </sequence>
+[21:54:48.622]  
+[21:54:48.622]  **********  Sequence "DebugCoreStart"  (Context="Connect", Pname="", info="")
+[21:54:48.622]  
+[21:54:48.622]  <debugvars>
+[21:54:48.623]    // Pre-defined
+[21:54:48.623]    __protocol=0x00010002      (Protocol="SWD", SWJ-DP="True")
+[21:54:48.623]    __connection=0x00010102    (Connection Type="Flash", Reset Type="Hardware Reset", Connection Under HW Reset)
+[21:54:48.623]    __dp=0x00000000
+[21:54:48.623]    __ap=0x00000000
+[21:54:48.624]    __traceout=0x00000000      (Trace Disabled)
+[21:54:48.624]    __errorcontrol=0x00000000  (Skip Errors="False")
+[21:54:48.624]    __FlashAddr=0x00000000
+[21:54:48.624]    __FlashLen=0x00000000
+[21:54:48.624]    __FlashArg=0x00000000
+[21:54:48.625]    __FlashOp=0x00000000
+[21:54:48.625]    __Result=0x00000000
+[21:54:48.626]    
+[21:54:48.626]    // User-defined
+[21:54:48.626]    DbgMCU_CR=0x00000007
+[21:54:48.626]  </debugvars>
+[21:54:48.626]  
+[21:54:48.627]  <sequence name="DebugCoreStart" Pname="" disable="false" info="">
+[21:54:48.627]    <block atomic="false" info="">
+[21:54:48.627]      Write32(0xE000EDF0, 0xA05F0001);                                        // Enable Core Debug via DHCSR
+[21:54:48.630]        // -> [Write32(0xE000EDF0, 0xA05F0001)]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:48.630]      Write32(0xE0042004, DbgMCU_CR);                                         // DBGMCU_CR: Configure MCU Debug
+[21:54:48.633]        // -> [Write32(0xE0042004, 0x00000007)]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:48.634]    </block>
+[21:54:48.634]  </sequence>
+[21:54:48.634]  
+[21:54:52.478]  **********  Sequence "DebugDeviceUnlock"  (Context="Connect", Pname="", info="")
+[21:54:52.478]  
+[21:54:52.480]  <debugvars>
+[21:54:52.481]    // Pre-defined
+[21:54:52.481]    __protocol=0x00010002      (Protocol="SWD", SWJ-DP="True")
+[21:54:52.481]    __connection=0x00010102    (Connection Type="Flash", Reset Type="Hardware Reset", Connection Under HW Reset)
+[21:54:52.482]    __dp=0x00000000
+[21:54:52.482]    __ap=0x00000000
+[21:54:52.483]    __traceout=0x00000000      (Trace Disabled)
+[21:54:52.483]    __errorcontrol=0x00000000  (Skip Errors="False")
+[21:54:52.483]    __FlashAddr=0x00000000
+[21:54:52.484]    __FlashLen=0x00000000
+[21:54:52.484]    __FlashArg=0x00000000
+[21:54:52.485]    __FlashOp=0x00000000
+[21:54:52.485]    __Result=0x00000000
+[21:54:52.485]    
+[21:54:52.485]    // User-defined
+[21:54:52.486]    DbgMCU_CR=0x00000007
+[21:54:52.486]  </debugvars>
+[21:54:52.486]  
+[21:54:52.486]  <sequence name="DebugDeviceUnlock" Pname="" disable="false" info="">
+[21:54:52.486]    <block atomic="false" info="">
+[21:54:52.487]      Sequence("CheckID");
+[21:54:52.487]        <sequence name="CheckID" Pname="" disable="false" info="">
+[21:54:52.487]          <block atomic="false" info="">
+[21:54:52.487]            __var pidr1 = 0;
+[21:54:52.488]              // -> [pidr1 <= 0x00000000]
+[21:54:52.488]            __var pidr2 = 0;
+[21:54:52.488]              // -> [pidr2 <= 0x00000000]
+[21:54:52.489]            __var jep106id = 0;
+[21:54:52.489]              // -> [jep106id <= 0x00000000]
+[21:54:52.489]            __var ROMTableBase = 0;
+[21:54:52.489]              // -> [ROMTableBase <= 0x00000000]
+[21:54:52.490]            __ap = 0;      // AHB-AP
+[21:54:52.490]              // -> [__ap <= 0x00000000]
+[21:54:52.490]            ROMTableBase = ReadAP(0xF8) & ~0x3;
+[21:54:52.492]              // -> [ReadAP(0x000000F8) => 0xE00FF003]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:52.493]              // -> [ROMTableBase <= 0xE00FF000]
+[21:54:52.493]            pidr1 = Read32(ROMTableBase + 0x0FE4);
+[21:54:52.497]              // -> [Read32(0xE00FFFE4) => 0x00000004]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:52.497]              // -> [pidr1 <= 0x00000004]
+[21:54:52.498]            pidr2 = Read32(ROMTableBase + 0x0FE8);
+[21:54:52.501]              // -> [Read32(0xE00FFFE8) => 0x0000000A]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:52.501]              // -> [pidr2 <= 0x0000000A]
+[21:54:52.502]            jep106id = ((pidr2 & 0x7) << 4 ) | ((pidr1 >> 4) & 0xF);
+[21:54:52.502]              // -> [jep106id <= 0x00000020]
+[21:54:52.502]          </block>
+[21:54:52.502]          <control if="jep106id != 0x20" while="" timeout="0" info="">
+[21:54:52.502]            // if-block "jep106id != 0x20"
+[21:54:52.503]              // =>  FALSE
+[21:54:52.503]            // skip if-block "jep106id != 0x20"
+[21:54:52.503]          </control>
+[21:54:52.503]        </sequence>
+[21:54:52.503]    </block>
+[21:54:52.504]  </sequence>
+[21:54:52.504]  
+[21:54:52.504]  **********  Sequence "DebugCoreStart"  (Context="Connect", Pname="", info="")
+[21:54:52.504]  
+[21:54:52.505]  <debugvars>
+[21:54:52.505]    // Pre-defined
+[21:54:52.505]    __protocol=0x00010002      (Protocol="SWD", SWJ-DP="True")
+[21:54:52.505]    __connection=0x00010102    (Connection Type="Flash", Reset Type="Hardware Reset", Connection Under HW Reset)
+[21:54:52.506]    __dp=0x00000000
+[21:54:52.506]    __ap=0x00000000
+[21:54:52.506]    __traceout=0x00000000      (Trace Disabled)
+[21:54:52.506]    __errorcontrol=0x00000000  (Skip Errors="False")
+[21:54:52.506]    __FlashAddr=0x00000000
+[21:54:52.506]    __FlashLen=0x00000000
+[21:54:52.506]    __FlashArg=0x00000000
+[21:54:52.506]    __FlashOp=0x00000000
+[21:54:52.506]    __Result=0x00000000
+[21:54:52.506]    
+[21:54:52.506]    // User-defined
+[21:54:52.506]    DbgMCU_CR=0x00000007
+[21:54:52.506]  </debugvars>
+[21:54:52.506]  
+[21:54:52.506]  <sequence name="DebugCoreStart" Pname="" disable="false" info="">
+[21:54:52.506]    <block atomic="false" info="">
+[21:54:52.506]      Write32(0xE000EDF0, 0xA05F0001);                                        // Enable Core Debug via DHCSR
+[21:54:52.510]        // -> [Write32(0xE000EDF0, 0xA05F0001)]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:52.510]      Write32(0xE0042004, DbgMCU_CR);                                         // DBGMCU_CR: Configure MCU Debug
+[21:54:52.514]        // -> [Write32(0xE0042004, 0x00000007)]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:52.514]    </block>
+[21:54:52.514]  </sequence>
+[21:54:52.514]  
+[21:54:56.350]  **********  Sequence "DebugDeviceUnlock"  (Context="Connect", Pname="", info="")
+[21:54:56.350]  
+[21:54:56.352]  <debugvars>
+[21:54:56.353]    // Pre-defined
+[21:54:56.353]    __protocol=0x00010002      (Protocol="SWD", SWJ-DP="True")
+[21:54:56.353]    __connection=0x00010102    (Connection Type="Flash", Reset Type="Hardware Reset", Connection Under HW Reset)
+[21:54:56.354]    __dp=0x00000000
+[21:54:56.355]    __ap=0x00000000
+[21:54:56.355]    __traceout=0x00000000      (Trace Disabled)
+[21:54:56.355]    __errorcontrol=0x00000000  (Skip Errors="False")
+[21:54:56.356]    __FlashAddr=0x00000000
+[21:54:56.356]    __FlashLen=0x00000000
+[21:54:56.356]    __FlashArg=0x00000000
+[21:54:56.357]    __FlashOp=0x00000000
+[21:54:56.357]    __Result=0x00000000
+[21:54:56.357]    
+[21:54:56.357]    // User-defined
+[21:54:56.357]    DbgMCU_CR=0x00000007
+[21:54:56.358]  </debugvars>
+[21:54:56.358]  
+[21:54:56.358]  <sequence name="DebugDeviceUnlock" Pname="" disable="false" info="">
+[21:54:56.358]    <block atomic="false" info="">
+[21:54:56.359]      Sequence("CheckID");
+[21:54:56.359]        <sequence name="CheckID" Pname="" disable="false" info="">
+[21:54:56.359]          <block atomic="false" info="">
+[21:54:56.359]            __var pidr1 = 0;
+[21:54:56.359]              // -> [pidr1 <= 0x00000000]
+[21:54:56.360]            __var pidr2 = 0;
+[21:54:56.360]              // -> [pidr2 <= 0x00000000]
+[21:54:56.360]            __var jep106id = 0;
+[21:54:56.360]              // -> [jep106id <= 0x00000000]
+[21:54:56.360]            __var ROMTableBase = 0;
+[21:54:56.360]              // -> [ROMTableBase <= 0x00000000]
+[21:54:56.361]            __ap = 0;      // AHB-AP
+[21:54:56.362]              // -> [__ap <= 0x00000000]
+[21:54:56.362]            ROMTableBase = ReadAP(0xF8) & ~0x3;
+[21:54:56.364]              // -> [ReadAP(0x000000F8) => 0xE00FF003]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:56.365]              // -> [ROMTableBase <= 0xE00FF000]
+[21:54:56.365]            pidr1 = Read32(ROMTableBase + 0x0FE4);
+[21:54:56.368]              // -> [Read32(0xE00FFFE4) => 0x00000004]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:56.368]              // -> [pidr1 <= 0x00000004]
+[21:54:56.369]            pidr2 = Read32(ROMTableBase + 0x0FE8);
+[21:54:56.373]              // -> [Read32(0xE00FFFE8) => 0x0000000A]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:56.373]              // -> [pidr2 <= 0x0000000A]
+[21:54:56.373]            jep106id = ((pidr2 & 0x7) << 4 ) | ((pidr1 >> 4) & 0xF);
+[21:54:56.373]              // -> [jep106id <= 0x00000020]
+[21:54:56.373]          </block>
+[21:54:56.374]          <control if="jep106id != 0x20" while="" timeout="0" info="">
+[21:54:56.374]            // if-block "jep106id != 0x20"
+[21:54:56.374]              // =>  FALSE
+[21:54:56.375]            // skip if-block "jep106id != 0x20"
+[21:54:56.375]          </control>
+[21:54:56.375]        </sequence>
+[21:54:56.375]    </block>
+[21:54:56.375]  </sequence>
+[21:54:56.375]  
+[21:54:56.375]  **********  Sequence "DebugCoreStart"  (Context="Connect", Pname="", info="")
+[21:54:56.375]  
+[21:54:56.377]  <debugvars>
+[21:54:56.377]    // Pre-defined
+[21:54:56.377]    __protocol=0x00010002      (Protocol="SWD", SWJ-DP="True")
+[21:54:56.377]    __connection=0x00010102    (Connection Type="Flash", Reset Type="Hardware Reset", Connection Under HW Reset)
+[21:54:56.377]    __dp=0x00000000
+[21:54:56.377]    __ap=0x00000000
+[21:54:56.377]    __traceout=0x00000000      (Trace Disabled)
+[21:54:56.377]    __errorcontrol=0x00000000  (Skip Errors="False")
+[21:54:56.377]    __FlashAddr=0x00000000
+[21:54:56.377]    __FlashLen=0x00000000
+[21:54:56.377]    __FlashArg=0x00000000
+[21:54:56.377]    __FlashOp=0x00000000
+[21:54:56.377]    __Result=0x00000000
+[21:54:56.377]    
+[21:54:56.377]    // User-defined
+[21:54:56.377]    DbgMCU_CR=0x00000007
+[21:54:56.378]  </debugvars>
+[21:54:56.378]  
+[21:54:56.378]  <sequence name="DebugCoreStart" Pname="" disable="false" info="">
+[21:54:56.378]    <block atomic="false" info="">
+[21:54:56.378]      Write32(0xE000EDF0, 0xA05F0001);                                        // Enable Core Debug via DHCSR
+[21:54:56.381]        // -> [Write32(0xE000EDF0, 0xA05F0001)]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:56.381]      Write32(0xE0042004, DbgMCU_CR);                                         // DBGMCU_CR: Configure MCU Debug
+[21:54:56.385]        // -> [Write32(0xE0042004, 0x00000007)]   (__dp=0x00000000, __ap=0x00000000)
+[21:54:56.385]    </block>
+[21:54:56.386]  </sequence>
+[21:54:56.386]  
+[21:56:27.928]  **********  Sequence "DebugDeviceUnlock"  (Context="Connect", Pname="", info="")
+[21:56:27.928]  
+[21:56:27.967]  <debugvars>
+[21:56:27.967]    // Pre-defined
+[21:56:27.968]    __protocol=0x00010002      (Protocol="SWD", SWJ-DP="True")
+[21:56:27.972]    __connection=0x00010102    (Connection Type="Flash", Reset Type="Hardware Reset", Connection Under HW Reset)
+[21:56:27.972]    __dp=0x00000000
+[21:56:27.973]    __ap=0x00000000
+[21:56:27.973]    __traceout=0x00000000      (Trace Disabled)
+[21:56:27.974]    __errorcontrol=0x00000000  (Skip Errors="False")
+[21:56:27.974]    __FlashAddr=0x00000000
+[21:56:27.975]    __FlashLen=0x00000000
+[21:56:27.975]    __FlashArg=0x00000000
+[21:56:27.976]    __FlashOp=0x00000000
+[21:56:27.976]    __Result=0x00000000
+[21:56:27.977]    
+[21:56:27.977]    // User-defined
+[21:56:27.977]    DbgMCU_CR=0x00000007
+[21:56:27.978]  </debugvars>
+[21:56:27.978]  
+[21:56:27.978]  <sequence name="DebugDeviceUnlock" Pname="" disable="false" info="">
+[21:56:27.978]    <block atomic="false" info="">
+[21:56:27.978]      Sequence("CheckID");
+[21:56:27.979]        <sequence name="CheckID" Pname="" disable="false" info="">
+[21:56:27.979]          <block atomic="false" info="">
+[21:56:27.979]            __var pidr1 = 0;
+[21:56:27.979]              // -> [pidr1 <= 0x00000000]
+[21:56:27.980]            __var pidr2 = 0;
+[21:56:27.980]              // -> [pidr2 <= 0x00000000]
+[21:56:27.980]            __var jep106id = 0;
+[21:56:27.981]              // -> [jep106id <= 0x00000000]
+[21:56:27.981]            __var ROMTableBase = 0;
+[21:56:27.981]              // -> [ROMTableBase <= 0x00000000]
+[21:56:27.981]            __ap = 0;      // AHB-AP
+[21:56:27.981]              // -> [__ap <= 0x00000000]
+[21:56:27.982]            ROMTableBase = ReadAP(0xF8) & ~0x3;
+[21:56:27.984]              // -> [ReadAP(0x000000F8) => 0xE00FF003]   (__dp=0x00000000, __ap=0x00000000)
+[21:56:27.984]              // -> [ROMTableBase <= 0xE00FF000]
+[21:56:27.984]            pidr1 = Read32(ROMTableBase + 0x0FE4);
+[21:56:27.989]              // -> [Read32(0xE00FFFE4) => 0x00000004]   (__dp=0x00000000, __ap=0x00000000)
+[21:56:27.989]              // -> [pidr1 <= 0x00000004]
+[21:56:27.990]            pidr2 = Read32(ROMTableBase + 0x0FE8);
+[21:56:27.993]              // -> [Read32(0xE00FFFE8) => 0x0000000A]   (__dp=0x00000000, __ap=0x00000000)
+[21:56:27.993]              // -> [pidr2 <= 0x0000000A]
+[21:56:27.994]            jep106id = ((pidr2 & 0x7) << 4 ) | ((pidr1 >> 4) & 0xF);
+[21:56:27.994]              // -> [jep106id <= 0x00000020]
+[21:56:27.994]          </block>
+[21:56:27.994]          <control if="jep106id != 0x20" while="" timeout="0" info="">
+[21:56:27.994]            // if-block "jep106id != 0x20"
+[21:56:27.994]              // =>  FALSE
+[21:56:27.995]            // skip if-block "jep106id != 0x20"
+[21:56:27.995]          </control>
+[21:56:27.995]        </sequence>
+[21:56:27.995]    </block>
+[21:56:27.995]  </sequence>
+[21:56:27.996]  
+[21:56:27.996]  **********  Sequence "DebugCoreStart"  (Context="Connect", Pname="", info="")
+[21:56:27.996]  
+[21:56:27.996]  <debugvars>
+[21:56:27.996]    // Pre-defined
+[21:56:27.997]    __protocol=0x00010002      (Protocol="SWD", SWJ-DP="True")
+[21:56:27.997]    __connection=0x00010102    (Connection Type="Flash", Reset Type="Hardware Reset", Connection Under HW Reset)
+[21:56:27.997]    __dp=0x00000000
+[21:56:27.998]    __ap=0x00000000
+[21:56:27.998]    __traceout=0x00000000      (Trace Disabled)
+[21:56:27.998]    __errorcontrol=0x00000000  (Skip Errors="False")
+[21:56:27.998]    __FlashAddr=0x00000000
+[21:56:27.999]    __FlashLen=0x00000000
+[21:56:27.999]    __FlashArg=0x00000000
+[21:56:27.999]    __FlashOp=0x00000000
+[21:56:27.999]    __Result=0x00000000
+[21:56:27.999]    
+[21:56:27.999]    // User-defined
+[21:56:27.999]    DbgMCU_CR=0x00000007
+[21:56:27.999]  </debugvars>
+[21:56:27.999]  
+[21:56:27.999]  <sequence name="DebugCoreStart" Pname="" disable="false" info="">
+[21:56:27.999]    <block atomic="false" info="">
+[21:56:27.999]      Write32(0xE000EDF0, 0xA05F0001);                                        // Enable Core Debug via DHCSR
+[21:56:28.002]        // -> [Write32(0xE000EDF0, 0xA05F0001)]   (__dp=0x00000000, __ap=0x00000000)
+[21:56:28.003]      Write32(0xE0042004, DbgMCU_CR);                                         // DBGMCU_CR: Configure MCU Debug
+[21:56:28.006]        // -> [Write32(0xE0042004, 0x00000007)]   (__dp=0x00000000, __ap=0x00000000)
+[21:56:28.006]    </block>
+[21:56:28.007]  </sequence>
+[21:56:28.007]  
+[22:09:29.261]  **********  Sequence "DebugDeviceUnlock"  (Context="Connect", Pname="", info="")
+[22:09:29.261]  
+[22:09:29.264]  <debugvars>
+[22:09:29.265]    // Pre-defined
+[22:09:29.265]    __protocol=0x00010002      (Protocol="SWD", SWJ-DP="True")
+[22:09:29.265]    __connection=0x00010102    (Connection Type="Flash", Reset Type="Hardware Reset", Connection Under HW Reset)
+[22:09:29.266]    __dp=0x00000000
+[22:09:29.266]    __ap=0x00000000
+[22:09:29.267]    __traceout=0x00000000      (Trace Disabled)
+[22:09:29.267]    __errorcontrol=0x00000000  (Skip Errors="False")
+[22:09:29.268]    __FlashAddr=0x00000000
+[22:09:29.268]    __FlashLen=0x00000000
+[22:09:29.269]    __FlashArg=0x00000000
+[22:09:29.269]    __FlashOp=0x00000000
+[22:09:29.269]    __Result=0x00000000
+[22:09:29.269]    
+[22:09:29.269]    // User-defined
+[22:09:29.270]    DbgMCU_CR=0x00000007
+[22:09:29.270]  </debugvars>
+[22:09:29.270]  
+[22:09:29.270]  <sequence name="DebugDeviceUnlock" Pname="" disable="false" info="">
+[22:09:29.271]    <block atomic="false" info="">
+[22:09:29.271]      Sequence("CheckID");
+[22:09:29.271]        <sequence name="CheckID" Pname="" disable="false" info="">
+[22:09:29.271]          <block atomic="false" info="">
+[22:09:29.271]            __var pidr1 = 0;
+[22:09:29.272]              // -> [pidr1 <= 0x00000000]
+[22:09:29.272]            __var pidr2 = 0;
+[22:09:29.272]              // -> [pidr2 <= 0x00000000]
+[22:09:29.272]            __var jep106id = 0;
+[22:09:29.273]              // -> [jep106id <= 0x00000000]
+[22:09:29.273]            __var ROMTableBase = 0;
+[22:09:29.273]              // -> [ROMTableBase <= 0x00000000]
+[22:09:29.274]            __ap = 0;      // AHB-AP
+[22:09:29.274]              // -> [__ap <= 0x00000000]
+[22:09:29.274]            ROMTableBase = ReadAP(0xF8) & ~0x3;
+[22:09:29.276]              // -> [ReadAP(0x000000F8) => 0xE00FF003]   (__dp=0x00000000, __ap=0x00000000)
+[22:09:29.277]              // -> [ROMTableBase <= 0xE00FF000]
+[22:09:29.277]            pidr1 = Read32(ROMTableBase + 0x0FE4);
+[22:09:29.281]              // -> [Read32(0xE00FFFE4) => 0x00000004]   (__dp=0x00000000, __ap=0x00000000)
+[22:09:29.281]              // -> [pidr1 <= 0x00000004]
+[22:09:29.281]            pidr2 = Read32(ROMTableBase + 0x0FE8);
+[22:09:29.285]              // -> [Read32(0xE00FFFE8) => 0x0000000A]   (__dp=0x00000000, __ap=0x00000000)
+[22:09:29.285]              // -> [pidr2 <= 0x0000000A]
+[22:09:29.285]            jep106id = ((pidr2 & 0x7) << 4 ) | ((pidr1 >> 4) & 0xF);
+[22:09:29.286]              // -> [jep106id <= 0x00000020]
+[22:09:29.286]          </block>
+[22:09:29.286]          <control if="jep106id != 0x20" while="" timeout="0" info="">
+[22:09:29.287]            // if-block "jep106id != 0x20"
+[22:09:29.287]              // =>  FALSE
+[22:09:29.287]            // skip if-block "jep106id != 0x20"
+[22:09:29.287]          </control>
+[22:09:29.288]        </sequence>
+[22:09:29.288]    </block>
+[22:09:29.288]  </sequence>
+[22:09:29.288]  
+[22:09:29.288]  **********  Sequence "DebugCoreStart"  (Context="Connect", Pname="", info="")
+[22:09:29.288]  
+[22:09:29.288]  <debugvars>
+[22:09:29.288]    // Pre-defined
+[22:09:29.288]    __protocol=0x00010002      (Protocol="SWD", SWJ-DP="True")
+[22:09:29.288]    __connection=0x00010102    (Connection Type="Flash", Reset Type="Hardware Reset", Connection Under HW Reset)
+[22:09:29.288]    __dp=0x00000000
+[22:09:29.288]    __ap=0x00000000
+[22:09:29.289]    __traceout=0x00000000      (Trace Disabled)
+[22:09:29.289]    __errorcontrol=0x00000000  (Skip Errors="False")
+[22:09:29.289]    __FlashAddr=0x00000000
+[22:09:29.289]    __FlashLen=0x00000000
+[22:09:29.289]    __FlashArg=0x00000000
+[22:09:29.289]    __FlashOp=0x00000000
+[22:09:29.289]    __Result=0x00000000
+[22:09:29.289]    
+[22:09:29.289]    // User-defined
+[22:09:29.289]    DbgMCU_CR=0x00000007
+[22:09:29.289]  </debugvars>
+[22:09:29.289]  
+[22:09:29.289]  <sequence name="DebugCoreStart" Pname="" disable="false" info="">
+[22:09:29.289]    <block atomic="false" info="">
+[22:09:29.289]      Write32(0xE000EDF0, 0xA05F0001);                                        // Enable Core Debug via DHCSR
+[22:09:29.292]        // -> [Write32(0xE000EDF0, 0xA05F0001)]   (__dp=0x00000000, __ap=0x00000000)
+[22:09:29.292]      Write32(0xE0042004, DbgMCU_CR);                                         // DBGMCU_CR: Configure MCU Debug
+[22:09:29.296]        // -> [Write32(0xE0042004, 0x00000007)]   (__dp=0x00000000, __ap=0x00000000)
+[22:09:29.296]    </block>
+[22:09:29.296]  </sequence>
+[22:09:29.297]  
+[22:10:09.679]  **********  Sequence "DebugDeviceUnlock"  (Context="Connect", Pname="", info="")
+[22:10:09.679]  
+[22:10:09.681]  <debugvars>
+[22:10:09.681]    // Pre-defined
+[22:10:09.682]    __protocol=0x00010002      (Protocol="SWD", SWJ-DP="True")
+[22:10:09.682]    __connection=0x00010102    (Connection Type="Flash", Reset Type="Hardware Reset", Connection Under HW Reset)
+[22:10:09.683]    __dp=0x00000000
+[22:10:09.683]    __ap=0x00000000
+[22:10:09.683]    __traceout=0x00000000      (Trace Disabled)
+[22:10:09.684]    __errorcontrol=0x00000000  (Skip Errors="False")
+[22:10:09.684]    __FlashAddr=0x00000000
+[22:10:09.684]    __FlashLen=0x00000000
+[22:10:09.684]    __FlashArg=0x00000000
+[22:10:09.685]    __FlashOp=0x00000000
+[22:10:09.685]    __Result=0x00000000
+[22:10:09.685]    
+[22:10:09.685]    // User-defined
+[22:10:09.686]    DbgMCU_CR=0x00000007
+[22:10:09.686]  </debugvars>
+[22:10:09.686]  
+[22:10:09.686]  <sequence name="DebugDeviceUnlock" Pname="" disable="false" info="">
+[22:10:09.687]    <block atomic="false" info="">
+[22:10:09.687]      Sequence("CheckID");
+[22:10:09.687]        <sequence name="CheckID" Pname="" disable="false" info="">
+[22:10:09.688]          <block atomic="false" info="">
+[22:10:09.688]            __var pidr1 = 0;
+[22:10:09.688]              // -> [pidr1 <= 0x00000000]
+[22:10:09.689]            __var pidr2 = 0;
+[22:10:09.689]              // -> [pidr2 <= 0x00000000]
+[22:10:09.689]            __var jep106id = 0;
+[22:10:09.689]              // -> [jep106id <= 0x00000000]
+[22:10:09.690]            __var ROMTableBase = 0;
+[22:10:09.690]              // -> [ROMTableBase <= 0x00000000]
+[22:10:09.690]            __ap = 0;      // AHB-AP
+[22:10:09.690]              // -> [__ap <= 0x00000000]
+[22:10:09.690]            ROMTableBase = ReadAP(0xF8) & ~0x3;
+[22:10:09.692]              // -> [ReadAP(0x000000F8) => 0xE00FF003]   (__dp=0x00000000, __ap=0x00000000)
+[22:10:09.693]              // -> [ROMTableBase <= 0xE00FF000]
+[22:10:09.693]            pidr1 = Read32(ROMTableBase + 0x0FE4);
+[22:10:09.697]              // -> [Read32(0xE00FFFE4) => 0x00000004]   (__dp=0x00000000, __ap=0x00000000)
+[22:10:09.698]              // -> [pidr1 <= 0x00000004]
+[22:10:09.698]            pidr2 = Read32(ROMTableBase + 0x0FE8);
+[22:10:09.701]              // -> [Read32(0xE00FFFE8) => 0x0000000A]   (__dp=0x00000000, __ap=0x00000000)
+[22:10:09.701]              // -> [pidr2 <= 0x0000000A]
+[22:10:09.702]            jep106id = ((pidr2 & 0x7) << 4 ) | ((pidr1 >> 4) & 0xF);
+[22:10:09.702]              // -> [jep106id <= 0x00000020]
+[22:10:09.703]          </block>
+[22:10:09.703]          <control if="jep106id != 0x20" while="" timeout="0" info="">
+[22:10:09.703]            // if-block "jep106id != 0x20"
+[22:10:09.704]              // =>  FALSE
+[22:10:09.704]            // skip if-block "jep106id != 0x20"
+[22:10:09.704]          </control>
+[22:10:09.704]        </sequence>
+[22:10:09.705]    </block>
+[22:10:09.705]  </sequence>
+[22:10:09.705]  
+[22:10:09.705]  **********  Sequence "DebugCoreStart"  (Context="Connect", Pname="", info="")
+[22:10:09.705]  
+[22:10:09.706]  <debugvars>
+[22:10:09.706]    // Pre-defined
+[22:10:09.706]    __protocol=0x00010002      (Protocol="SWD", SWJ-DP="True")
+[22:10:09.706]    __connection=0x00010102    (Connection Type="Flash", Reset Type="Hardware Reset", Connection Under HW Reset)
+[22:10:09.706]    __dp=0x00000000
+[22:10:09.706]    __ap=0x00000000
+[22:10:09.706]    __traceout=0x00000000      (Trace Disabled)
+[22:10:09.706]    __errorcontrol=0x00000000  (Skip Errors="False")
+[22:10:09.706]    __FlashAddr=0x00000000
+[22:10:09.706]    __FlashLen=0x00000000
+[22:10:09.706]    __FlashArg=0x00000000
+[22:10:09.706]    __FlashOp=0x00000000
+[22:10:09.706]    __Result=0x00000000
+[22:10:09.707]    
+[22:10:09.707]    // User-defined
+[22:10:09.707]    DbgMCU_CR=0x00000007
+[22:10:09.707]  </debugvars>
+[22:10:09.707]  
+[22:10:09.707]  <sequence name="DebugCoreStart" Pname="" disable="false" info="">
+[22:10:09.707]    <block atomic="false" info="">
+[22:10:09.707]      Write32(0xE000EDF0, 0xA05F0001);                                        // Enable Core Debug via DHCSR
+[22:10:09.710]        // -> [Write32(0xE000EDF0, 0xA05F0001)]   (__dp=0x00000000, __ap=0x00000000)
+[22:10:09.710]      Write32(0xE0042004, DbgMCU_CR);                                         // DBGMCU_CR: Configure MCU Debug
+[22:10:09.714]        // -> [Write32(0xE0042004, 0x00000007)]   (__dp=0x00000000, __ap=0x00000000)
+[22:10:09.714]    </block>
+[22:10:09.714]  </sequence>
+[22:10:09.715]  
+[22:10:16.514]  **********  Sequence "DebugDeviceUnlock"  (Context="Connect", Pname="", info="")
+[22:10:16.514]  
+[22:10:16.516]  <debugvars>
+[22:10:16.517]    // Pre-defined
+[22:10:16.518]    __protocol=0x00010002      (Protocol="SWD", SWJ-DP="True")
+[22:10:16.518]    __connection=0x00010102    (Connection Type="Flash", Reset Type="Hardware Reset", Connection Under HW Reset)
+[22:10:16.519]    __dp=0x00000000
+[22:10:16.519]    __ap=0x00000000
+[22:10:16.520]    __traceout=0x00000000      (Trace Disabled)
+[22:10:16.520]    __errorcontrol=0x00000000  (Skip Errors="False")
+[22:10:16.520]    __FlashAddr=0x00000000
+[22:10:16.521]    __FlashLen=0x00000000
+[22:10:16.521]    __FlashArg=0x00000000
+[22:10:16.521]    __FlashOp=0x00000000
+[22:10:16.521]    __Result=0x00000000
+[22:10:16.522]    
+[22:10:16.522]    // User-defined
+[22:10:16.522]    DbgMCU_CR=0x00000007
+[22:10:16.522]  </debugvars>
+[22:10:16.522]  
+[22:10:16.523]  <sequence name="DebugDeviceUnlock" Pname="" disable="false" info="">
+[22:10:16.523]    <block atomic="false" info="">
+[22:10:16.523]      Sequence("CheckID");
+[22:10:16.523]        <sequence name="CheckID" Pname="" disable="false" info="">
+[22:10:16.524]          <block atomic="false" info="">
+[22:10:16.524]            __var pidr1 = 0;
+[22:10:16.524]              // -> [pidr1 <= 0x00000000]
+[22:10:16.524]            __var pidr2 = 0;
+[22:10:16.524]              // -> [pidr2 <= 0x00000000]
+[22:10:16.525]            __var jep106id = 0;
+[22:10:16.525]              // -> [jep106id <= 0x00000000]
+[22:10:16.525]            __var ROMTableBase = 0;
+[22:10:16.525]              // -> [ROMTableBase <= 0x00000000]
+[22:10:16.525]            __ap = 0;      // AHB-AP
+[22:10:16.526]              // -> [__ap <= 0x00000000]
+[22:10:16.526]            ROMTableBase = ReadAP(0xF8) & ~0x3;
+[22:10:16.528]              // -> [ReadAP(0x000000F8) => 0xE00FF003]   (__dp=0x00000000, __ap=0x00000000)
+[22:10:16.529]              // -> [ROMTableBase <= 0xE00FF000]
+[22:10:16.529]            pidr1 = Read32(ROMTableBase + 0x0FE4);
+[22:10:16.533]              // -> [Read32(0xE00FFFE4) => 0x00000004]   (__dp=0x00000000, __ap=0x00000000)
+[22:10:16.533]              // -> [pidr1 <= 0x00000004]
+[22:10:16.533]            pidr2 = Read32(ROMTableBase + 0x0FE8);
+[22:10:16.537]              // -> [Read32(0xE00FFFE8) => 0x0000000A]   (__dp=0x00000000, __ap=0x00000000)
+[22:10:16.537]              // -> [pidr2 <= 0x0000000A]
+[22:10:16.537]            jep106id = ((pidr2 & 0x7) << 4 ) | ((pidr1 >> 4) & 0xF);
+[22:10:16.537]              // -> [jep106id <= 0x00000020]
+[22:10:16.538]          </block>
+[22:10:16.538]          <control if="jep106id != 0x20" while="" timeout="0" info="">
+[22:10:16.538]            // if-block "jep106id != 0x20"
+[22:10:16.538]              // =>  FALSE
+[22:10:16.538]            // skip if-block "jep106id != 0x20"
+[22:10:16.539]          </control>
+[22:10:16.539]        </sequence>
+[22:10:16.539]    </block>
+[22:10:16.539]  </sequence>
+[22:10:16.539]  
+[22:10:16.540]  **********  Sequence "DebugCoreStart"  (Context="Connect", Pname="", info="")
+[22:10:16.540]  
+[22:10:16.540]  <debugvars>
+[22:10:16.540]    // Pre-defined
+[22:10:16.540]    __protocol=0x00010002      (Protocol="SWD", SWJ-DP="True")
+[22:10:16.540]    __connection=0x00010102    (Connection Type="Flash", Reset Type="Hardware Reset", Connection Under HW Reset)
+[22:10:16.541]    __dp=0x00000000
+[22:10:16.541]    __ap=0x00000000
+[22:10:16.541]    __traceout=0x00000000      (Trace Disabled)
+[22:10:16.541]    __errorcontrol=0x00000000  (Skip Errors="False")
+[22:10:16.541]    __FlashAddr=0x00000000
+[22:10:16.541]    __FlashLen=0x00000000
+[22:10:16.542]    __FlashArg=0x00000000
+[22:10:16.542]    __FlashOp=0x00000000
+[22:10:16.542]    __Result=0x00000000
+[22:10:16.542]    
+[22:10:16.542]    // User-defined
+[22:10:16.542]    DbgMCU_CR=0x00000007
+[22:10:16.542]  </debugvars>
+[22:10:16.542]  
+[22:10:16.543]  <sequence name="DebugCoreStart" Pname="" disable="false" info="">
+[22:10:16.543]    <block atomic="false" info="">
+[22:10:16.543]      Write32(0xE000EDF0, 0xA05F0001);                                        // Enable Core Debug via DHCSR
+[22:10:16.546]        // -> [Write32(0xE000EDF0, 0xA05F0001)]   (__dp=0x00000000, __ap=0x00000000)
+[22:10:16.546]      Write32(0xE0042004, DbgMCU_CR);                                         // DBGMCU_CR: Configure MCU Debug
+[22:10:16.550]        // -> [Write32(0xE0042004, 0x00000007)]   (__dp=0x00000000, __ap=0x00000000)
+[22:10:16.550]    </block>
+[22:10:16.550]  </sequence>
+[22:10:16.550]  
