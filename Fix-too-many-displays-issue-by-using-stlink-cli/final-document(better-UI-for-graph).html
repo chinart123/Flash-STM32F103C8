@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Báo Cáo Kỹ Thuật: Giải Phẫu Lỗi Contents Mismatch (KeilC) & Chuyển Đổi STM32CubeIDE</title>
+<title>Báo Cáo Toàn Tập: Điều Tra Lỗi Contents Mismatch Trên KeilC & Thiết Lập STM32CubeIDE (LL Library)</title>
 <style>
   :root[data-theme="dark"] {
     --bg-main: #0b0f19;
@@ -127,10 +127,15 @@
     box-shadow: var(--shadow-card);
   }
   .hero h1 {
-    font-size: 26px;
+    font-size: 25px;
     color: var(--text-heading);
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     line-height: 1.35;
+  }
+  .hero p {
+    font-size: 14px;
+    color: var(--text-main);
+    margin-bottom: 14px;
   }
   .hero .meta {
     font-size: 13px;
@@ -139,12 +144,14 @@
     flex-wrap: wrap;
     gap: 16px;
   }
+
   .badge {
     display: inline-block;
     padding: 2px 9px;
     border-radius: 12px;
     font-size: 11.5px;
     font-weight: 700;
+    white-space: nowrap;
   }
   .b-measured { background: rgba(16,185,129,0.18); color: #34d399; border: 1px solid rgba(16,185,129,0.4); }
   .b-doc { background: rgba(56,189,248,0.18); color: #38bdf8; border: 1px solid rgba(56,189,248,0.4); }
@@ -167,7 +174,7 @@
     box-shadow: var(--shadow-card);
   }
   .part-title {
-    font-size: 21px;
+    font-size: 20px;
     font-weight: 800;
     color: var(--accent-cyan);
     border-bottom: 2px solid var(--border-color);
@@ -182,7 +189,7 @@
   h3.sub-title {
     font-size: 17.5px;
     color: var(--text-heading);
-    margin: 24px 0 12px;
+    margin: 26px 0 12px;
     padding-left: 12px;
     border-left: 4px solid var(--accent-purple);
   }
@@ -194,6 +201,7 @@
   p { margin-bottom: 12px; }
   ul, ol { margin: 0 0 14px 22px; }
   li { margin-bottom: 6px; }
+  a { color: var(--accent-cyan); }
 
   code {
     font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace;
@@ -214,7 +222,7 @@
     font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace;
     font-size: 12.8px;
     line-height: 1.55;
-    margin: 12px 0 18px;
+    margin: 10px 0 16px;
     position: relative;
   }
   pre code {
@@ -282,7 +290,7 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    margin-top: 14px;
+    margin-top: 12px;
     font-size: 12.5px;
     font-weight: 700;
     color: var(--accent-cyan);
@@ -301,7 +309,7 @@
   /* ===== TOC LIST ===== */
   .toc-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
     gap: 16px;
   }
   .toc-box {
@@ -319,7 +327,7 @@
     margin-bottom: 8px;
   }
   .toc-box ul { list-style: none; margin-left: 0; }
-  .toc-box li { margin-bottom: 5px; }
+  .toc-box li { margin-bottom: 6px; }
   .toc-box ul a {
     color: var(--text-main);
     text-decoration: none;
@@ -421,7 +429,6 @@
     box-shadow: 0 0 14px rgba(168,85,247,0.45);
   }
 
-  /* Info Banner inside Diagram */
   .ufd-status-bar {
     background: rgba(15, 23, 42, 0.85);
     border: 1px solid rgba(56, 189, 248, 0.4);
@@ -454,7 +461,6 @@
     color: #e2e8f0;
   }
 
-  /* 3-Column Header & Step Rows */
   .ufd-col-headers {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
@@ -491,7 +497,7 @@
     position: relative;
   }
   .ufd-row.passed {
-    opacity: 0.82;
+    opacity: 0.84;
     border-color: rgba(56, 189, 248, 0.28);
   }
   .ufd-row.active {
@@ -561,8 +567,8 @@
     <a href="#phan-1" class="nav-pill">Phần 1: Điều tra KeilC</a>
     <a href="#so-do-uv4" class="nav-pill">⚡ Sơ đồ UV4 Interactive</a>
     <a href="#phan-2" class="nav-pill">Phần 2: STM32CubeIDE</a>
-    <a href="#phan-3" class="nav-pill">Phần 3: Custom .FLM</a>
-    <a href="#phan-4" class="nav-pill">Phần 4: Automotive</a>
+    <a href="#phan-3" class="nav-pill">Phần 3: External Tools</a>
+    <a href="#phan-4" class="nav-pill">Phần 4: Jumper BOOT0</a>
     <a href="#phan-5" class="nav-pill">Phần 5: Code main.c</a>
     <button class="theme-btn" id="themeToggle" onclick="toggleTheme()">☀️ Giao diện Sáng</button>
   </div>
@@ -572,11 +578,27 @@
 
   <!-- ==================== HERO HEADER ==================== -->
   <section class="hero">
-    <h1>HÓA GIẢI LỖI <code>Contents mismatch</code> (KEILC + ST-LINK + STM32F103C8T6) &amp; QUY TRÌNH CHUYỂN ĐỔI SANG STM32CUBEIDE</h1>
+    <h1>BÁO CÁO TOÀN TẬP: ĐIỀU TRA LỖI <code>Contents mismatch</code> TRÊN KEILC VÀ THIẾT LẬP STM32CUBEIDE (LL LIBRARY)</h1>
+    <p>Tài liệu này lưu trữ toàn bộ hồ sơ điều tra, số đo thực nghiệm, phân tích dịch ngược thuật toán nạp <code>.FLM</code>, giải phẫu dữ liệu bộ nhớ Flash ở cấp độ chu kỳ xung nhịp trên Keil MDK (<code>UV4.exe</code>), cùng quy trình chuyển đổi hoàn chỉnh sang STM32CubeIDE sử dụng 100% thư viện LL (Low-Layer).</p>
     <div class="meta">
       <span>📅 <b>Ngày lập báo cáo:</b> 10/2026</span>
       <span>🎯 <b>Vi điều khiển:</b> STM32F103C8T6 (Cortex-M3, 72 MHz HSE PLL, Thư viện LL)</span>
-      <span>🔧 <b>Công cụ đối chiếu:</b> Keil µVision5 (<code>UV4.exe</code>) vs STM32CubeIDE (<code>STM32_Programmer_CLI.exe</code>)</span>
+      <span>🔧 <b>Môi trường đối chiếu:</b> Keil µVision 5 (<code>UV4.exe</code>) &amp; STM32CubeIDE (<code>STM32_Programmer_CLI.exe</code>)</span>
+    </div>
+
+    <div class="table-wrap" style="margin-top:18px; margin-bottom:0;">
+      <table>
+        <thead>
+          <tr><th>Nhãn độ tin cậy</th><th>Ý nghĩa trong báo cáo</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="badge b-measured">[Đã đo]</span></td><td>Có log thực tế, ảnh chụp hoặc số đo thanh ghi trực tiếp từ phần cứng của dự án.</td></tr>
+          <tr><td><span class="badge b-doc">[Tài liệu]</span></td><td>Có trong tài liệu chính thức của Keil / STMicroelectronics / IAR / CMSIS-Pack.</td></tr>
+          <tr><td><span class="badge b-comm">[Cộng đồng]</span></td><td>Báo cáo thực tế của kỹ sư trên các diễn đàn kỹ thuật (ST Community, Arm, EEVblog, CSDN).</td></tr>
+          <tr><td><span class="badge b-infer">[Suy luận]</span></td><td>Suy luận kỹ thuật hợp lý khớp với kiến trúc phần cứng nhưng chưa đo trực tiếp từng xung.</td></tr>
+          <tr><td><span class="badge b-untested">[Chưa thử]</span></td><td>Đề xuất thí nghiệm trong ma trận kiểm chứng, chưa chạy thực tế.</td></tr>
+        </tbody>
+      </table>
     </div>
   </section>
 
@@ -589,39 +611,40 @@
       <div class="toc-box">
         <a href="#phan-1">PHẦN 1: ĐIỀU TRA, KIỂM THỬ CHÉO VÀ GIẢI PHẪU LỖI <code>Contents mismatch</code> TRÊN KEILC</a>
         <ul>
-          <li><a href="#muc-1-1">1.1. Môi trường thử nghiệm, Cấu trúc Project (không RTE) &amp; Kết luận ngắn</a></li>
-          <li><a href="#muc-1-2">1.2. Loại trừ giả thuyết &amp; Kiểm thử chéo Phần cứng (Chip &amp; ST-Link Thật/Clone)</a></li>
-          <li><a href="#muc-1-3">1.3. Cô lập nhánh nạp, Giải phẫu Log trượt 8-byte Flash &amp; Dịch ngược <code>.FLM</code></a></li>
-          <li><a href="#muc-1-4">1.4. Sơ đồ luồng nạp <code>UV4.exe</code> (Interactive) &amp; Giải mã <code>Connect</code> / <code>Reset</code></a></li>
-          <li><a href="#muc-1-5">1.5. Quy trình Kiểm chứng chuẩn và Ma trận Thí nghiệm (Đề xuất từ Claude)</a></li>
-          <li><a href="#muc-1-6">1.6. Khắc phục bằng <code>flash_init.ini</code> &amp; Phân tích Thanh ghi (<code>72 MHz</code> vs <code>8 MHz</code>)</a></li>
-          <li><a href="#muc-1-7">1.7. Tổng hợp Dẫn chứng từ Datasheet, Reference Manual, Blog và Cộng đồng</a></li>
+          <li><a href="#phan-1-1">1.1. Môi trường thử nghiệm và Triệu chứng lỗi</a></li>
+          <li><a href="#phan-1-2">1.2. Loại trừ giả thuyết và Kiểm thử chéo Phần cứng (Chip &amp; ST-Link Thật/Clone)</a></li>
+          <li><a href="#phan-1-3">1.3. Cô lập nhánh nạp, Quan sát dữ liệu Flash và Dịch ngược thuật toán <code>.FLM</code></a></li>
+          <li><a href="#phan-1-4">1.4. Sơ đồ luồng nạp của <code>UV4.exe</code> và Giải mã các tùy chọn <code>Connect</code> / <code>Reset</code></a></li>
+          <li><a href="#phan-1-5">1.5. Quy trình Kiểm chứng chuẩn và Ma trận Thí nghiệm (Đề xuất từ Claude)</a></li>
+          <li><a href="#phan-1-6">1.6. Khắc phục bằng <code>flash_init.ini</code> và Phân tích Log Thanh ghi (<code>72 MHz</code> vs <code>8 MHz</code>)</a></li>
+          <li><a href="#phan-1-7">1.7. Tổng hợp Dẫn chứng từ Datasheet, Reference Manual, Blog và Cộng đồng</a></li>
         </ul>
       </div>
       <div class="toc-box">
-        <a href="#phan-2">PHẦN 2: THỰC NGHIỆM TRÊN STM32CUBEIDE &amp; EXTERNAL TOOLS CLI</a>
+        <a href="#phan-2">PHẦN 2: THIẾT LẬP PROJECT TRÊN STM32CUBEIDE (THƯ VIỆN LL)</a>
         <ul>
-          <li><a href="#muc-2-1">2.1. Tại sao STM32CubeIDE không bị lỗi <code>Contents mismatch</code>?</a></li>
-          <li><a href="#muc-2-2">2.2. Khởi tạo Project <code>LED_PC13_LL_CUBEIDE</code> &amp; Cấu hình Clock 72 MHz</a></li>
-          <li><a href="#muc-2-3">2.3. Sự cố khóa cổng SWD (<code>LL_GPIO_AF_DisableRemap_SWJ</code>) &amp; Hiện tượng <code>BOOT0 = 1</code></a></li>
-          <li><a href="#muc-2-4">2.4. Tách biệt 2 chế độ nạp bằng <code>STM32_Programmer_CLI.exe</code> &amp; Fix lỗi <code>${project_loc}</code></a></li>
+          <li><a href="#phan-2-1">2.1. Khởi tạo Project và chọn vi điều khiển</a></li>
+          <li><a href="#phan-2-2">2.2. Cấu hình chân Pinout và nguồn xung RCC</a></li>
+          <li><a href="#phan-2-3">2.3. Cấu hình sơ đồ xung nhịp Clock Configuration (72 MHz)</a></li>
+          <li><a href="#phan-2-4">2.4. Chuyển đổi Driver từ HAL sang LL</a></li>
+          <li><a href="#phan-2-5">2.5. Xử lý lỗi mất kết nối SWD (<code>Connection timed out</code>)</a></li>
         </ul>
-        <a href="#phan-3" style="margin-top:12px;">PHẦN 3: TÙY BIẾN THUẬT TOÁN NẠP (<code>.FLM</code> / <code>.STLDR</code>) PRO DEV</a>
+        <a href="#phan-3" style="margin-top:12px;">PHẦN 3: CẤU HÌNH FLASH BẰNG EXTERNAL TOOLS (PHÂN TÁCH 2 CHẾ ĐỘ NẠP)</a>
         <ul>
-          <li><a href="#muc-3-1">3.1. Các kho GitHub mã nguồn mở &amp; Hướng dẫn Keil AN333 / ST MOOCs</a></li>
+          <li><a href="#phan-3-1">3.1. Chế độ A: Nạp xong chạy ngay (Flash &amp; Run)</a></li>
+          <li><a href="#phan-3-2">3.2. Chế độ B: Nạp xong chờ bấm Reset vật lý (External Tools)</a></li>
         </ul>
       </div>
       <div class="toc-box">
-        <a href="#phan-4">PHẦN 4: KIẾN TRÚC NHÚNG AUTOMOTIVE (AUTOSAR), HÀNG KHÔNG &amp; ĐƯỜNG SẮT</a>
+        <a href="#phan-4">PHẦN 4: GHI CHÚ ĐẶC BIỆT VỀ JUMPER BOOT0 TRÊN STM32CUBEIDE</a>
         <ul>
-          <li><a href="#muc-4-1">4.1. Giải mã thuật ngữ (ECU, MCU, SoC, DCU, SKU) &amp; Luật thép AUTOSAR</a></li>
-          <li><a href="#muc-4-2">4.2. Bảng tổng hợp 9 dòng MCU Automotive, Khối Flash, IDE &amp; Compiler</a></li>
-          <li><a href="#muc-4-3">4.3. Tại sao Stellar/SPC5 tách khỏi CubeIDE? Đối chiếu Hàng không, Đường sắt &amp; Tàu thủy</a></li>
+          <li><a href="#phan-4-1">4.1. Hiện tượng thực tế và giả thuyết ban đầu</a></li>
+          <li><a href="#phan-4-2">4.2. Giải thích cơ chế can thiệp lõi của SWD và GDB Server</a></li>
         </ul>
-        <a href="#phan-5" style="margin-top:12px;">PHẦN 5: MÃ NGUỒN HOÀN CHỈNH (<code>main.c</code>)</a>
+        <a href="#phan-5" style="margin-top:12px;">PHẦN 5: TOÀN BỘ SOURCE CODE <code>main.c</code> (KEILC &amp; STM32CUBEIDE)</a>
         <ul>
-          <li><a href="#muc-5-1">5.1. File <code>Core/Src/main.c</code> chuẩn trên STM32CubeIDE</a></li>
-          <li><a href="#muc-5-2">5.2. File <code>main.c</code> chuẩn hóa trên KeilC</a></li>
+          <li><a href="#phan-5-1">5.1. Bản <code>main.c</code> cải tiến có Timeout an toàn cho KeilC</a></li>
+          <li><a href="#phan-5-2">5.2. Bản <code>main.c</code> hoàn chỉnh trên STM32CubeIDE</a></li>
         </ul>
       </div>
     </div>
@@ -637,213 +660,277 @@
     </div>
 
     <!-- 1.1 -->
-    <h3 class="sub-title" id="muc-1-1">1.1. Môi trường thử nghiệm, Cấu trúc Project (không dùng RTE) và Kết luận ngắn</h3>
-    <p>Trong dự án thử nghiệm <code>LED_PC13_LL</code> trên Keil µVision5, toàn bộ các file thư viện CMSIS và Low-Layer (LL) được thêm thủ công vào cây thư mục thay vì tích chọn qua công cụ Run-Time Environment (RTE):</p>
+    <h3 class="sub-title" id="phan-1-1">1.1. Môi trường thử nghiệm và Triệu chứng lỗi</h3>
+
+    <h4 class="mini-title">A. Cấu trúc thư mục Project trên KeilC (Add file thủ công vs RTE)</h4>
+    <p>Dự án gốc <code>LED_PC13_LL</code> trên KeilC được tổ chức bằng cách tự thêm (add) từng tệp thư viện LL và CMSIS vào thư mục <code>Drivers</code> và <code>User</code>, không thông qua hệ thống quản lý gói RTE (Run-Time Environment):</p>
 <pre><code>C:\Users\ASUS\Desktop\LED_PC13_LL
-|   EventRecorderStub.scvd, flash_debug.log, flash_init.ini, JLinkLog.txt, main.c
-|   STM32F103C8.uvprojx, STM32F103C8.uvoptx, STM32F103C8_Sequences_0000..0082.log
-+---DebugConfig/    Target_1_STM32F103C8_1.0.0.dbgconf
-+---Drivers/        core_cm3.h, stm32f103xb.h, stm32f1xx.h, stm32f1xx_ll_bus.h, stm32f1xx_ll_gpio.h, stm32f1xx_ll_rcc.h, stm32f1xx_ll_system.h
-+---Objects/        STM32F103C8.axf, STM32F103C8.hex, main.o, startup_stm32f103xb.o, system_stm32f1xx.o
-+---RTE/Device/     STM32F101_102_103_105_107.dbgconf
-\---User/           startup_stm32f103xb.s, system_stm32f1xx.c</code></pre>
+|   EventRecorderStub.scvd
+|   flash_debug.log
+|   flash_init.ini
+|   JLinkLog.txt
+|   JLinkSettings.ini
+|   main.c
+|   STM32F103C8.uvguix.ASUS
+|   STM32F103C8.uvoptx
+|   STM32F103C8.uvprojx
+|   STM32F103C8_Sequences_0000.log - STM32F103C8_Sequences_0082.log
+|
++---DebugConfig
+|       Target_1_STM32F103C8_1.0.0.dbgconf
+|
++---Drivers
+|       cmsis_armcc.h
+|       cmsis_armclang.h
+|       cmsis_compiler.h
+|       cmsis_version.h
+|       core_cm3.h
+|       stm32f103xb.h
+|       stm32f1xx.h
+|       stm32f1xx_ll_bus.h
+|       stm32f1xx_ll_gpio.h
+|       stm32f1xx_ll_rcc.h
+|       stm32f1xx_ll_system.h
+|       system_stm32f1xx.h
+|
++---Listings
+|       startup_stm32f103xb.lst
+|       STM32F103C8.map
+|
++---Objects
+|       STM32F103C8.axf
+|       STM32F103C8.hex
+|
++---RTE
+|   \---Device
+|       \---STM32F103C8
+|               STM32F101_102_103_105_107.dbgconf
+|               STM32F101_102_103_105_107.dbgconf.base@1.0.0
+|
+\---User
+        startup_stm32f103xb.s
+        system_stm32f1xx.c</code></pre>
 
     <div class="callout ok">
-      <span class="callout-title">📌 Kết luận về câu hỏi dùng RTE hay Add file thủ công trong KeilC:</span>
-      Việc tự thêm file thủ công hay dùng RTE chỉ khác nhau ở bước quản lý mã nguồn (biên dịch ra <code>.axf</code> / <code>.hex</code>). Khi nhấn <code>F8</code> (Download), KeilC vẫn gọi cùng một thuật toán nạp <code>STM32F10x_128.FLM</code> và cùng một cấu hình Debug/Reset. Do đó, <b>dù có chuyển sang dùng RTE thì lỗi <code>Contents mismatch</code> vẫn xảy ra y hệt</b>.
+      <span class="callout-title">Đánh giá việc tự add file thủ công so với dùng RTE:</span>
+      <ul>
+        <li>Việc tự gom các tệp <code>.h</code>, <code>.c</code>, <code>.s</code> vào thư mục riêng hay tích chọn qua giao diện RTE (Run-Time Environment) chỉ khác nhau ở khâu quản lý mã nguồn trước khi biên dịch (Compile &amp; Link) để tạo ra tệp thực thi <code>STM32F103C8.axf</code>.</li>
+        <li>Khi nhấn phím <code>F8</code> (Download), KeilC vẫn gọi cùng một trình điều khiển ST-Link và sử dụng chính xác cùng một tệp thuật toán nạp <code>STM32F10x_128.FLM</code> nằm trong gói CMSIS-Pack của dòng F1. Do đó, <b>dù có chuyển sang dùng RTE thì lỗi <code>Contents mismatch</code> vẫn xảy ra y hệt 100%</b>.</li>
+      </ul>
     </div>
 
-    <h4 class="mini-title">Tóm tắt kết luận điều tra gốc &amp; Hệ thống nhãn độ tin cậy</h4>
-    <ul>
-      <li><b>Cơ chế lỗi đã được xác lập chắc chắn:</b> Hàm <code>main.c</code> đưa chip lên xung nhịp <code>72 MHz</code>, file thuật toán nạp <code>.FLM</code> của Keil ghi cứng <code>FLASH_ACR = 0</code> (0 Wait State), và chip không được reset sạch về <code>HSI 8 MHz</code> trước khi nạp, khiến bước Verify đọc Flash bị thiếu Wait State.</li>
-      <li><b><code>main.c</code> không vấp lỗi silicon đã biết nào</b> trên dòng STM32F103x8; việc đẩy xung lên 72 MHz chỉ là điều kiện kích hoạt.</li>
-      <li><b>Chip thật hay giả (clone) và ST-Link thật hay clone không làm thay đổi bản chất lỗi:</b> Board mang mã <code>0x20036410</code> (mã revision hợp lệ của ST) vẫn báo lỗi y hệt hai board đầu.</li>
-      <li><b>Giải pháp nạp ổn định trên KeilC:</b> Sử dụng script <code>flash_init.ini</code> (ép chip về HSI 8 MHz trước khi <code>.FLM</code> chạy) hoặc gọi công cụ dòng lệnh ngoài (<code>ST-LINK_CLI</code> / <code>STM32_Programmer_CLI</code>).</li>
-    </ul>
-
+    <h4 class="mini-title">B. Rà soát mã nguồn <code>main.c</code> (Hàm <code>SystemClock_Config()</code>)</h4>
+    <p>Trước khi nghi ngờ công cụ nạp, mã nguồn <code>main.c</code> viết bằng thư viện LL đã được rà soát kỹ từng dòng so với chuẩn Reference Manual (RM0008):</p>
     <div class="table-wrap">
       <table>
         <thead>
-          <tr><th>Nhãn độ tin cậy</th><th>Ý nghĩa phân loại trong báo cáo</th></tr>
+          <tr><th>Hạng mục</th><th><code>main.c</code> thực hiện</th><th>Chuẩn tài liệu ST (RM0008)</th><th>Kết luận</th></tr>
         </thead>
         <tbody>
-          <tr><td><span class="badge b-measured">[Đã đo]</span></td><td>Có log thực tế hoặc số đo thanh ghi trực tiếp từ quá trình thực nghiệm trên phần cứng.</td></tr>
-          <tr><td><span class="badge b-doc">[Tài liệu]</span></td><td>Được xác nhận chính thức trong tài liệu của Keil / STMicroelectronics / IAR / CMSIS-Pack.</td></tr>
-          <tr><td><span class="badge b-comm">[Cộng đồng]</span></td><td>Báo cáo thực tế từ kỹ sư trên các diễn đàn (ST Community, Arm, EEVblog).</td></tr>
-          <tr><td><span class="badge b-infer">[Suy luận]</span></td><td>Kết luận logic hợp lý từ dữ liệu đo nhưng chưa chứng minh trực tiếp từng xung.</td></tr>
-          <tr><td><span class="badge b-untested">[Chưa thử]</span></td><td>Đề xuất thí nghiệm trong ma trận kiểm chứng.</td></tr>
+          <tr>
+            <td><b>Wait State ở 72 MHz</b></td>
+            <td><code>LL_FLASH_SetLatency(LL_FLASH_LATENCY_2)</code></td>
+            <td>0 WS cho 0–24 MHz, 1 WS cho 24–48 MHz, 2 WS cho 48–72 MHz <span class="badge b-doc">[Tài liệu]</span></td>
+            <td>Đúng chuẩn.</td>
+          </tr>
+          <tr>
+            <td><b>Thứ tự thiết lập</b></td>
+            <td>Đặt Latency sau khi PLL sẵn sàng, <b>trước</b> khi chuyển <code>SYSCLK</code> sang PLL</td>
+            <td>Bắt buộc phải mở Latency trước khi nâng xung hệ thống lên 72 MHz <span class="badge b-comm">[Cộng đồng]</span></td>
+            <td>Đúng. (CubeMX đặt Latency ngay đầu hàm cũng hợp lệ).</td>
+          </tr>
+          <tr>
+            <td><b>Prefetch Buffer</b></td>
+            <td>Không can thiệp</td>
+            <td>Giá trị mặc định sau Reset của <code>FLASH_ACR</code> là <code>0x30</code> (bit Prefetch tự bật). Khi firmware chạy sẽ thành <code>0x32</code> <span class="badge b-measured">[Đã đo]</span></td>
+            <td>Ổn.</td>
+          </tr>
+          <tr>
+            <td><b>Bộ chia Prescaler</b></td>
+            <td>AHB <code>/1</code>, APB1 <code>/2</code>, APB2 <code>/1</code></td>
+            <td>Bus APB1 tối đa chịu được 36 MHz, bắt buộc chia 2 khi SYSCLK ở 72 MHz <span class="badge b-doc">[Tài liệu]</span></td>
+            <td>Đúng chuẩn.</td>
+          </tr>
+          <tr>
+            <td><b>Vòng chờ HSE/PLL</b></td>
+            <td><code>while(...)</code> không có giới hạn (Timeout)</td>
+            <td>Nếu thạch anh ngoài hỏng hoặc lỏng chân, MCU sẽ treo vĩnh viễn tại vòng lặp <code>while</code> <span class="badge b-comm">[Cộng đồng]</span></td>
+            <td><b>Rủi ro treo mạch</b>, nhưng không phải nguyên nhân gây lỗi nạp.</td>
+          </tr>
+          <tr>
+            <td><b>Biến <code>SystemCoreClock</code></b></td>
+            <td>Không gọi hàm cập nhật</td>
+            <td>Cần gọi <code>LL_SetSystemCoreClock(72000000)</code> nếu các hàm thư viện khác phụ thuộc vào biến này <span class="badge b-infer">[Suy luận]</span></td>
+            <td>Không liên quan lỗi nạp Flash.</td>
+          </tr>
+          <tr>
+            <td><b>Hàm <code>Delay(90000)</code></b></td>
+            <td>Comment ghi <code>4500000</code>, nhưng code thực tế truyền vào <code>90000</code></td>
+            <td>Ở tốc độ 72 MHz, vòng lặp <code>90000</code> chạy hết chỉ vài mili-giây, làm LED PC13 chớp cực nhanh trông như sáng mờ <span class="badge b-measured">[Đã đo]</span></td>
+            <td>Dễ gây nhầm lẫn là "chip bị treo không chạy".</td>
+          </tr>
         </tbody>
       </table>
     </div>
+
+    <h4 class="mini-title">C. Kịch bản chuẩn tái hiện triệu chứng lỗi</h4>
+    <ol>
+      <li>Nếu comment dòng <code>SystemClock_Config();</code> trong <code>main()</code> (để chip chạy ở xung nội mặc định <code>HSI 8 MHz</code>), nhấn <code>F8</code> liên tục bao nhiêu lần cũng báo <code>Verify OK</code> <span class="badge b-measured">[Đã đo]</span>.</li>
+      <li>Khi mở lại <code>SystemClock_Config();</code> (đưa chip lên <code>72 MHz</code>):
+        <ul>
+          <li><b>Nhấn <code>F8</code> lần #1</b> (khi chip đang ở 8 MHz hoặc vừa xóa sạch): Nạp thành công, báo <code>Programming Done. Verify OK.</code></li>
+          <li><b>Nhấn nút RESET vật lý trên board:</b> Chip khởi động lại và thực thi code mới, đẩy xung nhịp hệ thống lên <code>72 MHz</code> (LED chớp nhanh).</li>
+          <li><b>Nhấn <code>F8</code> lần #2</b> (ngay khi chip đang chạy ở <code>72 MHz</code>): Quá trình <code>Erase</code> và <code>Program</code> báo hoàn tất, nhưng đến bước <code>Verify</code> lập tức văng lỗi <code>Contents mismatch</code> và dừng quá trình nạp <span class="badge b-measured">[Đã đo]</span>.</li>
+        </ul>
+      </li>
+    </ol>
     <a href="#muc-luc" class="back-toc">🔼 Quay về Mục lục</a>
 
     <!-- 1.2 -->
-    <h3 class="sub-title" id="muc-1-2">1.2. Loại trừ giả thuyết và Kiểm thử chéo Phần cứng (Chip &amp; ST-Link Thật/Clone)</h3>
-    <p>Bảng dưới đây tổng hợp toàn bộ 12 phép đo thực nghiệm kiểm thử chéo giữa các board STM32F103C8T6 (cả mã Revision lạ <code>0x00006410</code> lẫn mã Revision chuẩn <code>0x20036410</code>) và nhiều mạch nạp ST-Link V2 khác nhau:</p>
+    <h3 class="sub-title" id="phan-1-2">1.2. Loại trừ giả thuyết và Kiểm thử chéo Phần cứng (Chip &amp; ST-Link Thật/Clone)</h3>
 
+    <h4 class="mini-title">A. Bảng tổng hợp 12 bằng chứng thực nghiệm đã đo</h4>
     <div class="table-wrap">
       <table>
         <thead>
-          <tr>
-            <th>#</th>
-            <th>Thí nghiệm thực hiện</th>
-            <th>Kết quả thu được</th>
-            <th>Ý nghĩa kỹ thuật</th>
-            <th>Nhãn</th>
-          </tr>
+          <tr><th>#</th><th>Thí nghiệm thực hiện</th><th>Kết quả thu được</th><th>Ý nghĩa kỹ thuật</th><th>Nhãn</th></tr>
         </thead>
         <tbody>
           <tr>
             <td><b>1</b></td>
-            <td>Comment hàm <code>SystemClock_Config()</code> (để chip chạy mặc định HSI 8 MHz), không dùng <code>.ini</code></td>
+            <td>Comment <code>SystemClock_Config()</code> (chip ở HSI 8 MHz), không dùng <code>.ini</code></td>
             <td>Hết hoàn toàn lỗi mismatch</td>
-            <td>Xung nhịp <code>72 MHz</code> chính là điều kiện kích hoạt lỗi.</td>
+            <td>Tốc độ 72 MHz là điều kiện kích hoạt bắt buộc của lỗi.</td>
             <td><span class="badge b-measured">[Đã đo]</span></td>
           </tr>
           <tr>
             <td><b>2</b></td>
-            <td>Bật lại 72 MHz. Nhấn <code>F8 #1</code> ➔ Nhấn nút RESET vật lý trên board ➔ Nhấn <code>F8 #2</code></td>
-            <td><code>F8 #1</code> Verify OK, <code>F8 #2</code> nổ lỗi <code>Contents mismatch</code></td>
-            <td>Lỗi tái hiện ổn định 100%, không phải do file <code>.ini</code> gây ra.</td>
+            <td>Bật lại 72 MHz, LED xác nhận chạy nhanh. Bấm <code>F8 #1</code> ➔ Nhấn RESET trên board ➔ Bấm <code>F8 #2</code></td>
+            <td>Lần #1 <code>Verify OK</code>, lần #2 nổ <code>Contents mismatch</code></td>
+            <td>Lỗi tái hiện ổn định 100% theo chu kỳ, không phải lỗi ngẫu nhiên.</td>
             <td><span class="badge b-measured">[Đã đo]</span></td>
           </tr>
           <tr>
             <td><b>3</b></td>
-            <td>Lặp lại kịch bản với Board thứ 2 và mạch nạp ST-Link V2 thứ 2</td>
-            <td>Kết quả lỗi y hệt</td>
-            <td>Đây là lỗi hệ thống của luồng nạp, không phải do hỏng lẻ tẻ 1 linh kiện.</td>
+            <td>Lặp lại quy trình trên với Board thứ 2 và mạch nạp ST-Link V2 thứ 2</td>
+            <td>Kết quả lỗi y hệt 100%</td>
+            <td>Đây là lỗi hệ thống (Systemic issue), không phải do một linh kiện bị hỏng.</td>
             <td><span class="badge b-measured">[Đã đo]</span></td>
           </tr>
           <tr>
             <td><b>4</b></td>
-            <td>Thử trên Board thứ 3 có thanh ghi <code>0xE0042000 = 0x20036410</code></td>
+            <td>Thử nghiệm trên Board thứ 3 có mã định danh <code>0xE0042000 = 0x20036410</code></td>
             <td>Vẫn bị <code>Contents mismatch</code> ở lần <code>F8 #2</code></td>
-            <td>Chứng minh lỗi <b>không liên quan</b> đến việc chip thật hay chip clone.</td>
+            <td>Bác bỏ hoàn toàn giả thuyết "do chip giả/clone mới bị lỗi".</td>
             <td><span class="badge b-measured">[Đã đo]</span></td>
           </tr>
           <tr>
             <td><b>5</b></td>
             <td>Phân tích mẫu địa chỉ sai trong log <code>F8 #2</code></td>
-            <td>Tại các địa chỉ chia hết cho 8, byte <code>Flash=</code> bằng đúng byte <code>Required=</code> ở <code>địa chỉ − 8</code></td>
-            <td>Word 32-bit đầu của mỗi cặp 64-bit trả về dữ liệu của cặp trước ➔ Dấu hiệu đặc trưng của đọc thiếu Wait State.</td>
+            <td>Tại mọi địa chỉ chia hết cho 8, byte <code>Flash=</code> bằng đúng byte <code>Required=</code> ở <code>địa chỉ − 8</code> (VD: tại <code>0x08000010</code> đọc ra <code>75H</code>, bằng đúng byte cần ghi tại <code>0x08000008</code>)</td>
+            <td>Word đầu của mỗi cặp 64-bit trả về dữ liệu của cặp 64-bit trước đó ➔ Bằng chứng vật lý của việc đọc Flash thiếu Wait State.</td>
             <td><span class="badge b-measured">[Đã đo]</span></td>
           </tr>
           <tr>
             <td><b>6</b></td>
             <td>Dịch ngược hàm <code>Init</code> của file <code>STM32F10x_128.FLM</code></td>
-            <td>Ghi cứng <code>FLASH-&gt;ACR = 0</code>; hàm <code>UnInit</code> không khôi phục</td>
-            <td>Xác định thủ phạm trực tiếp từ phía thuật toán nạp của Keil.</td>
+            <td>Phát hiện lệnh ghi cứng <code>FLASH-&gt;ACR = 0</code>; hàm <code>UnInit</code> không khôi phục lại</td>
+            <td>Tìm ra thủ phạm trực tiếp phía thuật toán nạp của KeilC.</td>
             <td><span class="badge b-measured">[Đã đo]</span></td>
           </tr>
           <tr>
             <td><b>7</b></td>
-            <td>Đối chiếu mã nguồn mẫu <code>FlashPrg.c</code> của Keil</td>
-            <td>Hàm <code>Init</code> đặt <code>ACR = 0</code> kèm chú thích <i>"Zero Wait State"</i></td>
-            <td>Khớp hoàn toàn với kết quả dịch ngược ở mục 6.</td>
+            <td>Đối chiếu mã nguồn mẫu <code>FlashPrg.c</code> của Keil (trích dẫn trên CSDN)</td>
+            <td>Hàm <code>Init</code> đặt <code>FLASH-&gt;ACR = 0</code> kèm comment <i>"Zero Wait State"</i></td>
+            <td>Khớp tuyệt đối với kết quả dịch ngược ở mục 6, xác nhận đây là thiết kế gốc của tệp mẫu Keil.</td>
             <td><span class="badge b-comm">[Cộng đồng]</span></td>
           </tr>
           <tr>
             <td><b>8</b></td>
-            <td>Nối chân <code>NRST</code>, chọn <code>Reset = Hardware Reset</code>, không dùng <code>.ini</code></td>
-            <td>Vẫn bị mismatch ở lần <code>F8 #2</code></td>
-            <td>Cấu hình Hardware Reset mặc định trong Keil chưa đủ để đưa chip về 8 MHz trước khi nạp.</td>
+            <td>Nối dây chân <code>NRST</code>, đặt <code>Reset = Hardware Reset</code> trong Keil, không dùng <code>.ini</code></td>
+            <td>Vẫn bị <code>Contents mismatch</code> ở lần <code>F8 #2</code></td>
+            <td>Cấu hình Hardware Reset mặc định này chưa đủ để đưa chip về HSI trước khi nạp.</td>
             <td><span class="badge b-measured">[Đã đo]</span></td>
           </tr>
           <tr>
             <td><b>9</b></td>
-            <td>Mở ST-LINK Utility, chọn <code>Connect Under Reset</code>, đọc <code>0x40021004</code> (<code>RCC_CFGR</code>) khi chip đang chạy 72 MHz</td>
-            <td>Đọc ra <code>0x001D040A</code> (vẫn đang ở PLL 72 MHz)</td>
-            <td>Tín hiệu Reset phần cứng không tới được chip (do dây/chân NRST hoặc ST-Link clone không kéo chân NRST).</td>
+            <td>Mở ST-LINK Utility, chọn <code>Connect Under Reset</code>, đọc thanh ghi <code>0x40021004</code> (<code>RCC_CFGR</code>) khi firmware đang chạy 72 MHz</td>
+            <td>Giá trị trả về vẫn là <code>0x001D040A</code> (đang ở PLL 72 MHz)</td>
+            <td>Tín hiệu Reset phần cứng không truyền tới được chân reset của chip (hoặc mạch ST-Link clone không phát xung NRST).</td>
             <td><span class="badge b-measured">[Đã đo]</span></td>
           </tr>
           <tr>
             <td><b>10</b></td>
-            <td>Gắn script <code>flash_init.ini</code> đưa chip về HSI 8 MHz trước khi nạp</td>
-            <td>Nhấn <code>F8</code> chạy ổn định liên tiếp nhiều lần</td>
-            <td>Giải pháp sửa lỗi thực tế đã hoạt động thành công trên KeilC.</td>
+            <td>Sử dụng script <code>flash_init.ini</code> ép thanh ghi RCC về HSI 8 MHz trước khi nạp</td>
+            <td>Nhấn <code>F8</code> chạy ổn định liên tiếp nhiều lần, bất kể tắt hay bật Hardware Reset</td>
+            <td>Giải pháp phần mềm can thiệp đúng điểm yếu, khắc phục thành công trên KeilC.</td>
             <td><span class="badge b-measured">[Đã đo]</span></td>
           </tr>
           <tr>
             <td><b>11</b></td>
-            <td>Thử nghiệm một phiên bản <code>.ini</code> khác (Bản 2)</td>
-            <td>Ứng dụng <code>UV4.exe</code> bị crash văng khỏi màn hình, mã lỗi <code>0xC000041D</code>, module <code>unknown</code></td>
-            <td>Trình thông dịch script của Keil bị sập khi gặp cú pháp/lệnh không tương thích trong file <code>.ini</code>.</td>
+            <td>Chạy thử phiên bản script <code>.ini</code> khác (Bản 2)</td>
+            <td>Làm phần mềm Keil <code>UV4.exe</code> bị crash văng khỏi màn hình (Mã lỗi <code>0xC000041D</code>, module <code>unknown</code>)</td>
+            <td>Engine thông dịch script của Keil bị sập khi gặp cú pháp/địa chỉ không tương thích trong file <code>.ini</code>.</td>
             <td><span class="badge b-measured">[Đã đo]</span></td>
           </tr>
           <tr>
             <td><b>12</b></td>
-            <td>Đọc <code>0xE0042000 = 0x00006410</code> trên hai board đầu tiên</td>
-            <td><code>DEV_ID = 0x410</code> (Medium-density F103), nhưng <code>REV_ID = 0x0000</code> không nằm trong danh mục của ST (A=<code>0x1000</code>, Z=<code>0x1001</code>, B=<code>0x2000</code>, Y=<code>0x2001</code>, X/1/2/3=<code>0x2003</code>)</td>
-            <td>Hai board đầu có thể là silicon clone, trong khi board thứ 3 (<code>0x20036410</code>) là revision chuẩn. Cả hai loại đều gặp lỗi như nhau.</td>
+            <td>Kiểm tra thanh ghi <code>0xE0042000</code> (<code>DBGMCU_IDCODE</code>) trên 2 board đầu tiên</td>
+            <td>Trả về <code>0x00006410</code> (<code>DEV_ID = 0x410</code> đúng dòng F103 Medium-density, nhưng <code>REV_ID = 0x0000</code> không có trong tài liệu RM0008 của ST)</td>
+            <td>Hai board đầu có silicon khác với board thứ ba (<code>0x20036410</code>), nhưng cả hai loại silicon đều gặp lỗi giống hệt nhau.</td>
             <td><span class="badge b-infer">[Suy luận]</span></td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <h4 class="mini-title">Bảng tổng hợp các giả thuyết đã bị bác bỏ qua thực nghiệm</h4>
+    <h4 class="mini-title">B. Bảng các giả thuyết đã bị bác bỏ hoàn toàn</h4>
     <div class="table-wrap">
       <table>
         <thead>
-          <tr><th>Giả thuyết ban đầu</th><th>Trạng thái</th><th>Lý do bác bỏ dựa trên bằng chứng</th></tr>
+          <tr><th>Giả thuyết ban đầu</th><th>Trạng thái</th><th>Lý do bác bỏ dựa trên bằng chứng thực nghiệm</th></tr>
         </thead>
         <tbody>
-          <tr><td>"Do chip giả (clone) nên mới bị lỗi nạp"</td><td><b>Đã bác bỏ</b></td><td>Board thứ 3 mang mã <code>0x20036410</code> hợp lệ vẫn bị lỗi <code>Contents mismatch</code> y hệt.</td></tr>
-          <tr><td>"CPUID <code>0x411FC231</code> chứng minh 100% chip chính hãng ST"</td><td><b>Quá tay</b></td><td>Thanh ghi CPUID chỉ chứng minh nhân thiết kế là ARM Cortex-M3 r1p1, không định danh nhà sản xuất silicon.</td></tr>
-          <tr><td>"Chỉ cần nối chân NRST + chọn Hardware Reset là tự khỏi"</td><td><b>Đã bác bỏ</b></td><td>Đã test thực tế (Thí nghiệm #8 &amp; #9), xung reset không拉 (kéo) chip về 8 MHz được trên phần cứng hiện tại.</td></tr>
-          <tr><td>"Flash bị ghi đè chồng chập hoặc hỏng sau vài lần xóa"</td><td><b>Đã bác bỏ</b></td><td>Mỗi lần <code>F8</code> đều báo <code>Full Chip Erase Done</code> và <code>Programming Done</code>; dữ liệu sai chỉ xuất hiện trên đường đọc Verify.</td></tr>
-          <tr><td>"Dòng thông báo <code>Application running ...</code> là báo lỗi"</td><td><b>Đã bác bỏ</b></td><td>Đó là thông báo bình thường của tính năng <code>Reset and Run</code> sau khi nạp xong.</td></tr>
+          <tr>
+            <td>"Do mua phải chip STM32 giả/clone nên mới bị lỗi nạp"</td>
+            <td><b>Bác bỏ</b></td>
+            <td>Board thứ 3 có mã Revision chuẩn chính hãng ST (<code>0x20036410</code> — nhóm Rev 1/2/3/X) vẫn nổ lỗi <code>Contents mismatch</code> y hệt.</td>
+          </tr>
+          <tr>
+            <td>"CPUID <code>0x411FC231</code> chứng minh 100% chip chính hãng"</td>
+            <td><b>Bác bỏ</b></td>
+            <td>Thanh ghi <code>CPUID</code> (<code>0xE000ED00</code>) chỉ định danh kiến trúc lõi của ARM (Cortex-M3 r1p1), mọi hãng làm chip clone dùng lõi M3 đều có cùng mã này. Phải xem <code>DBGMCU_IDCODE</code> (<code>0xE0042000</code>).</td>
+          </tr>
+          <tr>
+            <td>"Chỉ cần nối chân NRST và bật Hardware Reset là hết lỗi"</td>
+            <td><b>Bác bỏ</b></td>
+            <td>Đã nối dây và đo thực tế (Thí nghiệm #8 &amp; #9): Xung reset không kéo được thanh ghi <code>RCC_CFGR</code> (<code>0x001D040A</code>) về 0 trên mạch ST-Link V2 đang dùng.</td>
+          </tr>
+          <tr>
+            <td>"Dữ liệu trong Flash bị ghi đè chồng chập / ghi lỗi"</td>
+            <td><b>Bác bỏ</b></td>
+            <td>Mỗi lần bấm <code>F8</code> đều có bước <code>Full Chip Erase Done.</code> và <code>Programming Done.</code>. Kiểm tra độc lập trên ST-LINK Utility cho thấy dữ liệu nằm trong Flash đã được ghi đúng 100%, lỗi chỉ xảy ra trên đường đọc về (Verify).</td>
+          </tr>
+          <tr>
+            <td>"Do bộ nhớ Flash nhỏ hoặc nạp nhiều lần làm hỏng ô nhớ Flash"</td>
+            <td><b>Bác bỏ</b></td>
+            <td>Tuổi thọ bộ nhớ Flash của STM32F103 chịu được tối thiểu 10.000 chu kỳ xóa/ghi.</td>
+          </tr>
+          <tr>
+            <td>"Dòng thông báo <code>Application running ...</code> là báo lỗi"</td>
+            <td><b>Bác bỏ</b></td>
+            <td>Đó là thông báo hoàn toàn bình thường của KeilC khi tùy chọn <code>Reset and Run</code> được kích hoạt sau khi nạp.</td>
+          </tr>
         </tbody>
       </table>
     </div>
     <a href="#muc-luc" class="back-toc">🔼 Quay về Mục lục</a>
 
     <!-- 1.3 -->
-    <h3 class="sub-title" id="muc-1-3">1.3. Cô lập nhánh nạp, Giải phẫu Log trượt 8-byte Flash và Dịch ngược thuật toán <code>.FLM</code></h3>
+    <h3 class="sub-title" id="phan-1-3">1.3. Cô lập nhánh nạp, Quan sát dữ liệu Flash và Dịch ngược thuật toán <code>.FLM</code></h3>
 
-    <h4 class="mini-title">A. Rà soát hàm <code>SystemClock_Config()</code> và Errata Silicon (DocID14574 Rev 13)</h4>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr><th>Hạng mục kiểm tra</th><th>Code <code>main.c</code> thực hiện</th><th>Tiêu chuẩn Reference Manual / Errata</th><th>Đánh giá</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><b>Flash Latency ở 72 MHz</b></td>
-            <td><code>LL_FLASH_SetLatency(LL_FLASH_LATENCY_2)</code></td>
-            <td>0 WS (0–24 MHz), 1 WS (24–48 MHz), <b>2 WS (48–72 MHz)</b> <span class="badge b-doc">[Tài liệu]</span></td>
-            <td>✅ <b>Đúng chuẩn</b>.</td>
-          </tr>
-          <tr>
-            <td><b>Thứ tự thiết lập</b></td>
-            <td>Đặt Latency trước khi chuyển <code>SYSCLK</code> sang <code>PLL</code></td>
-            <td>Bắt buộc tăng Wait State trước khi nâng xung (nếu ở 72 MHz với 0 WS chip sẽ crash ngay) <span class="badge b-comm">[Cộng đồng]</span></td>
-            <td>✅ <b>Đúng chuẩn</b>.</td>
-          </tr>
-          <tr>
-            <td><b>Bộ đệm Prefetch</b></td>
-            <td>Giữ mặc định sau Reset</td>
-            <td>Giá trị reset của <code>FLASH_ACR</code> là <code>0x30</code> (Prefetch ON). Khi chạy 72 MHz (2 WS) thanh ghi đạt <code>0x32</code>.</td>
-            <td>✅ <b>Ổn định</b>.</td>
-          </tr>
-          <tr>
-            <td><b>Chia tần Bus (Prescaler)</b></td>
-            <td>AHB <code>/1</code>, APB1 <code>/2</code>, APB2 <code>/1</code></td>
-            <td>Bus APB1 tối đa 36 MHz (72 MHz / 2 = 36 MHz).</td>
-            <td>✅ <b>Đúng chuẩn</b>.</td>
-          </tr>
-          <tr>
-            <td><b>Errata 2.2, 2.3, 2.10, 2.12</b></td>
-            <td>Không dùng <code>WFI/WFE</code>, không đọc <code>DBGMCU</code> từ code user, biên dịch bằng ARMCC</td>
-            <td>Errata DocID14574 Rev 13 không có lỗi phần cứng nào liên quan đến PLL/Latency khi chạy thông thường.</td>
-            <td>✅ <b>Không chạm Errata</b>.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <h4 class="mini-title">B. Nguyên văn Log lỗi <code>Contents mismatch</code> và Giải phẫu quy luật trượt 8-byte (64-bit Prefetch Buffer)</h4>
-    <p>Dưới đây là toàn bộ dữ liệu log thu được từ cửa sổ Build Output của KeilC khi nhấn <code>F8</code> lần 2 (lúc chip đang chạy ở <code>72 MHz</code>):</p>
+    <h4 class="mini-title">A. Nguyên văn Log lỗi <code>Contents mismatch</code> trên KeilC</h4>
+    <p>Dưới đây là toàn bộ log xuất ra từ cửa sổ Build Output của KeilC khi nhấn <code>F8</code> ở lần nạp thứ #2 (khi chip đang chạy ở xung nhịp <code>72 MHz</code>):</p>
 <pre><button class="copy-btn" onclick="copyCode(this)">Copy Log</button><code>Load "C:\\Users\\ASUS\\Desktop\\LED_PC13_LL\\Objects\\STM32F103C8.axf" 
 Full Chip Erase Done.
 Programming Done.
@@ -951,44 +1038,170 @@ Too many errors to display !
 Error: Flash Download failed  -  "Cortex-M3"
 Flash Load finished at 12:22:23</code></pre>
 
+    <h4 class="mini-title">B. Giải phẫu Log <code>Contents mismatch</code>: Cách nhìn vào Log để biết ngay chip bị thiếu 2 Wait States ở bước Verify</h4>
+    <p>Đoạn log trên không phải là những con số ngẫu nhiên bị hỏng (corrupt), mà chứa đựng một quy luật toán học và vật lý tuyệt đối giúp phân biệt ngay lập tức lỗi nằm ở giai đoạn nào của quá trình nạp Flash:</p>
+    <ol>
+      <li><b>Phân biệt các giai đoạn trong chu trình Flash:</b>
+        <ul>
+          <li><b>Giai đoạn 1 (<code>Full Chip Erase Done.</code>):</b> Bộ điều khiển Flash xóa toàn bộ chip (kéo tất cả các bit lên <code>0xFF</code>). Quá trình này dùng xung nội của bộ điều khiển Flash nên <b>Thành công 100%</b>.</li>
+          <li><b>Giai đoạn 2 (<code>Programming Done.</code>):</b> CPU lấy dữ liệu từ Buffer trong RAM ghi xuống từng nửa từ (Half-word 16-bit) của Flash. Do tốc độ ghi Flash rất chậm (cỡ 40–50 µs mỗi Half-word) và CPU phải đợi cờ <code>BSY</code> (Busy) trong thanh ghi <code>FLASH_SR</code> hạ xuống, việc thiếu Wait State đọc không làm hỏng quá trình ghi. Thực tế khi dùng ST-LINK Utility đọc lại vùng nhớ <code>0x08000000</code> sau khi Keil báo lỗi, toàn bộ dữ liệu trong Flash đều khớp 100% với cột <code>Required</code>. Tức là quá trình Program đã <b>Thành công 100%</b>.</li>
+          <li><b>Giai đoạn 3 (<code>Verify</code> - Đối chiếu dữ liệu):</b> Keil đọc tuần tự từng Word (32-bit = 4 byte) từ địa chỉ <code>0x08000000</code> trở đi để so sánh với tệp <code>.axf</code>. Chính tại giai đoạn đọc tốc độ cao này, dữ liệu đọc về (<code>Flash=</code>) bị trượt nhịp!</li>
+        </ul>
+      </li>
+      <li><b>Phát hiện "Quy luật trượt 8-Byte (64-bit Fetch Latch)" ngay trên bảng Log:</b>
+        <p>Nếu đặt các dòng log nằm trên biên địa chỉ chia hết cho 8 (<code>0x...0</code> và <code>0x...8</code>) cạnh nhau, ta thấy một hiện tượng đáng kinh ngạc: <b>Giá trị <code>Flash=</code> đọc được tại địa chỉ $A$ luôn bằng chính xác giá trị <code>Required=</code> của địa chỉ $(A - 8)$ (cách đó đúng 8 byte / 64 bit)!</b></p>
+      </li>
+    </ol>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Địa chỉ hiện tại ($A$)</th>
+            <th>Dữ liệu đọc về sai (<code>Flash=</code>) tại $A$</th>
+            <th>Dữ liệu đúng cần có (<code>Required=</code>) tại $A$</th>
+            <th>Đối chiếu với <code>Required=</code> tại $(A - 8)$</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>0x08000000..03</code></td>
+            <td><code>28H 01H [00H] 08H</code></td>
+            <td><b><code>60H 06H [00H] 20H</code></b> (Word <code>0x20000660</code>)</td>
+            <td><i>(Dữ liệu còn sót từ chu kỳ đọc cuối trước đó)</i></td>
+          </tr>
+          <tr>
+            <td><code>0x08000008..0B</code></td>
+            <td><b><code>60H 06H [00H] 20H</code></b></td>
+            <td><b><code>75H 01H [00H] 08H</code></b> (Word <code>0x08000175</code>)</td>
+            <td>🎯 <b>Khớp 100% với <code>Required</code> của <code>0x08000000..03</code>!</b></td>
+          </tr>
+          <tr>
+            <td><code>0x08000010</code></td>
+            <td><b><code>75H</code></b> (<code>75H 01H 00H 08H</code>)</td>
+            <td><b><code>79H</code></b> (<code>79H 01H 00H 08H</code>)</td>
+            <td>🎯 <b>Khớp 100% với <code>Required</code> của <code>0x08000008</code>!</b></td>
+          </tr>
+          <tr>
+            <td><code>0x08000018</code></td>
+            <td><b><code>79H</code></b></td>
+            <td><b><code>7DH</code></b></td>
+            <td>🎯 <b>Khớp 100% với <code>Required</code> của <code>0x08000010</code>!</b></td>
+          </tr>
+          <tr>
+            <td><code>0x08000020..23</code></td>
+            <td><b><code>7DH 01H [00H] 08H</code></b></td>
+            <td><b><code>00H 00H 00H 00H</code></b></td>
+            <td>🎯 <b>Khớp 100% với <code>Required</code> của <code>0x08000018..1B</code>!</b></td>
+          </tr>
+          <tr>
+            <td><code>0x08000030..33</code></td>
+            <td><b><code>00H 00H [00H] 00H</code></b></td>
+            <td><b><code>81H 01H [00H] 08H</code></b></td>
+            <td>🎯 <b>Khớp 100% với <code>Required</code> của <code>0x08000028..2B</code>!</b></td>
+          </tr>
+          <tr>
+            <td><code>0x08000038</code></td>
+            <td><b><code>81H</code></b></td>
+            <td><b><code>83H</code></b></td>
+            <td>🎯 <b>Khớp 100% với <code>Required</code> của <code>0x08000030</code>!</b></td>
+          </tr>
+          <tr>
+            <td><code>0x08000040</code></td>
+            <td><b><code>83H</code></b></td>
+            <td><b><code>87H</code></b></td>
+            <td>🎯 <b>Khớp 100% với <code>Required</code> của <code>0x08000038</code>!</b></td>
+          </tr>
+          <tr>
+            <td><code>0x08000100..03</code></td>
+            <td><code>00H 0CH 82H 44H</code></td>
+            <td><b><code>01H 07H DAH 45H</code></b></td>
+            <td>🎯 <b>Khớp 100% với <code>Required</code> của <code>0x080000F8..FB</code>!</b></td>
+          </tr>
+          <tr>
+            <td><code>0x08000108..0B</code></td>
+            <td><b><code>01H 07H DAH 45H</code></b></td>
+            <td><b><code>21H F8H AFH F2H</code></b></td>
+            <td>🎯 <b>Khớp 100% với <code>Required</code> của <code>0x08000100..03</code>!</b></td>
+          </tr>
+          <tr>
+            <td><code>0x08000110..13</code></td>
+            <td><b><code>21H F8H AFH F2H</code></b></td>
+            <td><code>0FH 00H 13H F0H</code></td>
+            <td>🎯 <b>Khớp 100% với <code>Required</code> của <code>0x08000108..0B</code>!</b></td>
+          </tr>
+          <tr>
+            <td><code>0x08000148..4B</code></td>
+            <td><code>0BH 60H 70H 47H</code></td>
+            <td><b><code>10H B5H 10H BDH</code></b></td>
+            <td>🎯 <b>Khớp 100% với <code>Required</code> của <code>0x08000140..43</code>!</b></td>
+          </tr>
+          <tr>
+            <td><code>0x08000150..53</code></td>
+            <td><b><code>10H B5H 10H BDH</code></b></td>
+            <td><code>11H 46H FFH F7H</code></td>
+            <td>🎯 <b>Khớp 100% với <code>Required</code> của <code>0x08000148..4B</code>!</b></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
     <div class="callout warn">
-      <span class="callout-title">🔍 Giải phẫu bằng chứng "Trượt 8-byte" (Chứng minh lỗi xảy ra ở bước ĐỌC Verify do thiếu 2 Wait State, không phải lỗi GHI Flash):</span>
-      <ol>
-        <li><b>Dữ liệu trong Flash thực chất đã được xóa và ghi ĐÚNG 100%:</b> Hai dòng <code>Full Chip Erase Done.</code> và <code>Programming Done.</code> đã hoàn tất. Nếu mở ST-LINK Utility ở chế độ đọc thông thường sau đó, dữ liệu trong Flash khớp hoàn toàn với file <code>.axf</code>.</li>
-        <li><b>Tại sao chỉ các địa chỉ tận cùng là <code>0, 1, 2, 3</code> và <code>8, 9, A, B</code> bị lỗi, còn <code>4, 5, 6, 7</code> và <code>C, D, E, F</code> không bao giờ xuất hiện trong log lỗi?</b>
-          <br/>Bộ điều khiển Flash (FLITF) của STM32F103 nạp dữ liệu vào Prefetch Buffer theo từng <b>khối 64-bit (8 byte = 2 Word 32-bit)</b> tại các mốc địa chỉ chia hết cho 8 (<code>0x08000000</code>, <code>0x08000008</code>, <code>0x08000010</code>, ..., <code>0x08000100</code>, <code>0x08000108</code>).</li>
-        <li><b>Quy luật lặp lại <code>Flash[Addr] == Required[Addr - 8]</code>:</b>
+      <span class="callout-title">3. Tại sao các địa chỉ tận cùng bằng 4, 5, 6, 7 và C, D, E, F hoàn toàn VẮNG MẶT trong Log lỗi?</span>
+      <ul>
+        <li>Quan sát kỹ toàn bộ danh sách lỗi từ <code>0x08000000</code> đến <code>0x080001B2</code>: <b>Chỉ có các byte nằm ở Word chẵn của khối 8-byte (địa chỉ kết thúc bằng <code>0, 1, 2, 3</code> và <code>8, 9, A, B</code>) bị báo lỗi mismatch!</b> Không có bất kỳ một địa chỉ nào kết thúc bằng <code>4, 5, 6, 7</code> hoặc <code>C, D, E, F</code> bị sai!</li>
+        <li><b>Giải thích cơ chế phần cứng (Flash Interface - FLITF):</b>
           <ul>
-            <li>Tại <code>0x08000000H</code>: Cần ghi (<code>Required</code>) là <code>60H 06H [00H] 20H</code> (địa chỉ đỉnh Stack <code>0x20000660</code>).</li>
-            <li>Sang mốc 8-byte kế tiếp <code>0x08000008H</code>: Cần ghi (<code>Required</code>) là <code>75H 01H [00H] 08H</code>, nhưng giá trị đọc ra (<code>Flash=</code>) lại là <b><code>60H 06H 20H</code></b> — chính là dữ liệu của <code>0x08000000H</code> bị trễ nhịp đẩy sang!</li>
-            <li>Sang mốc <code>0x08000010H</code>: Giá trị đọc ra (<code>Flash=75H</code>) lại chính là byte <code>Required=75H</code> của địa chỉ <code>0x08000008H</code>!</li>
-            <li>Tương tự ở vùng code: Tại <code>0x08000100H</code> có <code>Required = 01H 07H DAH 45H</code> ➔ Đến <code>0x08000108H</code> (cách đúng 8 byte), giá trị đọc ra <code>Flash = 01H 07H DAH 45H</code> lặp lại nguyên xi của <code>0x08000100H</code>!</li>
+            <li>Kiến trúc bộ nhớ Flash của STM32F103 tổ chức đường đọc vật lý theo từng <b>khối 64-bit (8 byte = 2 Word)</b> mỗi lần truy xuất: Word đầu tiên nằm ở offset <code>+0</code> (tận cùng <code>0..3</code> hoặc <code>8..B</code>), Word thứ hai nằm ở offset <code>+4</code> (tận cùng <code>4..7</code> hoặc <code>C..F</code>).</li>
+            <li>Khi CPU chạy ở <b>72 MHz</b> (1 chu kỳ <code>HCLK ≈ 13.88 ns</code>), mảng tế bào nhớ Flash vật lý cần khoảng <code>35–40 ns</code> để kích hoạt dòng đọc và đẩy 64-bit dữ liệu mới ra thanh ghi chốt (Read Latch). Đó là lý do ở 72 MHz, phần cứng bắt buộc phải cấu hình <b>2 Wait States (<code>LATENCY = 2</code>)</b> để bắt Bus AHB đợi thêm 2 chu kỳ HCLK trước khi lấy mẫu dữ liệu.</li>
+            <li>Khi tệp <code>.FLM</code> của Keil ghi đè <code>FLASH_ACR = 0</code> (<b>0 Wait State</b>, tắt luôn Prefetch):
+              <ol>
+                <li>Khi trình Verify yêu cầu đọc Word đầu tiên của khối 64-bit mới (ví dụ tại <code>0x08000008</code>), bộ điều khiển Flash bắt đầu kích hoạt đọc dòng 64-bit <code>0x08000008..0F</code>.</li>
+                <li>Nhưng vì <code>Wait State = 0</code>, Bus AHB không chờ 2 chu kỳ mà lập tức lấy mẫu dữ liệu trên thanh ghi chốt ngay ở chu kỳ đầu tiên (<code>13.88 ns</code>)! Lúc này dữ liệu mới chưa kịp ra tới chốt, nên Bus đọc phải <b>dữ liệu cũ còn nằm trên chốt của lần đọc 64-bit liền trước (<code>0x08000000..07</code>)</b>!</li>
+                <li>Tới khi trình Verify chuyển sang đọc Word thứ hai của cùng khối 64-bit đó (tại <code>0x0800000C</code>), thời gian trôi qua giữa 2 lệnh đọc trên Bus đã vượt quá <code>40 ns</code>, nên toàn bộ 64-bit của khối <code>0x08000008..0F</code> đã kịp nạp xong vào chốt! Nhờ vậy, việc đọc Word thứ hai (<code>0x0800000C..0F</code>) lấy ra dữ liệu hoàn toàn chính xác!</li>
+                <li>Ngay khi bước sang địa chỉ <code>0x08000010</code> (mở đầu khối 64-bit tiếp theo), chu trình đọc sớm lại tái diễn, và nó lại trả về Word đầu của khối <code>0x08000008..0B</code>!</li>
+              </ol>
+            </li>
           </ul>
         </li>
-        <li><b>Bản chất Vật lý:</b> Ở xung nhịp <code>72 MHz</code> (chu kỳ HCLK ~ <code>13.88 ns</code>), bộ nhớ Flash vật lý cần ~<code>35–40 ns</code> (tương đương <b>2 Wait State</b>) để xuất xong một khối 64-bit mới ra chốt đệm. Do hàm <code>Init()</code> của <code>.FLM</code> đã cưỡng bức ghi <code>FLASH_ACR = 0</code> (<b>0 Wait State</b>), ngay ở chu kỳ đầu tiên khi truy cập vào mốc địa chỉ chia hết cho 8 (Word 0: byte <code>0..3</code> hoặc <code>8..B</code>), mạch Sense Amplifier của Flash chưa kịp nạp khối 64-bit mới nên Bus AHB đọc phải <b>dữ liệu cũ còn lưu trên bộ chốt từ lần đọc khối 8-byte trước đó (<code>Addr - 8</code>)</b>. Đến khi Bus đọc sang Word thứ hai của khối 64-bit đó (Word 1: byte <code>4..7</code> hoặc <code>C..F</code>), thời gian trôi qua đã đủ 2 chu kỳ HCLK nên dữ liệu mới đã kịp ổn định và đọc ĐÚNG!</li>
-      </ol>
+      </ul>
     </div>
+
+    <h4 class="mini-title">C. Dịch ngược <code>STM32F10x_128.FLM</code> và đối chiếu mã nguồn gốc <code>FlashPrg.c</code></h4>
+    <p>Khi dịch ngược (Disassemble) hàm <code>Init()</code> bên trong tệp thuật toán nạp <code>STM32F10x_128.FLM</code> của KeilC và đối chiếu với mã nguồn mẫu <code>FlashPrg.c</code> của Keil, thủ phạm hiện nguyên hình:</p>
+<pre><code>int Init (unsigned long adr, unsigned long clk, unsigned long fnc) {
+  // Zero Wait State
+  FLASH-&gt;ACR  = 0x00000000;   // &lt;-- THỦ PHẠM: Ép Latency về 0 và tắt Prefetch Buffer!
+
+  // Unlock Flash
+  FLASH-&gt;KEYR = FLASH_KEY1;
+  FLASH-&gt;KEYR = FLASH_KEY2;
+  ...
+}</code></pre>
+    <p>Tác giả viết tệp <code>FlashPrg.c</code> tại Keil giả định rằng: <i>"Trước khi hàm <code>Init()</code> này chạy, vi điều khiển chắc chắn đã được Reset về xung nhịp mặc định HSI 8 MHz"</i>. Ở 8 MHz, việc đặt <code>FLASH-&gt;ACR = 0</code> là hoàn toàn hợp lệ. Tuy nhiên, khi KeilC kết nối qua ST-Link mà không thực hiện Reset phần cứng/ngoại vi thành công trước bước nạp, vi điều khiển vẫn đang chạy ở 72 MHz và thảm họa <code>Contents mismatch</code> xảy ra.</p>
     <a href="#muc-luc" class="back-toc">🔼 Quay về Mục lục</a>
 
     <!-- 1.4 -->
-    <h3 class="sub-title" id="muc-1-4">1.4. Sơ đồ luồng nạp của <code>UV4.exe</code> và Giải mã các tùy chọn <code>Connect</code> / <code>Reset</code></h3>
+    <h3 class="sub-title" id="phan-1-4">1.4. Sơ đồ luồng nạp của <code>UV4.exe</code> và Giải mã các tùy chọn <code>Connect</code> / <code>Reset</code></h3>
 
-    <h4 class="mini-title">A. Vai trò của <code>UV4.exe</code> và Phân tích Log Crash <code>0xC000041D</code></h4>
-    <p><code>UV4.exe</code> là tiến trình thực thi chính của Keil µVision. Khi nạp Flash, <code>UV4.exe</code> đóng vai trò điều phối (Host Orchestrator): gọi DLL của mạch nạp (<code>ST-LINKIII-KEIL_SWO.dll</code>), thông dịch file <code>.ini</code>, nạp thuật toán <code>.FLM</code> vào SRAM của chip và điều khiển con trỏ lệnh <code>PC</code> của Cortex-M3 chạy các hàm trong SRAM. Khi thử nghiệm một file <code>.ini</code> có lệnh không tương thích (Thí nghiệm #11), Windows Event Viewer ghi nhận <code>UV4.exe</code> bị sập với mã ngoại lệ <code>0xc000041d</code> (<code>STATUS_FATAL_USER_CALLBACK_EXCEPTION</code>):</p>
+    <h4 class="mini-title">A. Vai trò của <code>UV4.exe</code> và phân tích Log Crash Windows Event Viewer</h4>
+    <p><code>UV4.exe</code> là tệp thực thi lõi của IDE Keil µVision trên máy tính, đóng vai trò là <b>Tổng chỉ huy (Host Orchestrator)</b>: quản lý giao diện, gọi DLL của mạch nạp (<code>ST-LINKIII-KEIL_SWO.dll</code>), thông dịch tệp script <code>.ini</code>, bơm thuật toán <code>.FLM</code> xuống RAM của chip và điều khiển quá trình Verify.</p>
+    <p>Khi thử nghiệm một tệp <code>.ini</code> có cú pháp lệnh can thiệp không tương thích (Thí nghiệm #11), Windows Event Viewer ghi nhận sự cố sập ứng dụng <code>UV4.exe</code>:</p>
 <pre><code>Faulting application name: UV4.exe, version: 5.43.1.0, time stamp: 0x68a4cd5d
 Faulting module name: unknown, version: 0.0.0.0, time stamp: 0x00000000
 Exception code: 0xc000041d
 Fault offset: 0xb57cb6d4
 Faulting application path: C:\Users\ASUS\AppData\Local\Keil_v5\UV4\UV4.exe</code></pre>
+    <p>Mã ngoại lệ <code>0xC000041D</code> (<code>STATUS_FATAL_USER_CALLBACK_EXCEPTION</code>) xảy ra tại giai đoạn <code>UV4.exe</code> gọi hàm callback để thực thi kịch bản trong tệp <code>.ini</code> trước khi nạp Flash.</p>
 
     <!-- ULTIMATE INTERACTIVE DIAGRAM -->
-    <h4 class="mini-title" id="so-do-uv4">B. Sơ đồ luồng hoạt động nạp Flash của KeilC (<code>UV4.exe</code>) — Tương tác Thời gian thực (Ultimate Edition)</h4>
-    <p>Sơ đồ dưới đây mô phỏng chính xác 10 bước tương tác giữa <b>Máy tính (<code>UV4.exe</code>)</b>, <b>Mạch nạp (<code>ST-Link V2</code>)</b> và <b>Vi điều khiển (<code>STM32F103C8T6</code>)</b>. Bạn có thể bấm <b>▶ Chạy tự động</b>, chuyển từng bước, bấm trực tiếp vào bất kỳ hàng nào, hoặc chuyển đổi giữa <b>Kịch bản Lỗi (72 MHz)</b> và <b>Kịch bản Chuẩn (8 MHz)</b>:</p>
+    <h4 class="mini-title" id="so-do-uv4">B. Sơ đồ luồng hoạt động nạp Flash của KeilC (<code>UV4.exe</code>) — Tương tác Thời gian thực</h4>
+    <p>Sơ đồ tương tác dưới đây mô phỏng chi tiết 10 bước hoạt động giữa <b>Máy tính (<code>UV4.exe</code>)</b>, <b>Mạch nạp (<code>ST-Link V2</code>)</b> và <b>Chip <code>STM32F103C8T6</code></b>. Bạn có thể nhấn <b>▶ Chạy tự động</b>, chuyển từng bước, bấm trực tiếp vào từng hàng, hoặc đổi qua lại giữa <b>Kịch bản Lỗi (72 MHz)</b> và <b>Kịch bản Chuẩn (8 MHz)</b>:</p>
 
     <div class="ufd-wrapper">
       <div class="ufd-header">
         <h4>⚡ SƠ ĐỒ LUỒNG DỮ LIỆU &amp; THỰC THI THUẬT TOÁN .FLM TRONG KEILC (UV4.exe)</h4>
-        <p>Mô phỏng trực quan vòng đời file <code>STM32F10x_128.FLM</code> trên SRAM và cơ chế gây lỗi trượt 8-byte tại bước Verify</p>
+        <p>Vai trò của file <code>STM32F10x_128.FLM</code> trong SRAM &amp; cơ chế gây lỗi trượt 8-byte <code>Contents mismatch</code></p>
       </div>
 
       <div class="ufd-toolbar">
@@ -1000,21 +1213,21 @@ Faulting application path: C:\Users\ASUS\AppData\Local\Keil_v5\UV4\UV4.exe</code
       </div>
 
       <div class="ufd-phases">
-        <button class="ufd-phase-btn active" data-p="0" onclick="ufdJumpPhase(0)">Giai đoạn 1: Kết nối &amp; Xung nhịp (Bước 1–3)</button>
-        <button class="ufd-phase-btn" data-p="1" onclick="ufdJumpPhase(1)">Giai đoạn 2: Bơm .FLM vào RAM (Bước 4–5)</button>
-        <button class="ufd-phase-btn" data-p="2" onclick="ufdJumpPhase(2)">Giai đoạn 3: Thực thi .FLM (Bước 6–8)</button>
-        <button class="ufd-phase-btn" data-p="3" onclick="ufdJumpPhase(3)">Giai đoạn 4: Verify &amp; Kết thúc (Bước 9–10)</button>
+        <button class="ufd-phase-btn active" data-p="0" onclick="ufdJumpPhase(0)">1. Kết nối &amp; Xung nhịp (Bước 1–3)</button>
+        <button class="ufd-phase-btn" data-p="1" onclick="ufdJumpPhase(1)">2. Bơm thuật toán .FLM (Bước 4–5)</button>
+        <button class="ufd-phase-btn" data-p="2" onclick="ufdJumpPhase(2)">3. Thực thi .FLM trên Chip (Bước 6–8)</button>
+        <button class="ufd-phase-btn" data-p="3" onclick="ufdJumpPhase(3)">4. Verify &amp; Kết thúc (Bước 9–10)</button>
       </div>
 
       <div class="ufd-status-bar" id="ufdStatusBar">
         <div class="ufd-status-title" id="ufdStatusTitle">👋 Chế độ Xem Tổng Quan (Tất cả 10 bước đang hiển thị sáng rõ)</div>
-        <div class="ufd-status-desc" id="ufdStatusDesc">Nhấn <b>▶ Chạy tự động</b> hoặc <b>Bước tiếp ▶</b> (hoặc click trực tiếp vào từng hàng bên dưới) để theo dõi chi tiết luồng gói tin từ <code>UV4.exe</code> qua <code>ST-Link</code> tới <code>STM32F103</code>.</div>
+        <div class="ufd-status-desc" id="ufdStatusDesc">Nhấn <b>▶ Chạy tự động</b> hoặc <b>Bước tiếp ▶</b> (hoặc click trực tiếp vào từng hàng bên dưới) để theo dõi chi tiết luồng hoạt động từ <code>UV4.exe</code> qua <code>ST-Link</code> tới <code>STM32F103</code>.</div>
       </div>
 
       <div class="ufd-col-headers">
-        <div class="ufd-col-h pc">💻 CỘT 1: MÁY TÍNH (HOST)<br/><span style="font-size:11.5px;font-weight:400;">Tiến trình UV4.exe (KeilC)</span></div>
-        <div class="ufd-col-h st">🔌 CỘT 2: MẠCH NẠP (PROBE)<br/><span style="font-size:11.5px;font-weight:400;">ST-Link V2 (Giao thức SWD)</span></div>
-        <div class="ufd-col-h mc">🧠 CỘT 3: CHIP STM32F103C8T6<br/><span style="font-size:11.5px;font-weight:400;">Đang chạy 72 MHz (ACR = 0x32, 2 WS)</span></div>
+        <div class="ufd-col-h pc">💻 MÁY TÍNH (UV4.exe — KeilC)<br/><span style="font-size:11.5px;font-weight:400;">Host Orchestrator</span></div>
+        <div class="ufd-col-h st">🔌 MẠCH NẠP ST-Link V2<br/><span style="font-size:11.5px;font-weight:400;">Giao thức SWD (SWDIO / SWCLK)</span></div>
+        <div class="ufd-col-h mc">🧠 CHIP STM32F103C8T6<br/><span style="font-size:11.5px;font-weight:400;">Đang chạy 72 MHz từ trước</span></div>
       </div>
 
       <div class="ufd-rows" id="ufdRowsContainer">
@@ -1022,11 +1235,11 @@ Faulting application path: C:\Users\ASUS\AppData\Local\Keil_v5\UV4\UV4.exe</code
         <div class="ufd-row passed" data-idx="0" onclick="ufdSelectStep(0)">
           <div class="ufd-cell pc-cell">
             <span class="ufd-step-tag">BƯỚC 1 (GĐ 1)</span> <span class="ufd-arrow-tag">➔ USB</span>
-            <div><b>Khởi tạo phiên nạp (F8):</b> <code>UV4.exe</code> gọi driver <code>ST-LINKIII-KEIL_SWO.dll</code> và đọc cấu hình <code>Connect</code> / <code>Reset</code>.</div>
+            <div><b>Khởi tạo kết nối &amp; Yêu cầu Debug:</b> <code>UV4.exe</code> gọi <code>ST-LINKIII-KEIL_SWO.dll</code> và đọc cấu hình <code>Connect</code> / <code>Reset</code>.</div>
           </div>
           <div class="ufd-cell st-cell">
             <span class="ufd-step-tag">NHẬN LỆNH</span> <span class="ufd-arrow-tag">➔ SWD</span>
-            <div>Mở giao tiếp USB với PC và chuẩn bị phát xung trên 2 dây <code>SWDIO</code> &amp; <code>SWCLK</code>.</div>
+            <div>Nhận lệnh từ KeilC và chuẩn bị phát tín hiệu trên đường dây <code>SWD</code>.</div>
           </div>
           <div class="ufd-cell mc-cell">
             <span class="ufd-step-tag">TRẠNG THÁI TRƯỚC NẠP</span>
@@ -1038,15 +1251,15 @@ Faulting application path: C:\Users\ASUS\AppData\Local\Keil_v5\UV4\UV4.exe</code
         <div class="ufd-row passed" data-idx="1" onclick="ufdSelectStep(1)">
           <div class="ufd-cell pc-cell">
             <span class="ufd-step-tag">BƯỚC 2 (GĐ 1)</span> <span class="ufd-arrow-tag">➔</span>
-            <div>Yêu cầu kết nối Target và áp dụng <code>Reset after Connect</code> (nếu người dùng có tick).</div>
+            <div>Yêu cầu kết nối SWD và thực hiện <code>Reset after Connect</code> (nếu được tick).</div>
           </div>
           <div class="ufd-cell st-cell">
-            <span class="ufd-step-tag">PHÁT TÍN HIỆU SWD</span> <span class="ufd-arrow-tag">➔</span>
-            <div>Truy cập Debug Access Port (AHB-AP), ghi thanh ghi <code>DHCSR</code> để dừng lõi CPU.</div>
+            <span class="ufd-step-tag">BƯỚC 2</span> <span class="ufd-arrow-tag">➔ SWD</span>
+            <div>Gửi tín hiệu SWD đến chip và yêu cầu dừng lõi vi xử lý.</div>
           </div>
           <div class="ufd-cell mc-cell">
             <span class="ufd-step-tag">⏸ HALT CPU</span>
-            <div>Lõi Cortex-M3 dừng thực thi lệnh. Nếu không có <code>SYSRESETREQ</code> hoặc <code>NRST</code> hiệu quả, ngoại vi <code>RCC</code> vẫn giữ nguyên 72 MHz!</div>
+            <div>Lõi Cortex-M3 dừng lệnh. Nếu không có Reset ngoại vi (<code>SYSRESETREQ</code> / <code>NRST</code>), <code>RCC</code> vẫn giữ nguyên 72 MHz!</div>
           </div>
         </div>
 
@@ -1054,15 +1267,15 @@ Faulting application path: C:\Users\ASUS\AppData\Local\Keil_v5\UV4\UV4.exe</code
         <div class="ufd-row passed" data-idx="2" onclick="ufdSelectStep(2)">
           <div class="ufd-cell pc-cell">
             <span class="ufd-step-tag">BƯỚC 3 (GĐ 1)</span> <span class="ufd-arrow-tag">➔</span>
-            <div><b>Chạy Init File (Utilities):</b> Thực thi script <code>flash_init.ini</code> (nếu được cấu hình).<br/><span style="color:#fbbf24;font-size:11.5px;">★ Chốt chặn quyết định vận mệnh phiên nạp!</span></div>
+            <div><b>[Script] Chạy <code>flash_init.ini</code> (nếu có):</b><br/><span style="color:#fbbf24;font-size:11.5px;">⚠ Chốt chặn dập xung 72 MHz về 8 MHz trước khi nạp!</span></div>
           </div>
           <div class="ufd-cell st-cell">
-            <span class="ufd-step-tag">GHI THANH GHI QUA SWD</span> <span class="ufd-arrow-tag">➔</span>
-            <div id="ufdRow3St">Truyền lệnh <code>_WDWORD</code> xuống địa chỉ <code>0x40021000</code> (RCC_CR) và <code>0x40021004</code> (RCC_CFGR).</div>
+            <span class="ufd-step-tag">BƯỚC 3</span> <span class="ufd-arrow-tag">➔</span>
+            <div>Mạch nạp ghi trực tiếp thanh ghi <code>RCC_CR</code> (<code>0x40021000</code>) và <code>RCC_CFGR</code> (<code>0x40021004</code>) qua SWD.</div>
           </div>
           <div class="ufd-cell mc-cell" id="ufdRow3Mc">
             <span class="ufd-step-tag">TRẠNG THÁI XUNG NHỊP</span>
-            <div>⚠️ <b>Kịch bản Lỗi:</b> Không có <code>.ini</code> &amp; không Reset RCC ➔ Chip <b>VẪN KẸT Ở 72 MHz</b> trước khi vào Giai đoạn 2!</div>
+            <div>⚠️ <b>Kịch bản Lỗi:</b> Không có <code>.ini</code> &amp; không Reset RCC ➔ Chip <b>VẪN KẸT Ở 72 MHz</b>!</div>
           </div>
         </div>
 
@@ -1070,15 +1283,15 @@ Faulting application path: C:\Users\ASUS\AppData\Local\Keil_v5\UV4\UV4.exe</code
         <div class="ufd-row passed" data-idx="3" onclick="ufdSelectStep(3)">
           <div class="ufd-cell pc-cell">
             <span class="ufd-step-tag">BƯỚC 4 (GĐ 2)</span>
-            <div><b>Đọc file <code>.FLM</code> trên ổ cứng PC:</b> <code>UV4.exe</code> mở file <code>STM32F10x_128.FLM</code> và trích xuất mã máy của các hàm <code>Init</code>, <code>Erase</code>, <code>ProgramPage</code>.</div>
+            <div><b>Đọc file <code>STM32F10x_128.FLM</code> trên ổ cứng:</b> Lấy mã nhị phân của thuật toán nạp Flash.</div>
           </div>
           <div class="ufd-cell st-cell">
-            <span class="ufd-step-tag">CHỜ DỮ LIỆU</span>
-            <div>Sẵn sàng nhận luồng byte thuật toán từ <code>UV4.exe</code>.</div>
+            <span class="ufd-step-tag">TRUNG CHUYỂN</span>
+            <div>Sẵn sàng truyền khối mã thuật toán <code>.FLM</code> xuống bộ nhớ RAM của vi điều khiển.</div>
           </div>
           <div class="ufd-cell mc-cell">
             <span class="ufd-step-tag">CHỜ NẠP RAM</span>
-            <div>CPU đang ở trạng thái Halt, vùng nhớ <code>SRAM (0x20000000)</code> sẵn sàng nhận mã thuật toán.</div>
+            <div>Vùng nhớ <code>SRAM (0x20000000)</code> sẵn sàng tiếp nhận thuật toán nạp.</div>
           </div>
         </div>
 
@@ -1086,15 +1299,15 @@ Faulting application path: C:\Users\ASUS\AppData\Local\Keil_v5\UV4\UV4.exe</code
         <div class="ufd-row passed" data-idx="4" onclick="ufdSelectStep(4)">
           <div class="ufd-cell pc-cell">
             <span class="ufd-step-tag">BƯỚC 5 (GĐ 2)</span> <span class="ufd-arrow-tag">➔ BƠM FLM</span>
-            <div>Đẩy toàn bộ mã nhị phân của thuật toán <code>.FLM</code> xuống mạch nạp và thiết lập vùng đệm (Buffer).</div>
+            <div>Đẩy toàn bộ mã nhị phân <code>.FLM</code> từ máy tính xuống vùng nhớ RAM của chip.</div>
           </div>
           <div class="ufd-cell st-cell">
-            <span class="ufd-step-tag">GHI AHB-AP</span> <span class="ufd-arrow-tag">➔ SRAM</span>
-            <div>Ghi thẳng khối mã máy <code>.FLM</code> vào <code>SRAM</code> thông qua cổng Debug SWD.</div>
+            <span class="ufd-step-tag">GHI QUA SWD</span> <span class="ufd-arrow-tag">➔ SRAM</span>
+            <div>Ghi khối nhị phân <code>.FLM</code> vào <code>SRAM</code> qua cổng AHB-AP.</div>
           </div>
           <div class="ufd-cell ram-cell">
-            <span class="ufd-step-tag" style="background:rgba(192,132,252,0.25);color:#e9d5ff;">📦 SRAM (0x20000000)</span>
-            <div><b>[Khối mã .FLM đã nằm trong RAM]</b><br/>Chứa hàm <code>Init()</code>, <code>EraseSector()</code>, <code>ProgramPage()</code>, <code>UnInit()</code>.</div>
+            <span class="ufd-step-tag" style="background:rgba(192,132,252,0.25);color:#e9d5ff;">📦 RAM (SRAM)</span>
+            <div><b>[Khối mã FLM nằm trong RAM]</b><br/>Chứa các hàm <code>Init()</code>, <code>Erase</code>, <code>ProgramPage()</code>, <code>UnInit()</code>.</div>
           </div>
         </div>
 
@@ -1102,47 +1315,47 @@ Faulting application path: C:\Users\ASUS\AppData\Local\Keil_v5\UV4\UV4.exe</code
         <div class="ufd-row passed" data-idx="5" onclick="ufdSelectStep(5)">
           <div class="ufd-cell pc-cell">
             <span class="ufd-step-tag">BƯỚC 6 (GĐ 3)</span> <span class="ufd-arrow-tag">➔ GỌI INIT()</span>
-            <div>Ra lệnh: <i>"CPU, hãy nhảy con trỏ PC vào chạy hàm <code>Init()</code> của khối <code>.FLM</code> trong RAM!"</i></div>
+            <div>Ra lệnh: <i>"CPU, hãy chạy hàm <code>Init()</code> của khối FLM đang nằm trong RAM!"</i></div>
           </div>
           <div class="ufd-cell st-cell">
             <span class="ufd-step-tag">ĐIỀU KHIỂN PC</span> <span class="ufd-arrow-tag">➔</span>
-            <div>Trỏ thanh ghi <code>PC</code> của Cortex-M3 vào địa chỉ <code>FLM_Init()</code> trong SRAM rồi cho chạy.</div>
+            <div>Trỏ thanh ghi <code>PC</code> của Cortex-M3 vào hàm <code>FLM_Init()</code> trong SRAM.</div>
           </div>
           <div class="ufd-cell mc-cell" style="border-color:#f43f5e;">
-            <span class="ufd-step-tag" style="background:rgba(244,63,94,0.25);color:#fda4af;">🚨 THỦ PHẠM: FLM_Init()</span>
-            <div>CPU thực thi <code>Init()</code> trong RAM:<br/><b>Ghi cứng <code>FLASH-&gt;ACR = 0</code> (Ép về 0 Wait State &amp; Tắt Prefetch!)</b></div>
+            <span class="ufd-step-tag" style="background:rgba(244,63,94,0.25);color:#fda4af;">🚨 BƯỚC 6: CPU CHẠY FLM_Init()</span>
+            <div>▶ CPU chạy <code>FLM_Init()</code> trong RAM:<br/><b>└─► ÉP <code>FLASH_ACR = 0</code> (0 Wait State, tắt Prefetch!)</b></div>
           </div>
         </div>
 
         <!-- Row 7 -->
         <div class="ufd-row passed" data-idx="6" onclick="ufdSelectStep(6)">
           <div class="ufd-cell pc-cell">
-            <span class="ufd-step-tag">BƯỚC 7 (GĐ 3)</span> <span class="ufd-arrow-tag">➔ XÓA FLASH</span>
-            <div>Ra lệnh gọi hàm <code>EraseChip()</code> / <code>EraseSector()</code> và in ra log: <code>Full Chip Erase Done.</code></div>
+            <span class="ufd-step-tag">BƯỚC 7 (GĐ 3)</span> <span class="ufd-arrow-tag">➔ BƠM FIRMWARE</span>
+            <div>Thực thi xóa Flash (<code>Full Chip Erase Done.</code>) và bơm mã code Firmware (<code>.axf</code>) của bạn vào RAM.</div>
           </div>
           <div class="ufd-cell st-cell">
-            <span class="ufd-step-tag">THỰC THI ERASE</span> <span class="ufd-arrow-tag">➔</span>
-            <div>Kích hoạt hàm xóa trong SRAM và chờ cờ <code>BSY</code> trong <code>FLASH_SR</code> hạ xuống.</div>
+            <span class="ufd-step-tag">TRUYỀN BUFFER</span> <span class="ufd-arrow-tag">➔ SRAM</span>
+            <div>Đẩy từng gói dữ liệu Firmware từ PC vào vùng đệm trên RAM.</div>
           </div>
-          <div class="ufd-cell mc-cell">
-            <span class="ufd-step-tag">🧹 XÓA SẠCH FLASH</span>
-            <div>Mở khóa <code>FLASH_KEYR</code>, xóa sạch vùng nhớ <code>0x08000000</code> về <code>0xFF</code> thành công 100%.</div>
+          <div class="ufd-cell ram-cell">
+            <span class="ufd-step-tag" style="background:rgba(192,132,252,0.25);color:#e9d5ff;">📦 RAM (SRAM)</span>
+            <div><b>[Buffer Firmware nằm trong RAM]</b><br/>Flash đã xóa sạch về <code>0xFF</code>, dữ liệu mới sẵn sàng trong Buffer.</div>
           </div>
         </div>
 
         <!-- Row 8 -->
         <div class="ufd-row passed" data-idx="7" onclick="ufdSelectStep(7)">
           <div class="ufd-cell pc-cell">
-            <span class="ufd-step-tag">BƯỚC 8 (GĐ 3)</span> <span class="ufd-arrow-tag">➔ GHI CODE</span>
-            <div>Bơm từng gói dữ liệu của file <code>STM32F103C8.axf</code> xuống Buffer RAM và gọi <code>ProgramPage()</code>. In ra: <code>Programming Done.</code></div>
+            <span class="ufd-step-tag">BƯỚC 8 (GĐ 3)</span> <span class="ufd-arrow-tag">➔ GHI FLASH</span>
+            <div>Ra lệnh: <i>"CPU, hãy chạy hàm <code>ProgramPage()</code> của FLM!"</i> (In ra: <code>Programming Done.</code>)</div>
           </div>
           <div class="ufd-cell st-cell">
-            <span class="ufd-step-tag">BƠM BUFFER</span> <span class="ufd-arrow-tag">➔ SRAM</span>
-            <div>Đẩy dữ liệu Firmware vào Buffer trên RAM và kích CPU chạy <code>ProgramPage()</code>.</div>
+            <span class="ufd-step-tag">GỌI PROGRAM</span> <span class="ufd-arrow-tag">➔</span>
+            <div>Kích hoạt hàm <code>ProgramPage()</code> trong SRAM và đợi cờ <code>BSY</code> hoàn tất.</div>
           </div>
-          <div class="ufd-cell ram-cell">
-            <span class="ufd-step-tag" style="background:rgba(192,132,252,0.25);color:#e9d5ff;">📥 SRAM ➔ FLASH</span>
-            <div>CPU copy từng Half-Word (16-bit) từ <code>Buffer SRAM</code> ghi xuống <code>Flash (0x08000000)</code> <b>THÀNH CÔNG 100%</b>.</div>
+          <div class="ufd-cell mc-cell">
+            <span class="ufd-step-tag">▶ BƯỚC 8: PROGRAMPAGE()</span>
+            <div>CPU chạy <code>ProgramPage()</code>:<br/><b>└─► Ghi từ RAM ➔ Flash (0x08000000) thành công 100%!</b></div>
           </div>
         </div>
 
@@ -1150,101 +1363,143 @@ Faulting application path: C:\Users\ASUS\AppData\Local\Keil_v5\UV4\UV4.exe</code
         <div class="ufd-row passed" data-idx="8" onclick="ufdSelectStep(8)">
           <div class="ufd-cell pc-cell">
             <span class="ufd-step-tag">BƯỚC 9 (GĐ 4)</span> <span class="ufd-arrow-tag">⬅ ĐỌC VERIFY</span>
-            <div id="ufdRow9Pc"><b>Verify (Đối chiếu):</b> Đọc ngược dữ liệu từ Flash <code>0x08000000</code> về PC để so khớp với file <code>.axf</code> gốc.</div>
+            <div><b>Verify:</b> <i>"CPU, hãy gửi nội dung Flash vừa ghi về cho tao kiểm tra!"</i></div>
           </div>
           <div class="ufd-cell st-cell">
-            <span class="ufd-step-tag">ĐỌC AHB / FLITF</span> <span class="ufd-arrow-tag">⬅</span>
-            <div>Truy xuất liên tiếp các địa chỉ Flash từ <code>0x08000000H</code> trở đi trong điều kiện <code>FLASH_ACR = 0</code>.</div>
+            <span class="ufd-step-tag">ĐỌC FLASH (ACR=0)</span> <span class="ufd-arrow-tag">⬅</span>
+            <div>Đọc tuần tự từng Word 32-bit từ <code>0x08000000H</code> qua FLITF về PC để đối chiếu.</div>
           </div>
           <div class="ufd-cell mc-cell" id="ufdRow9Mc">
-            <span class="ufd-step-tag" style="background:rgba(244,63,94,0.25);color:#fda4af;">💥 ĐIỂM NỔ LỖI MISMATCH</span>
-            <div>Ở <b>72 MHz</b> mà <code>FLASH_ACR = 0</code> (0 WS): Bộ đệm 64-bit bị hụt nhịp! Word đầu mỗi cụm 8-byte trả về dữ liệu của <code>Addr - 8</code> ➔ <b>Báo lỗi Contents mismatch!</b></div>
+            <span class="ufd-step-tag" style="background:rgba(244,63,94,0.25);color:#fda4af;">💥 BƯỚC 9: LỖI MISMATCH!</span>
+            <div><b>[!] NẾU CHIP ĐANG Ở 72 MHz (mà ACR = 0):</b><br/>➔ Đọc hụt nhịp chốt 64-bit! Trả về dữ liệu của <code>Addr - 8</code> ➔ <b>Nổ lỗi Contents mismatch!</b></div>
           </div>
         </div>
 
         <!-- Row 10 -->
         <div class="ufd-row passed" data-idx="9" onclick="ufdSelectStep(9)">
           <div class="ufd-cell pc-cell">
-            <span class="ufd-step-tag">BƯỚC 10 (GĐ 4)</span> <span class="ufd-arrow-tag">➔ KẾT THÚC</span>
-            <div>Gọi hàm <code>UnInit()</code> của <code>.FLM</code>. Nếu Verify OK và có tick <code>Reset and Run</code>, phát lệnh khởi động lại chip.</div>
+            <span class="ufd-step-tag">BƯỚC 10 (GĐ 4)</span> <span class="ufd-arrow-tag">➔ RESET &amp; RUN</span>
+            <div>Gọi <code>UnInit()</code> và ra lệnh Reset &amp; Chạy (<code>Resume</code>) nếu có tick <code>Reset and Run</code>.</div>
           </div>
           <div class="ufd-cell st-cell">
-            <span class="ufd-step-tag">RESET &amp; RESUME</span> <span class="ufd-arrow-tag">➔</span>
-            <div>Hàm <code>UnInit()</code> không khôi phục <code>FLASH_ACR</code>. Phát lệnh Reset theo cấu hình (SYSRESETREQ / VECTRESET / HW RESET).</div>
+            <span class="ufd-step-tag">PHÁT LỆNH RESET</span> <span class="ufd-arrow-tag">➔</span>
+            <div>Thực thi kiểu Reset đã chọn (<code>SYSRESETREQ</code> / <code>HW RESET</code> / <code>VECTRESET</code>).</div>
           </div>
           <div class="ufd-cell mc-cell">
-            <span class="ufd-step-tag">🔄 CHẠY FIRMWARE</span>
-            <div>Nếu được Reset sạch (<code>SYSRESETREQ</code> / nút nhấn vật lý), <code>FLASH_ACR</code> về <code>0x30</code> rồi lên <code>0x32</code> và chạy ổn định ở 72 MHz.</div>
+            <span class="ufd-step-tag">🔄 BƯỚC 10: KHỞI ĐỘNG LẠI</span>
+            <div>Chip khởi động lại và chạy Firmware mới.</div>
           </div>
         </div>
       </div>
     </div>
 
     <!-- 1.4.C -->
-    <h4 class="mini-title">C. Giải mã thực chất các tùy chọn <code>Connect</code>, <code>Reset</code> và các công tắc liên quan trong KeilC</h4>
-    <p>Trong chuỗi sự kiện khi nhấn <code>F8</code>, để không xảy ra lỗi thì <b>ngay ở Bước (1)–(3) chip bắt buộc phải về lại HSI 8 MHz</b>. Nếu lệnh Reset chỉ diễn ra ở Bước (10) (sau khi nạp xong) thì đã quá muộn:</p>
+    <h4 class="mini-title">C. Chuỗi 7 sự kiện khi nhấn F8 và Giải mã các tùy chọn <code>Connect</code> / <code>Reset</code></h4>
+    <p>Tóm tắt chuỗi thứ tự thời gian khi nhấn <code>F8</code>:</p>
+<pre><code>(1) Kết nối SWD            &lt;- Tùy chọn [Connect] quyết định có tác động chân NRST ở đây không
+(2) [Reset after Connect]  &lt;- Tùy chọn [Reset] quyết định kiểu reset nếu ô này được tick
+(3) Init File (Utilities)  &lt;- Script flash_init.ini chạy ở đây nếu được khai báo
+(4) FLM Init: ACR = 0      &lt;- Thủ phạm ép 0 Wait State. Luôn chạy sau bước (1)–(3)
+(5) Erase, Program         &lt;- Xóa và Ghi thành công 100%
+(6) Verify                 &lt;- Đọc Flash với 0 WS: Nổ lỗi Mismatch nếu chip vẫn còn ở 72 MHz
+(7) [Reset and Run]        &lt;- Chạy firmware mới sau khi nạp xong</code></pre>
+    <p><b>Điều kiện tiên quyết để không bị lỗi:</b> Ngay tại bước <b>(1) – (3)</b>, vi điều khiển bắt buộc phải được đưa về xung nhịp <b>HSI 8 MHz</b>. Nếu lệnh Reset chỉ diễn ra ở bước (7) thì đã quá muộn!</p>
 
+    <p><b>Bảng giải mã tùy chọn <code>Connect</code> (<code>Debug -&gt; Settings</code>):</b></p>
     <div class="table-wrap">
       <table>
         <thead>
-          <tr><th>Nhóm tùy chọn</th><th>Tên thiết lập</th><th>Cơ chế hoạt động thực tế</th><th>Có Reset ngoại vi (RCC, <code>FLASH_ACR</code>) không?</th><th>Tác động tới lỗi <code>Contents mismatch</code></th></tr>
+          <tr><th>Tùy chọn Connect</th><th>Cơ chế hoạt động</th><th>Yêu cầu nối chân NRST?</th><th>Tác dụng với lỗi <code>Contents mismatch</code></th></tr>
         </thead>
         <tbody>
           <tr>
-            <td><b>Connect</b></td>
-            <td><code>Normal</code></td>
-            <td>Kết nối SWD bình thường, không phát xung reset phần cứng.</td>
-            <td><b>Không</b></td>
-            <td>❌ Không giúp hạ xung; đây là kịch bản mặc định gây lỗi.</td>
+            <td><b>Normal</b></td>
+            <td>Kết nối SWD bình thường, không kéo chân Reset phần cứng.</td>
+            <td>Không</td>
+            <td>Không giúp được. Giữ nguyên xung 72 MHz của chip, dẫn thẳng tới lỗi.</td>
           </tr>
           <tr>
-            <td><b>Connect</b></td>
-            <td><code>with Pre-reset</code></td>
-            <td>Kéo chân <code>NRST</code> phần cứng <b>trước</b> khi kết nối SWD <span class="badge b-doc">[Tài liệu]</span>.</td>
-            <td>Có (nếu chân NRST hoạt động thật)</td>
-            <td>⚠️ Chỉ giúp được nếu mạch ST-Link thực sự kéo được chân NRST của chip.</td>
+            <td><b>with Pre-reset</b></td>
+            <td>Phát một xung kéo chân Reset phần cứng xuống thấp <b>trước</b> khi bắt đầu kết nối <span class="badge b-doc">[Tài liệu]</span>.</td>
+            <td><b>Có</b></td>
+            <td>Chỉ giúp được nếu xung NRST từ ST-Link thực sự truyền tới chân Reset của chip.</td>
           </tr>
           <tr>
-            <td><b>Connect</b></td>
-            <td><code>under Reset</code></td>
-            <td>Giữ chân <code>NRST</code> ở mức thấp <b>trong suốt lúc</b> bắt tay SWD <span class="badge b-doc">[Tài liệu]</span>.</td>
-            <td>Có (nếu chân NRST hoạt động thật)</td>
-            <td>⚠️ Tương tự trên; đồng thời là cách chữa kinh điển khi chip khóa cổng SWD.</td>
+            <td><b>under Reset</b></td>
+            <td>Giữ chặt chân Reset phần cứng ở mức thấp <b>trong suốt lúc</b> thiết lập kết nối <span class="badge b-doc">[Tài liệu]</span>.</td>
+            <td><b>Có</b></td>
+            <td>Giúp đưa chip về trạng thái sạch và cứu mạch khi bị khóa SWD (nếu chân NRST hoạt động thật).</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p><b>Bảng giải mã tùy chọn <code>Reset</code> (<code>Debug -&gt; Settings</code>):</b></p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Tùy chọn Reset</th><th>Cơ chế hoạt động</th><th>Có Reset ngoại vi (RCC, <code>FLASH_ACR</code>) không?</th><th>Ghi chú kỹ thuật</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>Autodetect</b></td>
+            <td>Keil tự chọn cơ chế dựa theo mô tả trong gói CMSIS-Pack (DFP).</td>
+            <td>Tùy thuộc cấu hình trong Pack</td>
+            <td>Thường bị khóa hoặc hoạt động không nhất quán với mạch nạp ST-Link.</td>
           </tr>
           <tr>
-            <td><b>Reset</b></td>
-            <td><code>Autodetect</code></td>
-            <td>Keil tự chọn kiểu reset (thường dựa vào mô tả trong gói CMSIS-Pack).</td>
-            <td>Tùy thuộc cách được chọn</td>
-            <td>❌ Thực tế đo đạc trên F103 cho thấy nó không đưa RCC về 8 MHz trước khi nạp.</td>
+            <td><b>HW RESET</b></td>
+            <td>Kéo chân phần cứng <code>NRST</code> xuống mức thấp (GND).</td>
+            <td><b>Có</b> (Reset toàn bộ chip)</td>
+            <td>Phụ thuộc hoàn toàn vào dây NRST và khả năng phát xung của mạch ST-Link.</td>
           </tr>
           <tr>
-            <td><b>Reset</b></td>
-            <td><code>HW RESET</code></td>
-            <td>Kéo chân <code>NRST</code> vật lý <span class="badge b-doc">[Tài liệu]</span>.</td>
-            <td><b>Có</b> (nếu NRST thông suốt)</td>
-            <td>⚠️ Phụ thuộc hoàn toàn vào phần cứng ST-Link và dây nối NRST.</td>
+            <td><b>SYSRESETREQ</b></td>
+            <td>Ghi bit <code>SYSRESETREQ</code> trong thanh ghi <code>AIRCR</code> của lõi Cortex-M3 qua SWD.</td>
+            <td><b>Có (Reset cả lõi CPU và toàn bộ ngoại vi RCC, FLASH)</b></td>
+            <td><b>Đáng giá nhất!</b> Reset mềm qua dây SWDIO/SWCLK, không cần dây NRST vật lý.</td>
           </tr>
           <tr>
-            <td><b>Reset</b></td>
-            <td><code>SYSRESETREQ</code></td>
-            <td>Ghi bit <code>SYSRESETREQ</code> trong thanh ghi <code>AIRCR</code> của Cortex-M3.</td>
-            <td><b>CÓ (Reset cả Core lẫn toàn bộ ngoại vi RCC/Flash)</b></td>
-            <td>✅ <b>Đáng dùng nhất</b> vì là Reset mềm qua dây SWD, không cần dây NRST!</td>
+            <td><b>VECTRESET</b></td>
+            <td>Ghi bit <code>VECTRESET</code> trong thanh ghi <code>AIRCR</code> của lõi Cortex-M3.</td>
+            <td><b>KHÔNG!</b> (Chỉ reset mỗi lõi CPU, giữ nguyên ngoại vi)</td>
+            <td><b>Nguy hiểm cho trường hợp này:</b> Không đưa RCC về 8 MHz và không khôi phục <code>FLASH_ACR</code>.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p><b>Bảng các công tắc cấu hình liên quan trong KeilC:</b></p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Công tắc</th><th>Vị trí trong KeilC</th><th>Tác dụng thực tế</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>Reset after Connect</b></td>
+            <td><code>Debug -&gt; Settings</code></td>
+            <td>Ngay sau khi kết nối ở bước (1), thực thi ngay kiểu Reset đã chọn ở bước (2) <span class="badge b-doc">[Tài liệu]</span>.</td>
           </tr>
           <tr>
-            <td><b>Reset</b></td>
-            <td><code>VECTRESET</code></td>
-            <td>Ghi bit <code>VECTRESET</code> chỉ làm mới lõi CPU Cortex-M3 <span class="badge b-doc">[Tài liệu]</span>.</td>
-            <td><b>KHÔNG (Giữ nguyên RCC 72 MHz &amp; ACR)</b></td>
-            <td>❌ <b>Cần tránh tuyệt đối!</b> Khiến chip chạy lại mà không reset ngoại vi (làm <code>FLASH_ACR</code> bị kẹt ở <code>0x02</code> thay vì <code>0x32</code>).</td>
+            <td><b>Reset and Run</b></td>
+            <td><code>Debug -&gt; Settings -&gt; Flash Download</code></td>
+            <td>Sau khi nạp và Verify xong ở bước (6), tự động Reset và cho chip chạy ở bước (7).</td>
           </tr>
           <tr>
-            <td><b>Tab Pack</b></td>
-            <td><code>Debug Description: Enable</code></td>
-            <td>Sử dụng kịch bản debug viết sẵn trong file <code>.dbgconf</code> / DFP của hãng <span class="badge b-doc">[Tài liệu]</span>.</td>
-            <td>Có thể khóa cứng một số tùy chọn Reset của driver</td>
-            <td>💡 Hai báo cáo cộng đồng (Arm, EEVblog) xác nhận: <b>Tắt (Disable)</b> ô này giúp ST-Link phát lệnh reset chuẩn xác hơn <span class="badge b-comm">[Cộng đồng]</span>.</td>
+            <td><b>Pack -&gt; Debug Description: Enable</b></td>
+            <td><code>Debug -&gt; Settings -&gt; Pack</code></td>
+            <td>Sử dụng chuỗi kịch bản debug định sẵn trong gói DFP (<code>.dbgconf</code>). Hai báo cáo từ cộng đồng (Arm Forum, EEVblog) xác nhận: <b>Bỏ tick (Disable) ô này giúp ST-Link thực hiện Reset chuẩn xác hơn</b> <span class="badge b-comm">[Cộng đồng]</span>.</td>
+          </tr>
+          <tr>
+            <td><b>Init File</b></td>
+            <td><code>Utilities -&gt; Init File</code></td>
+            <td>Nơi nạp tệp <code>flash_init.ini</code> để chạy các lệnh can thiệp thanh ghi ở bước (3) trước khi nạp Flash.</td>
+          </tr>
+          <tr>
+            <td><b>Debug access log</b></td>
+            <td><code>Debug -&gt; Settings</code></td>
+            <td>Xuất nhật ký truy cập SWD ra các tệp <code>STM32F103C8_Sequences_xxxx.log</code> trong thư mục project để kiểm tra Keil có thực sự phát lệnh Reset hay không <span class="badge b-doc">[Tài liệu]</span>.</td>
           </tr>
         </tbody>
       </table>
@@ -1252,404 +1507,639 @@ Faulting application path: C:\Users\ASUS\AppData\Local\Keil_v5\UV4\UV4.exe</code
     <a href="#muc-luc" class="back-toc">🔼 Quay về Mục lục</a>
 
     <!-- 1.5 -->
-    <h3 class="sub-title" id="muc-1-5">1.5. Quy trình Kiểm chứng chuẩn và Ma trận Thí nghiệm (Đề xuất từ Claude)</h3>
-    <p>Để mọi phép thử cấu hình trên KeilC có giá trị khoa học và không bị nhiễu bởi trạng thái lưu đệm của IDE, quy trình kiểm chứng chuẩn 6 bước được thiết lập như sau:</p>
+    <h3 class="sub-title" id="phan-1-5">1.5. Quy trình Kiểm chứng chuẩn và Ma trận Thí nghiệm (Đề xuất từ Claude)</h3>
+
+    <h4 class="mini-title">A. Quy trình kiểm chứng chuẩn 6 bước (Đảm bảo tính hợp lệ của phép thử)</h4>
     <ol>
-      <li><b>Build lại Project:</b> Kiểm tra cửa sổ Build Output báo <code>0 Error(s)</code> và file <code>main.c</code> (chạy 72 MHz, <code>Delay(4500000)</code>) đã được biên dịch.</li>
-      <li><b>Thay đổi duy nhất 1 biến cấu hình:</b> Đặt đúng một dòng thiết lập theo Ma trận bên dưới rồi bấm OK.</li>
-      <li><b>Khởi động lạnh toàn bộ phiên:</b> Tắt hẳn KeilC, rút cáp USB ST-Link ra khỏi máy tính, cắm lại USB, mở lại KeilC và kiểm tra lại hộp thoại xem cấu hình đã thực sự được lưu chưa.</li>
-      <li><b>Nhấn <code>F8</code> lần 1:</b> Nạp code vào chip.</li>
-      <li><b>Nhấn nút RESET vật lý trên board:</b> Quan sát mắt thường xem LED PC13 đã nháy đúng nhịp nhanh của <code>72 MHz</code> chưa. (Nếu LED nháy chậm ở 8 MHz thì thí nghiệm không hợp lệ, phải dừng lại kiểm tra).</li>
-      <li><b>Nhấn <code>F8</code> lần 2:</b> Ghi nhận kết quả (Pass hay <code>Contents mismatch</code>) và đọc thanh ghi <code>0x40022000</code> (<code>FLASH_ACR</code>) bằng ST-LINK Utility ở chế độ <code>Hot Plug</code> (đọc ra <code>0x32</code> là ngoại vi được reset sạch; đọc ra <code>0x02</code> là ngoại vi không được reset).</li>
+      <li>Nhấn <b>Rebuild</b>, kiểm tra cửa sổ Build Output báo <code>0 Error(s)</code> và xác nhận <code>main.c</code> vừa được biên dịch mới.</li>
+      <li>Thiết lập đúng một biến cấu hình cần thử nghiệm trong hộp thoại <code>Options for Target</code> ➔ Nhấn <b>OK</b>.</li>
+      <li><b>Đóng hoàn toàn phần mềm KeilC, rút cáp USB ST-Link ra khỏi máy tính, cắm lại cáp USB, rồi mở lại KeilC.</b> (Mở lại hộp thoại Settings để kiểm tra chắc chắn cấu hình đã được lưu cứng vào tệp <code>.uvoptx</code>).</li>
+      <li>Nhấn <code>F8</code> nạp lần #1 (Đảm bảo báo <code>Verify OK</code>).</li>
+      <li><b>Nhấn nút RESET vật lý trên board STM32.</b> Quan sát mắt thường xác nhận LED PC13 nhấp nháy đúng tốc độ nhanh của <code>72 MHz</code>. (Nếu LED nháy chậm ở tốc độ 8 MHz thì phép thử không hợp lệ, phải dừng lại kiểm tra).</li>
+      <li>Nhấn <code>F8</code> nạp lần #2 ngay khi LED đang nháy nhanh và ghi nhận kết quả (<code>Verify OK</code> hay <code>Contents mismatch</code>).</li>
     </ol>
 
+    <h4 class="mini-title">B. Bảng Ma trận Thí nghiệm (B0 -&gt; E8)</h4>
     <div class="table-wrap">
       <table>
         <thead>
-          <tr><th>Mã TN</th><th>Pack: Debug Description</th><th>Connect</th><th>Reset</th><th>Reset after Connect</th><th>Giả thuyết kiểm chứng</th><th>Kết quả F8 #2</th></tr>
+          <tr>
+            <th>Mã Test</th>
+            <th>Pack: Debug Description</th>
+            <th>Tùy chọn Connect</th>
+            <th>Tùy chọn Reset</th>
+            <th>Reset after Connect</th>
+            <th>Giả thuyết kiểm chứng</th>
+            <th>Kết quả F8 lần #2</th>
+          </tr>
         </thead>
         <tbody>
-          <tr><td><b>B0</b></td><td>Enable (Mặc định)</td><td>Normal</td><td>Autodetect</td><td>Tắt</td><td>Baseline đối chứng gây lỗi</td><td>❌ <code>mismatch</code> <span class="badge b-measured">[Đã đo]</span></td></tr>
-          <tr><td><b>E1</b></td><td><b>Disable</b></td><td>Normal</td><td>Autodetect</td><td>Tắt</td><td>Kiểm tra xem tắt Pack Description có mở khóa reset của driver ST-Link không</td><td><span class="badge b-untested">[Chưa thử]</span></td></tr>
-          <tr><td><b>E2</b></td><td>Enable</td><td>Normal</td><td><b>SYSRESETREQ</b></td><td><b>Bật</b></td><td>Reset mềm qua SWD xóa sạch RCC và ACR về mặc định mà không cần chân NRST</td><td><span class="badge b-untested">[Chưa thử]</span></td></tr>
-          <tr><td><b>E3</b></td><td>Enable</td><td><b>with Pre-reset</b></td><td>SYSRESETREQ</td><td>Bật</td><td>Kết hợp thêm xung reset phần cứng trước khi kết nối</td><td><span class="badge b-untested">[Chưa thử]</span></td></tr>
-          <tr><td><b>E4</b></td><td>Enable</td><td><b>under Reset</b></td><td>SYSRESETREQ</td><td>Bật</td><td>Giữ chân reset trong lúc kết nối kèm SYSRESETREQ</td><td><span class="badge b-untested">[Chưa thử]</span></td></tr>
-          <tr><td><b>E5</b></td><td>Enable</td><td>under Reset</td><td><b>HW RESET</b></td><td>Bật</td><td>Cấu hình phần cứng thuần túy (yêu cầu chân NRST hoạt động thật)</td><td><span class="badge b-untested">[Chưa thử]</span></td></tr>
-          <tr><td><b>E6</b></td><td><b>Disable</b></td><td>under Reset</td><td>SYSRESETREQ</td><td>Bật</td><td>Tổ hợp mạnh nhất của cấu hình hộp thoại Keil</td><td><span class="badge b-untested">[Chưa thử]</span></td></tr>
-          <tr><td><b>E7</b></td><td>Tùy ý</td><td>Tùy ý</td><td>Tùy ý</td><td>Tùy ý</td><td>Gắn script <code>flash_init.ini</code> vào ô <i>Utilities ➔ Init File</i></td><td>✅ <b>PASS 100%</b> <span class="badge b-measured">[Đã đo]</span></td></tr>
-          <tr><td><b>E8</b></td><td>—</td><td>—</td><td>—</td><td>—</td><td>Dùng <code>ST-LINK_CLI -c SWD -P "#H" -V -rst</code> làm External Tool</td><td>✅ <b>PASS 100%</b> <span class="badge b-measured">[Đã đo]</span></td></tr>
+          <tr>
+            <td><b>B0</b></td>
+            <td>Enable (Mặc định)</td>
+            <td>Normal</td>
+            <td>Autodetect</td>
+            <td>Tắt</td>
+            <td>Baseline gốc: Chip giữ nguyên 72 MHz khi <code>.FLM</code> chạy</td>
+            <td>❌ <b>Mismatch</b> <span class="badge b-measured">[Đã đo]</span></td>
+          </tr>
+          <tr>
+            <td><b>E1</b></td>
+            <td><b>Disable</b></td>
+            <td>Giữ như B0</td>
+            <td>Giữ như B0</td>
+            <td>Giữ như B0</td>
+            <td>Kiểm tra báo cáo cộng đồng về việc tắt Debug Description giúp ST-Link tự reset</td>
+            <td><span class="badge b-untested">[Chưa thử]</span></td>
+          </tr>
+          <tr>
+            <td><b>E2</b></td>
+            <td>Enable</td>
+            <td>Normal</td>
+            <td><b>SYSRESETREQ</b></td>
+            <td><b>Bật</b></td>
+            <td>Dùng Reset mềm qua SWD để xóa sạch <code>RCC</code> và <code>FLASH_ACR</code> về mặc định mà không cần dây NRST</td>
+            <td><span class="badge b-untested">[Chưa thử]</span></td>
+          </tr>
+          <tr>
+            <td><b>E3</b></td>
+            <td>Enable</td>
+            <td><b>with Pre-reset</b></td>
+            <td>SYSRESETREQ</td>
+            <td>Bật</td>
+            <td>Bổ sung xung Reset phần cứng trước khi kết nối kết hợp Reset mềm</td>
+            <td><span class="badge b-untested">[Chưa thử]</span></td>
+          </tr>
+          <tr>
+            <td><b>E4</b></td>
+            <td>Enable</td>
+            <td><b>under Reset</b></td>
+            <td>SYSRESETREQ</td>
+            <td>Bật</td>
+            <td>Giữ Reset phần cứng trong lúc kết nối kết hợp SYSRESETREQ</td>
+            <td><span class="badge b-untested">[Chưa thử]</span></td>
+          </tr>
+          <tr>
+            <td><b>E5</b></td>
+            <td>Enable</td>
+            <td>under Reset</td>
+            <td><b>HW RESET</b></td>
+            <td>Bật</td>
+            <td>Phụ thuộc hoàn toàn vào xung phần cứng trên chân NRST</td>
+            <td>❌ <b>Mismatch</b> <span class="badge b-measured">[Đã đo]</span> (Do NRST không tới chip)</td>
+          </tr>
+          <tr>
+            <td><b>E6</b></td>
+            <td><b>Disable</b></td>
+            <td>under Reset</td>
+            <td>SYSRESETREQ</td>
+            <td>Bật</td>
+            <td>Tổ hợp mạnh nhất: Tắt Pack Description + Connect Under Reset + SYSRESETREQ</td>
+            <td><span class="badge b-untested">[Chưa thử]</span></td>
+          </tr>
+          <tr>
+            <td><b>E7</b></td>
+            <td>Tùy ý</td>
+            <td>Tùy ý</td>
+            <td>Tùy ý</td>
+            <td>Tùy ý</td>
+            <td>Sử dụng tệp kịch bản <code>flash_init.ini</code> tại tab Utilities để ép chip về HSI 8 MHz ở bước (3)</td>
+            <td>✅ <b>PASS 100%</b> <span class="badge b-measured">[Đã đo]</span></td>
+          </tr>
+          <tr>
+            <td><b>E8</b></td>
+            <td>—</td>
+            <td>—</td>
+            <td>—</td>
+            <td>—</td>
+            <td>Bỏ qua trình nạp của Keil, gọi trực tiếp <code>ST-LINK_CLI.exe -c SWD -P "#H" -V -rst</code> qua External Tool</td>
+            <td>✅ <b>PASS 100%</b> <span class="badge b-measured">[Đã đo]</span></td>
+          </tr>
         </tbody>
       </table>
     </div>
     <a href="#muc-luc" class="back-toc">🔼 Quay về Mục lục</a>
 
     <!-- 1.6 -->
-    <h3 class="sub-title" id="muc-1-6">1.6. Khắc phục bằng <code>flash_init.ini</code> và Phân tích Log Thanh ghi (<code>72 MHz</code> vs <code>8 MHz</code>)</h3>
+    <h3 class="sub-title" id="phan-1-6">1.6. Khắc phục bằng <code>flash_init.ini</code> và Phân tích Log Thanh ghi (<code>72 MHz</code> vs <code>8 MHz</code>)</h3>
 
-    <h4 class="mini-title">A. Giải phẫu chi tiết các giá trị Thanh ghi đo được trong thực nghiệm</h4>
+    <h4 class="mini-title">A. Bảng giải phẫu giá trị các Thanh ghi phần cứng (<code>72 MHz</code> vs <code>8 MHz</code>)</h4>
+    <p>Trong quá trình đo đạc bằng ST-LINK Utility và trình xuất log của KeilC, giá trị thực tế tại các địa chỉ thanh ghi lõi và ngoại vi đã phơi bày toàn bộ trạng thái bên trong con chip:</p>
     <div class="table-wrap">
       <table>
         <thead>
-          <tr><th>Thanh ghi &amp; Địa chỉ</th><th>Giá trị đo được</th><th>Giải mã từng Bit phần cứng (Bit-field Breakdown)</th><th>Kết luận chẩn đoán</th></tr>
+          <tr><th>Tên Thanh ghi</th><th>Địa chỉ vật lý</th><th>Giá trị đo được</th><th>Giải mã chi tiết từng cụm Bit (Theo RM0008)</th><th>Ý nghĩa chẩn đoán</th></tr>
         </thead>
         <tbody>
           <tr>
-            <td><code>DBGMCU_IDCODE</code><br/><code>0xE0042000</code></td>
+            <td><code>DBGMCU_IDCODE</code></td>
+            <td><code>0xE0042000</code></td>
             <td><code>0x00006410</code> (Board 1, 2)<br/><code>0x20036410</code> (Board 3)</td>
-            <td>• Bits [11:0] <code>DEV_ID = 0x410</code>: STM32F10x Medium-density.<br/>• Bits [31:16] <code>REV_ID</code>: <code>0x0000</code> (Revision không có trong tài liệu ST) vs <code>0x2003</code> (Revision chuẩn).</td>
-            <td>Khẳng định cả chip mã <code>0x0000</code> lẫn chip chuẩn <code>0x2003</code> đều bị lỗi như nhau khi nạp ở 72 MHz.</td>
+            <td>• Bit [11:0] <code>DEV_ID = 0x410</code> (Medium-density F103).<br/>• Bit [31:16] <code>REV_ID = 0x0000</code> (Clone) vs <code>0x2003</code> (Chính hãng ST).</td>
+            <td>Cả hai mã chip đều bị lỗi <code>Contents mismatch</code> như nhau <span class="badge b-measured">[Đã đo]</span>.</td>
           </tr>
           <tr>
-            <td><code>RCC_CFGR</code><br/><code>0x40021004</code></td>
+            <td><code>SCB_CPUID</code></td>
+            <td><code>0xE000ED00</code></td>
+            <td><code>0x411FC231</code></td>
+            <td>• Implementer = <code>0x41</code> (ARM), PartNo = <code>0xC23</code> (Cortex-M3), Revision = <code>r1p1</code>.</td>
+            <td>Chỉ xác nhận lõi vi xử lý là Cortex-M3 tiêu chuẩn <span class="badge b-measured">[Đã đo]</span>.</td>
+          </tr>
+          <tr>
+            <td><code>RCC_CFGR</code><br/><i>(Sau Reset)</i></td>
+            <td><code>0x40021004</code></td>
+            <td><code>0x00000000</code></td>
+            <td>• <code>SW = 00</code>, <code>SWS = 00</code>: Hệ thống đang chạy bằng xung nội <b>HSI 8 MHz</b>.<br/>• Toàn bộ bộ chia AHB, APB1, APB2 đều bằng <code>/1</code>.</td>
+            <td>Trạng thái an toàn tuyệt đối để nạp Flash (0 Wait State đọc chuẩn 100%) <span class="badge b-measured">[Đã đo]</span>.</td>
+          </tr>
+          <tr>
+            <td><code>RCC_CFGR</code><br/><i>(Khi chạy 72MHz)</i></td>
+            <td><code>0x40021004</code></td>
             <td><code>0x001D040A</code></td>
-            <td>• Bits [1:0] <code>SW = 10b</code> (Chọn PLL làm SYSCLK).<br/>• Bits [3:2] <code>SWS = 10b</code> (PLL đang là SYSCLK).<br/>• Bits [10:8] <code>PPRE1 = 100b</code> (APB1 chia 2 = 36 MHz).<br/>• Bit [16] <code>PLLSRC = 1</code> (Nguồn HSE).<br/>• Bits [21:18] <code>PLLMUL = 0111b</code> (Nhân 9 ➔ 8 MHz × 9 = <b>72 MHz</b>).</td>
-            <td>Chứng minh khi chọn <i>Connect Under Reset</i> mà đọc ra <code>0x001D040A</code> nghĩa là <b>xung Reset chưa hề chạm tới khối RCC</b>; chip vẫn đang chạy ở 72 MHz!</td>
+            <td>• Bit [1:0] <code>SW = 10</code> (Chọn PLL làm SYSCLK).<br/>• Bit [3:2] <code>SWS = 10</code> (PLL đang là SYSCLK).<br/>• Bit [10:8] <code>PPRE1 = 100</code> (APB1 chia 2 = 36 MHz).<br/>• Bit [16] <code>PLLSRC = 1</code> (Nguồn PLL từ HSE).<br/>• Bit [21:18] <code>PLLMUL = 0111</code> (PLL nhân 9 = <b>72 MHz</b>).</td>
+            <td>Khi chọn <i>Connect Under Reset</i> trên ST-LINK Utility mà vẫn đọc ra <code>0x001D040A</code>, chứng tỏ <b>xung Reset phần cứng không hề tác động được vào chip</b> <span class="badge b-measured">[Đã đo]</span>.</td>
           </tr>
           <tr>
-            <td><code>FLASH_ACR</code><br/><code>0x40022000</code></td>
-            <td><b>1)</b> <code>0x00000030</code><br/><b>2)</b> <code>0x00000032</code><br/><b>3)</b> <code>0x00000000</code><br/><b>4)</b> <code>0x00000002</code></td>
-            <td>• <code>0x30</code>: <code>PRFTBS=1</code> (Bit 5), <code>PRFTBE=1</code> (Bit 4), <code>LATENCY=000b</code> (Mặc định ngay sau khi Reset sạch ở 8 MHz).<br/>• <code>0x32</code>: <code>PRFTBS=1</code>, <code>PRFTBE=1</code>, <code>LATENCY=010b</code> (2 Wait State chuẩn khi chạy 72 MHz).<br/>• <code>0x00</code>: <b>Do <code>FLM_Init()</code> ghi đè</b> (Tắt sạch Prefetch và ép <code>LATENCY = 0</code>).<br/>• <code>0x02</code>: <code>PRFTBE=0</code> (Prefetch bị tắt), <code>LATENCY=2</code>.</td>
-            <td>Giá trị <code>0x02</code> là bằng chứng thép cho thấy sau khi <code>FLM_Init()</code> xóa <code>ACR</code> về <code>0x00</code>, Keil cho chạy lại code <code>main.c</code> (chỉ cộng thêm <code>LATENCY=2</code> thành <code>0x02</code>) <b>mà không hề Reset ngoại vi</b> (nếu có Reset ngoại vi thì bit Prefetch phải bật lại thành <code>0x32</code>)!</td>
+            <td><code>FLASH_ACR</code><br/><i>(Sau Reset sạch)</i></td>
+            <td><code>0x40022000</code></td>
+            <td><code>0x00000030</code></td>
+            <td>• Bit [5] <code>PRFTBS = 1</code> (Prefetch Buffer đang bật).<br/>• Bit [4] <code>PRFTBE = 1</code> (Cho phép Prefetch Buffer).<br/>• Bit [2:0] <code>LATENCY = 000</code> (<b>0 Wait State</b>).</td>
+            <td>Giá trị mặc định chuẩn của nhà sản xuất ngay sau khi Reset phần cứng <span class="badge b-measured">[Đã đo]</span>.</td>
+          </tr>
+          <tr>
+            <td><code>FLASH_ACR</code><br/><i>(Chạy 72MHz chuẩn)</i></td>
+            <td><code>0x40022000</code></td>
+            <td><code>0x00000032</code></td>
+            <td>• Bit [5:4] <code>PRFTBS = 1</code>, <code>PRFTBE = 1</code> (Prefetch bật).<br/>• Bit [2:0] <code>LATENCY = 010</code> (<b>2 Wait States</b>).</td>
+            <td>Trạng thái chuẩn khi <code>main.c</code> chạy sau một cú Reset sạch (<code>0x30 | 0x02 = 0x32</code>) <span class="badge b-measured">[Đã đo]</span>.</td>
+          </tr>
+          <tr>
+            <td><code>FLASH_ACR</code><br/><i>(Bị FLM ghi đè)</i></td>
+            <td><code>0x40022000</code></td>
+            <td><code>0x00000000</code></td>
+            <td>• <code>PRFTBE = 0</code> (Tắt Prefetch Buffer).<br/>• <code>LATENCY = 000</code> (<b>0 Wait State</b>).</td>
+            <td><b>Thủ phạm gây lỗi Verify!</b> Hàm <code>Init()</code> của <code>.FLM</code> xóa sạch cả Prefetch lẫn Latency về 0 khi <code>RCC_CFGR</code> vẫn đang là <code>0x001D040A</code> (72 MHz) <span class="badge b-measured">[Đã đo]</span>.</td>
+          </tr>
+          <tr>
+            <td><code>FLASH_ACR</code><br/><i>(Di chứng sau nạp)</i></td>
+            <td><code>0x40022000</code></td>
+            <td><code>0x00000002</code></td>
+            <td>• <code>PRFTBE = 0</code> (Prefetch Buffer vẫn bị tắt!).<br/>• <code>LATENCY = 010</code> (2 Wait States do <code>main.c</code> bật lại).</td>
+            <td>Bằng chứng cho thấy bước <i>Reset and Run</i> của Keil chỉ reset lõi (kiểu <code>VECTRESET</code>) chứ <b>không reset ngoại vi</b>, khiến bit <code>PRFTBE</code> bị <code>.FLM</code> tắt trước đó không được khôi phục về 1 <span class="badge b-measured">[Đã đo]</span>.</td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <h4 class="mini-title">B. Nội dung chuẩn của file <code>flash_init.ini</code> (Đưa chip về HSI 8 MHz trước khi <code>.FLM</code> chạy)</h4>
-    <p>Khi gán file <code>flash_init.ini</code> vào mục <b>Options for Target ➔ Utilities ➔ Init File</b>, KeilC sẽ thực thi hàm này ở Bước 3 (trước khi gọi <code>FLM_Init</code>). Lưu ý phải ghi thanh ghi <code>RCC_CFGR</code> thêm một lần sau khi tắt PLL vì các bit cấu hình PLL chỉ cho phép xóa khi PLL đã dừng hẳn:</p>
-<pre><button class="copy-btn" onclick="copyCode(this)">Copy .ini</button><code>FUNC void ResetClocks (void) {
-    unsigned int v;
-    // 1. Đọc trạng thái RCC_CR hiện tại và đảm bảo bật HSI (Bit 0 - HSION = 1)
-    v = _RDWORD(0x40021000);
-    _WDWORD(0x40021000, (v | 0x00000001));
+    <h4 class="mini-title">B. Giải pháp can thiệp bằng tệp <code>flash_init.ini</code></h4>
+    <p>Để triệt tiêu lỗi <code>Contents mismatch</code> ngay trên nút <code>F8</code> của KeilC mà không cần phụ thuộc vào dây NRST, ta gắn tệp <code>flash_init.ini</code> vào mục <code>Options for Target -&gt; Utilities -&gt; Init File</code>. Kịch bản này chạy ở Bước (3) (ngay trước khi <code>.FLM</code> chạy hàm <code>Init()</code>), trực tiếp ghi vào các thanh ghi <code>RCC</code> và <code>FLASH</code> qua giao thức SWD để ép chip lùi từ 72 MHz về <code>HSI 8 MHz</code>:</p>
+<pre><button class="copy-btn" onclick="copyCode(this)">Copy flash_init.ini</button><code>// Nội dung chuẩn cho file flash_init.ini (Đặt tại tab Utilities -&gt; Init File)
+FUNC void ResetClocks (void) {
+    // 1. Mở sẵn 2 Wait States và bật Prefetch Buffer trên FLASH_ACR (0x40022000 = 0x32)
+    _WDWORD(0x40022000, 0x00000032);
 
-    // 2. Chuyển SYSCLK về lại HSI (Xóa SW[1:0] trong RCC_CFGR về 00)
+    // 2. Bật dao động nội HSI (Bit 0 HSION = 1 trong thanh ghi RCC_CR tại 0x40021000)
+    _WDWORD(0x40021000, _RDWORD(0x40021000) | 0x00000001);
+
+    // 3. Chuyển nguồn SYSCLK về lại HSI (Xóa các bit SW trong thanh ghi RCC_CFGR tại 0x40021004)
     _WDWORD(0x40021004, 0x00000000);
 
-    // 3. Tắt PLL và HSE (Xóa PLLON bit 24, CSSON bit 19, HSEON bit 16 trong RCC_CR)
-    v = _RDWORD(0x40021000);
-    _WDWORD(0x40021000, (v & 0xFEF6FFFF));
+    // 4. Tắt PLL và HSE (Xóa bit PLLON [24] và HSEON [16] trong RCC_CR, giữ lại HSION)
+    _WDWORD(0x40021000, 0x00000083);
 
-    // 4. Ghi RCC_CFGR về 0 thêm một lần nữa sau khi PLL đã tắt hẳn để xóa sạch PLLMUL/PLLSRC
+    // 5. Ghi lại RCC_CFGR = 0 một lần nữa sau khi PLL đã tắt hẳn (vì các bit cấu hình PLL chỉ cho phép xóa khi PLLON = 0)
     _WDWORD(0x40021004, 0x00000000);
-
-    // 5. Khôi phục FLASH_ACR về giá trị mặc định sau reset (0x30: Prefetch ON, 0 WS @ 8MHz)
-    _WDWORD(0x40022000, 0x00000030);
 }
 
+// Gọi thực thi hàm ngay trước khi nạp Flash
 ResetClocks();</code></pre>
     <a href="#muc-luc" class="back-toc">🔼 Quay về Mục lục</a>
 
     <!-- 1.7 -->
-    <h3 class="sub-title" id="muc-1-7">1.7. Tổng hợp Dẫn chứng từ Datasheet, Reference Manual, Blog và Cộng đồng</h3>
+    <h3 class="sub-title" id="phan-1-7">1.7. Tổng hợp Dẫn chứng từ Datasheet, Reference Manual, Blog và Cộng đồng</h3>
+
+    <h4 class="mini-title">A. Rà soát tài liệu Errata Silicon của STM32F103x8/B (DocID14574 Rev 13)</h4>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Mục Errata</th><th>Mô tả lỗi Silicon của hãng ST</th><th>Liên hệ với lỗi <code>Contents mismatch</code> của dự án</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>Mục 2.2</b></td>
+            <td>Lỗi đọc bộ nhớ Flash ngay sau khi thoát lệnh ngủ <code>WFI</code> / <code>WFE</code> nếu Prefetch bật, đang ở 2 WS và xung FLITF bị tắt trong chế độ Sleep.</td>
+            <td>Không liên quan (<code>main.c</code> không dùng chế độ ngủ <code>WFI</code> / <code>WFE</code>).</td>
+          </tr>
+          <tr>
+            <td><b>Mục 2.3</b></td>
+            <td>Thanh ghi <code>DBGMCU_IDCODE</code> và <code>DBGMCU_CR</code> chỉ đọc được khi có Debugger kết nối, nếu đọc từ code người dùng (User mode) sẽ trả về <code>0x00000000</code>.</td>
+            <td>Giải thích tại sao chỉ kiểm tra mã chip <code>0x20036410</code> qua Debugger / ST-LINK Utility.</td>
+          </tr>
+          <tr>
+            <td><b>Mục 2.10</b></td>
+            <td>Các bản Revision cũ (<b>Rev Z và Rev B</b>) không hỗ trợ một số chuỗi lệnh ghép của trình biên dịch mới (IAR ≥ 5.20, GCC ≥ 4.2.3). Rev Y và Rev 1/2/3/X không bị.</td>
+            <td>Đây là nguồn gốc cảnh báo trên phần mềm IAR, không ảnh hưởng tới ARMCC của KeilC.</td>
+          </tr>
+          <tr>
+            <td><b>Mục 2.12</b></td>
+            <td>Cờ <code>BSY</code> (Busy) trong thanh ghi <code>FLASH_SR</code> bật lên trễ 1 chu kỳ CPU sau khi gạt bit <code>STRT</code> để xóa Flash.</td>
+            <td>Chỉ liên quan tới code xóa Flash nội bộ, không phải nguyên nhân trượt byte ở bước Verify.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 class="mini-title">B. Tổng hợp các báo cáo tương đồng từ Cộng đồng Kỹ sư Quốc tế</h4>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Nguồn báo cáo</th><th>Hiện tượng được ghi nhận</th><th>Sự trùng khớp với kết quả điều tra của chúng ta</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>ST Community (2010)</b><br/><i>(IAR + ST-Link)</i></td>
+            <td>Một bo mạch đọc ra toàn số 0 hoặc dữ liệu sai từ Flash khi chạy ở 72 MHz với 0 Wait State, trong khi cùng code đó nạp lên bo mạch khác lại "tạm chạy được".</td>
+            <td>Khớp 100%: Đọc Flash thiếu Wait State ở 72 MHz gây sai lệch dữ liệu trên đường đọc, và ngưỡng chịu đựng vật lý có dung sai nhỏ giữa từng viên silicon.</td>
+          </tr>
+          <tr>
+            <td><b>ST Community (2010)</b><br/><i>(SYSCLK trên F101)</i></td>
+            <td>Hạ <code>FLASH_ACR</code> về 0 Wait State khi xung nhịp đang ở mức cao luôn làm vi điều khiển crash ngay lập tức, kể cả khi đã chia nhỏ HCLK.</td>
+            <td>Khẳng định độ trễ đọc Flash phải luôn bám sát tần số xung nhịp thực tế.</td>
+          </tr>
+          <tr>
+            <td><b>CSDN Blog (2022)</b><br/><i>(Phân tích <code>FlashPrg.c</code>)</i></td>
+            <td>Trích dẫn nguyên văn mã nguồn thuật toán nạp <code>.FLM</code> của Keil với dòng lệnh <code>FLASH-&gt;ACR = 0; // Zero Wait State</code> trong hàm <code>Init()</code>.</td>
+            <td>Xác nhận kết quả dịch ngược tệp <code>STM32F10x_128.FLM</code> của chúng ta là hoàn toàn chính xác.</td>
+          </tr>
+          <tr>
+            <td><b>Arm Community &amp; EEVblog</b></td>
+            <td>Mạch nạp ST-Link V2 trên Keil MDK 5.28/5.31 không phát xung Reset chuẩn xác khi bật <code>Pack -&gt; Debug Description</code>.</td>
+            <td>Giải thích tại sao cấu hình mặc định của KeilC không đưa được chip về HSI 8 MHz trước khi gọi <code>.FLM</code>.</td>
+          </tr>
+          <tr>
+            <td><b>RIOT-OS Git</b><br/><i>(<code>cpu/stm32f1/cpu.c</code>)</i></td>
+            <td>Ghi chú trong mã nguồn hệ điều hành nhúng: MCU dòng F1 sẽ treo vĩnh viễn nếu bật HSE mà thạch anh ngoài không dao động.</td>
+            <td>Cơ sở để bổ sung biến đếm Timeout vào hàm <code>SystemClock_Config()</code>.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 class="mini-title">C. Danh mục Đường dẫn Tham khảo Chính thức (Links)</h4>
     <ul>
-      <li><b>[1] Keil — ULINKpro Connect &amp; Reset Options:</b> <code>https://www.keil.com/support/man/docs/ulinkpro/ulinkpro_ctx_debug.asp</code></li>
-      <li><b>[2] Keil — J-Link Debug (Connect, Reset):</b> <code>https://www.keil.com/support/man/docs/jlink/jlink_conf_debug.asp</code></li>
-      <li><b>[3] IAR — ST-LINK Setup (Reset types):</b> <code>https://docs.iar.com/ewarm/9.7/en/c-spy-debugging/debugger-options/reference-information-on-c-spy-hardware-debugger-driver-options/st-link---setup.html</code></li>
-      <li><b>[4] CMSIS-Pack — Use of debug descriptions in µVision:</b> <code>https://arm-software.github.io/CMSIS_5/5.7.0/Pack/html/dbg_sqns_uvision.html</code></li>
-      <li><b>[5] Arm Community — MDK 5.28 problem with Reset and Run:</b> <code>https://community.arm.com/support-forums/f/keil-forum/44063/mdk-arm-5-28-problem-with-reset-and-run</code></li>
-      <li><b>[6] EEVblog — ST-Link V2 không reset target sau khi nạp:</b> <code>https://eevblog.com/forum/microcontrollers/cant-get-stm-link-v2-debuggerprogrammer-to-reset-the-target-after-programming</code></li>
-      <li><b>[7] Arm Community — PDSC Sequence Execution failed (Connect under Reset + HW RESET):</b> <code>https://community.arm.com/support-forums/f/keil-forum/47144/pdsc-sequence-execution-failed-error/167512</code></li>
-      <li><b>[8] STMicroelectronics — Errata sheet STM32F101/102/103x8/B (DocID14574 Rev 13):</b> <code>https://git.ondrovo.com/gex/gex-platform-info/raw/branch/master/F103_BLUEPILL/stm32f103%20errata.pdf</code></li>
-      <li><b>[9] ST Community — SYSCLK trên STM32F101 (0 WS ở 72 MHz gây crash):</b> <code>https://community.st.com/s/question/0D50X00009XkbE7/sysclk-on-stm32f101</code></li>
-      <li><b>[10] ST Community — ST-Link + IAR debugger (đọc ra số 0 ở 72 MHz với 0 WS):</b> <code>https://community.st.com/t5/stm32-mcus-products/st-link-iar-debugger/td-p/567522</code></li>
-      <li><b>[11] ST Community — Chip không lập trình lại được khi xung quá cao (2016):</b> <code>https://community.st.com/s/question/0D50X00009XkaK7SAJ/unable-to-program-when-in-stop-mode</code></li>
-      <li><b>[12] ST Community — F103C8 nạp lần hai báo "No target device" (2025):</b> <code>https://community.st.com/stm32-mcus-products-25/stm32-flash-software-155091</code></li>
-      <li><b>[13] CSDN Blog — Trích lục mã nguồn <code>FlashPrg.c</code> của Keil (<code>Init</code> đặt <code>FLASH-&gt;ACR = 0</code>):</b> <code>https://blog.csdn.net/sinat_31039061/article/details/128350295</code></li>
-      <li><b>[14] RIOT-OS — <code>cpu/stm32f1/cpu.c</code> (Ghi chú treo vô tận khi chờ HSE không có thạch anh):</b> <code>https://git.riot-os.org/RIOT-OS/RIOT/blame/commit/3711a6d406e49a816a75492bf1e6285cf6b8590c/cpu/stm32f1/cpu.c</code></li>
+      <li><b>Keil ULINKpro — Connect &amp; Reset Options:</b> <a href="https://www.keil.com/support/man/docs/ulinkpro/ulinkpro_ctx_debug.asp" target="_blank">https://www.keil.com/support/man/docs/ulinkpro/ulinkpro_ctx_debug.asp</a></li>
+      <li><b>Keil J-Link — Debug (Connect, Reset):</b> <a href="https://www.keil.com/support/man/docs/jlink/jlink_conf_debug.asp" target="_blank">https://www.keil.com/support/man/docs/jlink/jlink_conf_debug.asp</a></li>
+      <li><b>IAR ST-LINK — Setup (Reset types):</b> <a href="https://docs.iar.com/ewarm/9.7/en/c-spy-debugging/debugger-options/reference-information-on-c-spy-hardware-debugger-driver-options/st-link---setup.html" target="_blank">https://docs.iar.com/ewarm/9.7/en/c-spy-debugging/debugger-options/reference-information-on-c-spy-hardware-debugger-driver-options/st-link---setup.html</a></li>
+      <li><b>CMSIS-Pack — Use of debug descriptions in µVision:</b> <a href="https://arm-software.github.io/CMSIS_5/5.7.0/Pack/html/dbg_sqns_uvision.html" target="_blank">https://arm-software.github.io/CMSIS_5/5.7.0/Pack/html/dbg_sqns_uvision.html</a></li>
+      <li><b>Arm Community — MDK 5.28 problem with Reset and Run:</b> <a href="https://community.arm.com/support-forums/f/keil-forum/44063/mdk-arm-5-28-problem-with-reset-and-run" target="_blank">https://community.arm.com/support-forums/f/keil-forum/44063/mdk-arm-5-28-problem-with-reset-and-run</a></li>
+      <li><b>EEVblog — ST-Link V2 không reset target sau khi nạp:</b> <a href="https://eevblog.com/forum/microcontrollers/cant-get-stm-link-v2-debuggerprogrammer-to-reset-the-target-after-programming" target="_blank">https://eevblog.com/forum/microcontrollers/cant-get-stm-link-v2-debuggerprogrammer-to-reset-the-target-after-programming</a></li>
+      <li><b>Arm Community — PDSC Sequence Execution failed:</b> <a href="https://community.arm.com/support-forums/f/keil-forum/47144/pdsc-sequence-execution-failed-error/167512" target="_blank">https://community.arm.com/support-forums/f/keil-forum/47144/pdsc-sequence-execution-failed-error/167512</a></li>
+      <li><b>ST Errata Sheet STM32F101/102/103x8/B (DocID14574 Rev 13):</b> <a href="https://git.ondrovo.com/gex/gex-platform-info/raw/branch/master/F103_BLUEPILL/stm32f103%20errata.pdf" target="_blank">https://git.ondrovo.com/gex/gex-platform-info/raw/branch/master/F103_BLUEPILL/stm32f103%20errata.pdf</a></li>
+      <li><b>ST Community — SYSCLK trên STM32F101 (0 WS ở 72 MHz crash):</b> <a href="https://community.st.com/s/question/0D50X00009XkbE7/sysclk-on-stm32f101" target="_blank">https://community.st.com/s/question/0D50X00009XkbE7/sysclk-on-stm32f101</a></li>
+      <li><b>ST Community — ST-Link + IAR debugger:</b> <a href="https://community.st.com/t5/stm32-mcus-products/st-link-iar-debugger/td-p/567522" target="_blank">https://community.st.com/t5/stm32-mcus-products/st-link-iar-debugger/td-p/567522</a></li>
+      <li><b>CSDN Blog — Trích dẫn <code>FlashPrg.c</code> của Keil (Init đặt ACR = 0):</b> <a href="https://blog.csdn.net/sinat_31039061/article/details/12835061" target="_blank">https://blog.csdn.net/sinat_31039061/article/details/128350295</a></li>
+      <li><b>RIOT-OS — <code>cpu/stm32f1/cpu.c</code>:</b> <a href="https://git.riot-os.org/RIOT-OS/RIOT/blame/commit/3711a6d406e49a816a75492bf1e6285cf6b8590c/cpu/stm32f1/cpu.c" target="_blank">https://git.riot-os.org/RIOT-OS/RIOT/blame/commit/3711a6d406e49a816a75492bf1e6285cf6b8590c/cpu/stm32f1/cpu.c</a></li>
     </ul>
     <a href="#muc-luc" class="back-toc">🔼 Quay về Mục lục</a>
   </section>
 
   <!-- =====================================================================
-       PHẦN 2: CHUYỂN ĐỔI SANG STM32CUBEIDE & KIỂM CHỨNG THỰC TẾ
+       PHẦN 2: THIẾT LẬP PROJECT TRÊN STM32CUBEIDE (THƯ VIỆN LL)
        ===================================================================== -->
   <section class="section-card" id="phan-2">
     <div class="part-title">
-      <span>PHẦN 2: THỰC NGHIỆM TRÊN STM32CUBEIDE &amp; THIẾT LẬP EXTERNAL TOOLS CLI</span>
+      <span>PHẦN 2: THIẾT LẬP PROJECT TRÊN STM32CUBEIDE (THƯ VIỆN LL)</span>
       <a href="#muc-luc" class="back-toc">🔼 Quay về Mục lục</a>
     </div>
+    <p>Để kiểm chứng xem hệ sinh thái chính hãng của STMicroelectronics xử lý bài toán nạp ở 72 MHz như thế nào, chúng ta thiết lập dự án song song <code>LED_PC13_LL_CUBEIDE</code> trên STM32CubeIDE với cùng logic code LL.</p>
 
-    <!-- 2.1 -->
-    <h3 class="sub-title" id="muc-2-1">2.1. Tại sao STM32CubeIDE không bị lỗi <code>Contents mismatch</code> như KeilC?</h3>
-    <p>Khi bê nguyên logic <code>main.c</code> (chạy 72 MHz LL) sang <b>STM32CubeIDE</b>, hiện tượng lỗi <code>Contents mismatch</code> biến mất hoàn toàn nhờ sự khác biệt về kiến trúc nạp dưới tầng sâu (Theo tài liệu <i>UM2576</i> của STMicroelectronics):</p>
-    <ul>
-      <li><b>Không dùng file <code>.FLM</code> của Keil:</b> STM32CubeIDE sử dụng <b>ST-LINK GDB Server</b> kết hợp trực tiếp với công cụ lõi chính hãng <b>STM32CubeProgrammer (<code>STM32_Programmer_CLI.exe</code>)</b> để nạp Flash.</li>
-      <li><b>Kiểm soát phần cứng tận gốc:</b> Trước khi xóa/ghi và xác minh bộ nhớ Flash, <code>STM32CubeProgrammer</code> chủ động thực hiện trình tự <i>Reset &amp; Halt</i> chuẩn của ST để đưa vi điều khiển về trạng thái xung nhịp an toàn, tuyệt đối không chạy hàm <code>Init()</code> mù quáng ép <code>FLASH_ACR = 0</code> trong khi hệ thống đang phóng ở 72 MHz như file <code>.FLM</code> của Keil.</li>
-    </ul>
-    <a href="#muc-luc" class="back-toc">🔼 Quay về Mục lục</a>
-
-    <!-- 2.2 -->
-    <h3 class="sub-title" id="muc-2-2">2.2. Quy trình khởi tạo Project <code>LED_PC13_LL_CUBEIDE</code> và Cấu hình Clock 72 MHz</h3>
+    <h3 class="sub-title" id="phan-2-1">2.1. Khởi tạo Project và chọn vi điều khiển</h3>
     <ol>
-      <li><b>Khởi tạo Project:</b> Chọn <code>File ➔ New ➔ STM32 Project</code> ➔ Tìm Part Number <code>STM32F103C8Tx</code> ➔ Đặt tên Project là <code>LED_PC13_LL_CUBEIDE</code>, bỏ tick <i>Use default location</i> và trỏ đường dẫn về <code>C:\Users\ASUS\Desktop\LED_PC13_LL_CUBEIDE</code>.</li>
-      <li><b>Cấu hình Pinout &amp; RCC trên CubeMX (<code>.ioc</code>):</b>
+      <li>Mở phần mềm <b>STM32CubeIDE</b>, trên thanh menu chọn <code>File -&gt; New -&gt; STM32 Project</code>.</li>
+      <li>Tại cửa sổ <i>Target Selection</i>, gõ vào ô tìm kiếm <i>Part Number</i>:
+        <pre><code>STM32F103C8</code></pre>
+      </li>
+      <li>Chọn dòng <code>STM32F103C8Tx</code> trong danh sách kết quả bên phải và bấm <b>Next</b>.</li>
+      <li>Tại cửa sổ <i>Project Setup</i>:
         <ul>
-          <li>Click chân <code>PC13-TAMPER-RTC</code> chọn <code>GPIO_Output</code>.</li>
-          <li>Vào <code>System Core ➔ RCC</code>: mục <i>High Speed Clock (HSE)</i> chọn <code>Crystal/Ceramic Resonator</code>.</li>
-          <li><b>Rất quan trọng (Giữ cổng nạp SWD):</b> Vào <code>System Core ➔ SYS</code>: mục <i>Debug</i> bắt buộc chọn <b><code>Serial Wire</code></b>.</li>
+          <li>Nhập tên dự án vào ô <i>Project Name</i>:
+            <pre><code>LED_PC13_LL_CUBEIDE</code></pre>
+          </li>
+          <li>Bỏ chọn dấu tick ở ô <i>Use default location</i>, bấm <b>Browse...</b> và chọn đường dẫn lưu trực tiếp ngoài màn hình Desktop (nằm kế bên thư mục <code>LED_PC13_LL</code> của KeilC):
+            <pre><code>C:\Users\ASUS\Desktop\LED_PC13_LL_CUBEIDE</code></pre>
+          </li>
+          <li>Giữ nguyên mục <i>Targeted Project Type</i> là <code>Executable</code> và nhấn <b>Finish</b>.</li>
         </ul>
       </li>
-      <li><b>Cấu hình tab <code>Clock Configuration</code> lên 72 MHz:</b>
-        <ul>
-          <li>Ô <code>Input frequency</code> (HSE): Nhập <code>8</code> (MHz).</li>
-          <li>Khối <code>PLL Source Mux</code>: Tick chọn <code>HSE</code> (chia <code>/ 1</code>).</li>
-          <li>Khối <code>System Clock Mux</code>: Tick chọn <code>PLLCLK</code>.</li>
-          <li>Ô <code>HCLK (MHz)</code>: Nhập <code>72</code> rồi nhấn <b>Enter</b> ➔ CubeMX tự động tính toán <code>PLLMul = X 9</code>, <code>AHB Prescaler = / 1</code> (72 MHz), <code>APB1 Prescaler = / 2</code> (36 MHz), <code>APB2 Prescaler = / 1</code> (72 MHz).</li>
-        </ul>
-      </li>
-      <li><b>Đổi Driver sang LL (Low-Layer):</b> Mở tab <code>Project Manager ➔ Advanced Settings</code>, tại khung <i>Driver Selector</i> chuyển cả <code>RCC</code> và <code>GPIO</code> từ <code>HAL</code> sang <b><code>LL</code></b>, sau đó nhấn <code>Ctrl + S</code> để sinh code.</li>
     </ol>
     <a href="#muc-luc" class="back-toc">🔼 Quay về Mục lục</a>
 
-    <!-- 2.3 -->
-    <h3 class="sub-title" id="muc-2-3">2.3. Sự cố khóa cổng SWD (<code>LL_GPIO_AF_DisableRemap_SWJ</code>) &amp; Hiện tượng <code>BOOT0 = 1</code> chạy ngay</h3>
-    <p>Trong lần nạp đầu tiên trên STM32CubeIDE, nếu trong mục <code>System Core ➔ SYS</code> để mặc định là <i>No Debug</i>, CubeMX sẽ tự động sinh ra dòng lệnh khóa chết cổng SWD ngay đầu hàm <code>main()</code>:</p>
+    <h3 class="sub-title" id="phan-2-2">2.2. Cấu hình chân Pinout và nguồn xung RCC</h3>
+    <p>Trong giao diện đồ họa của tệp cấu hình <code>LED_PC13_LL_CUBEIDE.ioc</code> (tab <i>Pinout &amp; Configuration</i>):</p>
+    <ol>
+      <li><b>Cấu hình chân điều khiển LED (PC13):</b>
+        <ul>
+          <li>Nhấp chuột trái vào chân <code>PC13-TAMPER-RTC</code> trên hình vẽ vi điều khiển, chọn chức năng:
+            <pre><code>GPIO_Output</code></pre>
+          </li>
+        </ul>
+      </li>
+      <li><b>Cấu hình kích hoạt thạch anh ngoài (HSE):</b>
+        <ul>
+          <li>Ở danh sách ngoại vi bên trái, mở rộng mục <code>System Core</code> ➔ Chọn <code>RCC</code>.</li>
+          <li>Tại mục <i>High Speed Clock (HSE)</i>, đổi từ <code>Disable</code> sang cờ:
+            <pre><code>Crystal/Ceramic Resonator</code></pre>
+            (Hai chân thạch anh <code>PD0-OSC_IN</code> và <code>PD1-OSC_OUT</code> trên sơ đồ chip sẽ chuyển sang màu xanh lá).
+          </li>
+        </ul>
+      </li>
+    </ol>
+    <a href="#muc-luc" class="back-toc">🔼 Quay về Mục lục</a>
+
+    <h3 class="sub-title" id="phan-2-3">2.3. Cấu hình sơ đồ xung nhịp Clock Configuration (72 MHz)</h3>
+    <p>Chuyển sang tab <b>Clock Configuration</b> và thực hiện cấu hình theo đúng trình tự sau:</p>
+    <ol>
+      <li><b>Input frequency (HSE):</b> Đảm bảo ô tần số thạch anh đầu vào (nằm bên trái khối <code>HSE</code>) mang giá trị:
+        <pre><code>8</code></pre>
+      </li>
+      <li><b>PLL Source Mux:</b> Tích chọn nút radio chuyển từ <code>HSI / 2</code> sang nhánh:
+        <pre><code>HSE</code></pre>
+      </li>
+      <li><b>System Clock Mux:</b> Tích chọn nút radio chuyển từ <code>HSI</code> sang nhánh:
+        <pre><code>PLLCLK</code></pre>
+      </li>
+      <li><b>HCLK (MHz):</b> Nhấp vào ô <code>HCLK (MHz)</code> (có ghi chú <code>72 MHz max</code> bên dưới), nhập tần số tối đa và nhấn phím <b>Enter</b>:
+        <pre><code>72</code></pre>
+      </li>
+      <li>STM32CubeIDE sẽ tự động giải bài toán chia tần và khóa các thông số chuẩn:
+        <ul>
+          <li>Bộ nhân <code>PLLMul</code>: <code>X 9</code></li>
+          <li>Bộ chia <code>AHB Prescaler</code>: <code>/ 1</code></li>
+          <li>Bộ chia <code>APB1 Prescaler</code> (Giới hạn tối đa 36 MHz): <code>/ 2</code></li>
+          <li>Bộ chia <code>APB2 Prescaler</code> (Tối đa 72 MHz): <code>/ 1</code></li>
+        </ul>
+      </li>
+    </ol>
+    <a href="#muc-luc" class="back-toc">🔼 Quay về Mục lục</a>
+
+    <h3 class="sub-title" id="phan-2-4">2.4. Chuyển đổi Driver từ HAL sang LL</h3>
+    <ol>
+      <li>Chuyển sang tab <b>Project Manager</b> ➔ Chọn mục <b>Advanced Settings</b> ở danh sách bên trái.</li>
+      <li>Trong khung <i>Driver Selector</i>, chuyển đổi cột Driver của cả <code>RCC</code> và <code>GPIO</code> từ <code>HAL</code> sang:
+        <pre><code>LL</code></pre>
+      </li>
+      <li>Nhấn tổ hợp phím <code>Ctrl + S</code> để lưu tệp <code>.ioc</code> và chọn <b>Yes</b> để IDE tự động sinh mã nguồn (Generate Code).</li>
+    </ol>
+    <a href="#muc-luc" class="back-toc">🔼 Quay về Mục lục</a>
+
+    <h3 class="sub-title" id="phan-2-5">2.5. Xử lý lỗi mất kết nối SWD (<code>Connection timed out</code>)</h3>
+
+    <h4 class="mini-title">A. Triệu chứng lỗi khi nạp lần 2 trên STM32CubeIDE</h4>
+    <p>Ở lần bấm <b>Run</b> đầu tiên, STM32CubeIDE nạp thành công (<code>Download verified successfully</code>). Tuy nhiên, ngay ở lần bấm nạp thứ 2, cửa sổ Console và hộp thoại báo lỗi liên tục xuất hiện:</p>
+<pre><code>Target is not responding, retrying...
+Target is not responding, retrying...
+Shutting down...
+Error in final launch sequence:
+Failed to execute MI command:
+target remote localhost:61234
+Error message from debugger back end:
+localhost:61234: Connection timed out.</code></pre>
+
+    <h4 class="mini-title">B. Nguyên nhân gốc rễ và Cách khắc phục</h4>
+    <p>Khi cấu hình <code>.ioc</code> mà quên bật <code>Serial Wire</code> trong mục <code>System Core -&gt; SYS -&gt; Debug</code>, công cụ CubeMX sẽ tự động sinh ra dòng lệnh tắt sạch cả cổng JTAG lẫn cổng nạp SWD ngay đầu hàm <code>main()</code>:</p>
 <pre><code>/** DISABLE: JTAG-DP Disabled and SW-DP Disabled */
 LL_GPIO_AF_DisableRemap_SWJ();</code></pre>
-    <p>Hậu quả là ngay sau khi nạp xong lần 1 (<code>Download verified successfully</code>), chip vừa chạy vào <code>main()</code> liền tự cắt đứt kết nối SWD, khiến GDB Server báo lỗi ở các lần sau:</p>
-<pre><code>Target is not responding, retrying...
-Error in final launch sequence:
-Failed to execute MI command: target remote localhost:61234
-Error message from debugger back end: localhost:61234: Connection timed out.</code></pre>
+    <p>Ngay khi vi điều khiển vừa chạy dòng lệnh này ở lần nạp đầu tiên, hai chân <code>SWDIO (PA13)</code> và <code>SWCLK (PA14)</code> bị ngắt khỏi bộ Debug Access Port, làm mạch nạp ST-Link bị mất liên lạc hoàn toàn ở các lần nạp sau.</p>
 
-    <h4 class="mini-title">Cách khắc phục &amp; Cứu chip:</h4>
+    <p><b>Cách sửa code và cứu mạch:</b></p>
     <ol>
-      <li><b>Sửa mã nguồn:</b> Xóa hoặc comment dòng <code>LL_GPIO_AF_DisableRemap_SWJ();</code> (hoặc đổi thành <code>LL_GPIO_AF_Remap_SWJ_NOJTAG();</code> để chỉ tắt JTAG nhưng giữ nguyên SWD).</li>
-      <li><b>Cứu mạch bằng Jumper <code>BOOT0</code>:</b> Rút USB ST-Link ➔ Gạt Jumper <code>BOOT0</code> từ <code>0</code> sang <code>1</code> ➔ Cắm lại USB (để chip vào System Bootloader, không chạy đoạn code khóa SWD trong Flash) ➔ Bấm <b>Run</b> để nạp đè code mới ➔ Trả Jumper <code>BOOT0</code> về lại <code>0</code>.</li>
+      <li>Trong tệp <code>Core/Src/main.c</code>, xóa bỏ hàm <code>LL_GPIO_AF_DisableRemap_SWJ();</code> hoặc đổi thành hàm chỉ tắt JTAG nhưng giữ nguyên cổng SWD:
+        <pre><code>LL_GPIO_AF_Remap_SWJ_NOJTAG();</code></pre>
+      </li>
+      <li><i>(Khuyến nghị)</i> Trong tệp <code>.ioc</code>, vào <code>System Core -&gt; SYS -&gt; mục Debug</code>, chọn cấu hình:
+        <pre><code>Serial Wire</code></pre>
+      </li>
+      <li><b>Thao tác cứu mạch đang bị khóa SWD:</b> Rút cáp USB ST-Link, gạt Jumper <code>BOOT0</code> trên board từ <code>0</code> sang <code>1</code>, cắm lại cáp USB (để chip vào chế độ System Bootloader, không chạy dòng code khóa SWD trong Flash), sau đó nhấn <b>Run</b> trên CubeIDE để nạp đè bản code đã sửa. Cuối cùng trả Jumper <code>BOOT0</code> về <code>0</code>.</li>
     </ol>
 
-    <div class="callout special">
-      <span class="callout-title">⚡ GHI CHÚ ĐẶC BIỆT (Hiện tượng Jumper <code>BOOT0 = 1</code> chưa kịp gạt về <code>0</code> mà chương trình đã chạy ngay trên CubeIDE):</span>
-      <p>Trong quá trình thực nghiệm, ngay khi đang để Jumper <b><code>BOOT0 = 1</code></b> và bấm nút <b>Run</b> trên STM32CubeIDE, mặc dù chưa kịp gạt <code>BOOT0</code> về <code>0</code> nhưng ngay sau khi nạp xong, đèn LED PC13 trên mạch đã chớp tắt chạy chương trình ngay lập tức!</p>
-      <ul>
-        <li><b>Góc nhìn &amp; Giả thuyết từ người thực nghiệm:</b> Hiện tượng ấn tượng này mang lại cảm giác các thanh ghi Low-Layer (<code>LL</code>) can thiệp cực mạnh và sâu trực tiếp vào lõi <code>Cortex-M3</code>, giúp hệ thống giành quyền thực thi ngay lập tức bất chấp trạng thái chân <code>BOOT0</code> (tuy nhiên giả thuyết về sự can thiệp của LL vào chân BOOT vẫn để mở vì chưa kiểm chứng độc lập với HAL).</li>
-        <li><b>Giải thích bổ sung từ cơ chế Debugger của CubeIDE:</b> Chân <code>BOOT0</code> chỉ được phần cứng STM32 lấy mẫu để quyết định địa chỉ khởi động khi có xung Reset phần cứng hoặc cấp nguồn lại (Power-on Reset). Khi bấm <b>Run</b> (chế độ內 bộ của CubeIDE), công cụ nạp của ST thông qua giao thức SWD đã chủ động ghi đè trực tiếp thanh ghi Bộ đếm chương trình (<b>Program Counter - <code>PC</code></b>) và <b>Stack Pointer (<code>MSP</code>)</b> của lõi Cortex-M3 trỏ thẳng vào vùng nhớ Flash (<code>0x08000000</code>) rồi phát lệnh <code>Resume</code>. Nhờ đó CPU chạy thẳng vào hàm <code>main()</code> trong Flash ngay cả khi chân vật lý <code>BOOT0</code> vẫn đang cắm ở mức <code>1</code>! (Lưu ý: Vẫn phải trả <code>BOOT0</code> về <code>0</code> để lần rút cáp cấp nguồn sau chip tự boot được vào Flash).</li>
-      </ul>
-    </div>
-    <a href="#muc-luc" class="back-toc">🔼 Quay về Mục lục</a>
-
-    <!-- 2.4 -->
-    <h3 class="sub-title" id="muc-2-4">2.4. Thiết lập 2 Chế độ nạp tách biệt trên STM32CubeIDE (Tương đương KeilC)</h3>
-    <p>Do nút <b>Run</b> mặc định của Eclipse/STM32CubeIDE luôn khóa cứng tùy chọn <code>Resume</code> (nạp xong bắt buộc chạy ngay), để có thêm chế độ <b>"Nạp xong đứng im chờ người dùng tự bấm nút RESET vật lý trên board"</b>, chúng ta tích hợp trực tiếp <code>STM32_Programmer_CLI.exe</code> vào menu <b>External Tools Configurations</b>:</p>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr><th>Tham số cấu hình (External Tools)</th><th>Giá trị thiết lập chi tiết</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><b>Name</b></td>
-            <td><code>Flash_Only_Wait_Reset</code></td>
-          </tr>
-          <tr>
-            <td><b>Location</b><br/>(Đường dẫn tới CLI của CubeProgrammer)</td>
-            <td><code>C:\ST\STM32CubeIDE_1.x.x\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.cubeprogrammer.win32_...\tools\bin\STM32_Programmer_CLI.exe</code></td>
-          </tr>
-          <tr>
-            <td><b>Working Directory</b></td>
-            <td><code>${workspace_loc}</code></td>
-          </tr>
-          <tr>
-            <td><b>Arguments (Chế độ B: Nạp xong ĐỨNG IM chờ bấm RESET vật lý)</b></td>
-            <td><code>-c port=SWD -d "C:\Users\ASUS\Desktop\LED_PC13_LL_CUBEIDE\Debug\LED_PC13_LL_CUBEIDE.elf" -v</code><br/><i>(Giải thích cờ: <code>-c port=SWD</code> kết nối qua SWD; <code>-d "..."</code> nạp file .elf; <code>-v</code> verify dữ liệu; <b>không có</b> cờ <code>-rst</code> hay <code>-run</code> nên chip sẽ đứng im sau khi nạp).</i></td>
-          </tr>
-          <tr>
-            <td><b>Arguments (Chế độ A: Nạp xong CHẠY LUÔN qua CLI)</b></td>
-            <td><code>-c port=SWD -d "C:\Users\ASUS\Desktop\LED_PC13_LL_CUBEIDE\Debug\LED_PC13_LL_CUBEIDE.elf" -v -rst</code></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="callout warn">
-      <span class="callout-title">⚠️ Khắc phục lỗi <code>Variable references empty selection: ${project_loc}</code>:</span>
-      Nếu dùng biến động <code>${project_loc}</code> trong ô <i>Arguments</i> mà con trỏ chuột đang không click chọn vào thư mục Project bên cột <i>Project Explorer</i>, Eclipse sẽ không biết lấy đường dẫn của project nào và báo lỗi <code>Variable references empty selection: ${project_loc}</code>. Việc thay bằng <b>đường dẫn tuyệt đối</b> <code>"C:\Users\ASUS\Desktop\LED_PC13_LL_CUBEIDE\Debug\LED_PC13_LL_CUBEIDE.elf"</code> giải quyết triệt để 100% lỗi này dù bạn đang đặt chuột ở bất kỳ đâu! Kết quả nạp thành công cho cả chip thật lẫn chip clone.
+    <div class="callout ok">
+      <span class="callout-title">Kết quả kiểm chứng với bài toán 72 MHz:</span>
+      Sau khi giữ lại cổng SWD, tiến hành lặp lại kịch bản gây lỗi của KeilC (Nạp lần 1 ➔ Bấm Reset vật lý ➔ Sửa thông số vòng lặp Delay ➔ Nạp lần 2, lần 3, lần 4...). <b>STM32CubeIDE nạp và Verify thành công 100% ở mọi lần nạp, hoàn toàn không xảy ra lỗi <code>Contents mismatch</code>!</b> Lý do là vì ST-LINK GDB Server gọi công cụ <code>STM32CubeProgrammer</code> bên dưới để quản lý tiến trình Reset &amp; Halt phần cứng chuẩn xác, không dùng tệp <code>.FLM</code> ép <code>FLASH_ACR = 0</code> một cách mù quáng như KeilC.
     </div>
     <a href="#muc-luc" class="back-toc">🔼 Quay về Mục lục</a>
   </section>
 
   <!-- =====================================================================
-       PHẦN 3: TÙY BIẾN THUẬT TOÁN NẠP (.FLM / .STLDR)
+       PHẦN 3: CẤU HÌNH FLASH BẰNG EXTERNAL TOOLS (PHÂN TÁCH 2 CHẾ ĐỘ NẠP)
        ===================================================================== -->
   <section class="section-card" id="phan-3">
     <div class="part-title">
-      <span>PHẦN 3: TÙY BIẾN THUẬT TOÁN NẠP (<code>.FLM</code> / <code>.STLDR</code>) TỪ PRO DEV &amp; CHÍNH HÃNG</span>
+      <span>PHẦN 3: CẤU HÌNH FLASH BẰNG EXTERNAL TOOLS (PHÂN TÁCH 2 CHẾ ĐỘ NẠP)</span>
       <a href="#muc-luc" class="back-toc">🔼 Quay về Mục lục</a>
     </div>
 
-    <h3 class="sub-title" id="muc-3-1">3.1. Kho lưu trữ GitHub của các Pro Dev &amp; Tài liệu hướng dẫn build Custom Loader</h3>
+    <h3 class="sub-title" id="phan-3-1">3.1. Chế độ A: Nạp xong chạy ngay (Flash &amp; Run)</h3>
+    <p>Khi muốn nạp code vào Flash và cho vi điều khiển tự động chạy ngay lập tức (giống ST-LINK Utility):</p>
     <ul>
-      <li><b>GitHub 1 — Clive Turvey (<code>cturvey/stm32extldr</code>):</b> <code>https://github.com/cturvey/stm32extldr</code> (Kho mã nguồn chuẩn mực nhất hỗ trợ build ra cả <code>.FLM</code> cho KeilC và <code>.stldr</code> cho STM32CubeProgrammer).</li>
-      <li><b>GitHub 2 — ST MOOCs Official Repo (<code>vlcekji2/External-Loaders</code>):</b> <code>https://github.com/vlcekji2/External-Loaders</code> (Cung cấp khung project mẫu và hàm kiểm thử).</li>
-      <li><b>GitHub 3 — <code>Nikitarc/External-loader-for-STM32G071-and-W25Q64</code>:</b> <code>https://github.com/Nikitarc/External-loader-for-STM32G071-and-W25Q64</code></li>
-      <li><b>Hướng dẫn chính hãng của Keil (Application Note AN333):</b> Lấy project mẫu trong <code>C:\Keil_v5\ARM\Flash\STM32F10x</code> (hoặc <code>_Template_Flash</code>), mở file <code>FlashPrg.c</code>, tìm hàm <code>Init()</code> và xóa dòng lệnh ép <code>FLASH-&gt;ACR = 0;</code> (hoặc chèn code ép <code>RCC</code> về HSI 8 MHz ngay đầu hàm <code>Init()</code>), sau đó nhấn <code>F7</code> để biên dịch ra file <code>.FLM</code> mới không bao giờ bị lỗi mismatch ở 72 MHz.</li>
-      <li><b>Khóa học chính hãng ST MOOCs (External QSPI Loader):</b> <code>https://www.st.com/content/st_com/en/support/learning/stm32-education/stm32-moocs/external_QSPI_loader.html</code></li>
-    </ul>
-    <a href="#muc-luc" class="back-toc">🔼 Quay về Mục lục</a>
-  </section>
-
-  <!-- =====================================================================
-       PHẦN 4: MỞ RỘNG KIẾN TRÚC NHÚNG AUTOMOTIVE, HÀNG KHÔNG & ĐƯỜNG SẮT
-       ===================================================================== -->
-  <section class="section-card" id="phan-4">
-    <div class="part-title">
-      <span>PHẦN 4: KIẾN TRÚC NHÚNG AUTOMOTIVE (AUTOSAR), HÀNG KHÔNG, ĐƯỜNG SẮT &amp; TÀU THỦY</span>
-      <a href="#muc-luc" class="back-toc">🔼 Quay về Mục lục</a>
-    </div>
-
-    <h3 class="sub-title" id="muc-4-1">4.1. Giải mã thuật ngữ (ECU, MCU, SoC, DCU, SKU) &amp; Luật thép của AUTOSAR</h3>
-    <ul>
-      <li><b>ECU (Electronic Control Unit):</b> Hộp điều khiển điện tử hoàn chỉnh trên xe hơi (gồm bo mạch PCB, vỏ bảo vệ, linh kiện và giắc cắm). Một chiếc ô tô hiện đại có từ 50–100 ECU (ABS, túi khí, động cơ, BCM...).</li>
-      <li><b>MCU (Microcontroller Unit):</b> Con chip vi điều khiển nằm bên trong hộp ECU (như NXP S32K, Infineon AURIX, STM32), chuyên chạy các tác vụ điều khiển thời gian thực (Real-time).</li>
-      <li><b>SoC (System on Chip):</b> Vi xử lý hiệu năng cao (Qualcomm Snapdragon Ride, Nvidia Drive, Renesas R-Car) chạy Linux / QNX / Android Automotive cho màn hình giải trí (IVI) và tự lái AI (ADAS).</li>
-      <li><b>DCU / ZCU (Domain / Zonal Control Unit):</b> Kiến trúc gom cụm hàng chục ECU nhỏ lẻ thành 3–5 máy tính trung tâm theo miền/vùng trên các dòng xe điện hiện đại.</li>
-      <li><b>SKU (Stock Keeping Unit):</b> Mã định danh phân loại phiên bản đóng gói/nhiệt độ của linh kiện bán dẫn.</li>
-    </ul>
-
-    <div class="callout warn">
-      <span class="callout-title">🚫 Tại sao dự án chuẩn AUTOSAR cấm viết code kiểu <code>while(1)</code> + <code>Delay()</code> + chọc thẳng thanh ghi?</span>
-      <ol>
-        <li><b>Lớp cách ly phần cứng MCAL (Microcontroller Abstraction Layer):</b> Code ứng dụng (SWC) bắt buộc phải gọi qua giao diện chuẩn hóa (ví dụ <code>Dio_WriteChannel()</code>) chứ không được gán trực tiếp thanh ghi GPIO/RCC để đảm bảo tính độc lập phần cứng.</li>
-        <li><b>Hệ điều hành thời gian thực (AUTOSAR OS / OSEK):</b> Không được tự viết <code>while(1)</code> hay dùng vòng lặp <code>for</code> làm trễ (gây treo Watchdog). Mọi logic phải đặt trong các <b>Runnable Entities</b> được lập lịch định kỳ (ví dụ Task 10ms, 100ms).</li>
-        <li><b>Tiêu chuẩn An toàn Chức năng (ISO 26262 ASIL-D):</b> Chỉ có ngoại lệ duy nhất là viết <b>CDD (Complex Device Driver)</b> cho phần cứng đặc thù mới được phép can thiệp thanh ghi, nhưng phải kiểm duyệt MISRA-C và truy xuất nguồn gốc cực kỳ nghiêm ngặt.</li>
-      </ol>
-    </div>
-
-    <h3 class="sub-title" id="muc-4-2">4.2. Bảng tổng hợp các dòng MCU Automotive, Khối Flash (Tương đương .FLM), IDE &amp; Compiler</h3>
-    <p>Nguyên lý nạp Flash (bơm đoạn mã Loader vào RAM ➔ CPU thực thi lệnh ghi vào Flash Controller) áp dụng cho 100% vi điều khiển Automotive (đặc biệt quan trọng khi viết <b>FBL - Flash Bootloader</b> cập nhật phần mềm qua mạng OTA). Đối với sinh viên mới bắt đầu, <b>NXP S32K144 (với khối điều khiển Flash FTFC)</b> là dễ tiếp cận và thân thiện nhất:</p>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Hãng sản xuất</th>
-            <th>Dòng MCU Automotive</th>
-            <th>Kiến trúc Lõi</th>
-            <th>Cơ chế Loader trung gian (Tương đương .FLM)</th>
-            <th>Khối phần cứng Flash Controller</th>
-            <th>IDE Thông dụng</th>
-            <th>Trình biên dịch (Compiler) kèm theo &amp; Bên thứ 3</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><b>NXP</b> (Khuyên dùng cho SV)</td>
-            <td><b>S32K Series</b> (S32K1, S32K3)</td>
-            <td>ARM Cortex-M</td>
-            <td>Trực tiếp <code>.FLM</code> (Keil) hoặc <code>.arp</code> (J-Link / PEmicro)</td>
-            <td><b>FTFC</b> (Qua mảng thanh ghi <code>FCCOB</code> &amp; cờ <code>CCIF</code>)</td>
-            <td><b>S32 Design Studio (S32DS)</b>, KeilC, IAR</td>
-            <td><b>GCC (Free)</b>, Green Hills (GHS), IAR, ARMCC</td>
-          </tr>
-          <tr>
-            <td><b>NXP</b></td>
-            <td><b>MPC5xxx Series</b></td>
-            <td>Power Architecture (PowerPC)</td>
-            <td>Script <code>.cmm</code> (Lauterbach) / <code>.s19</code> loader</td>
-            <td><b>CFlash / DFlash</b> Controller</td>
-            <td><b>S32DS for Power</b></td>
-            <td><b>GCC (Free)</b>, GHS, Wind River (Diab)</td>
-          </tr>
-          <tr>
-            <td><b>Infineon</b></td>
-            <td><b>AURIX</b> (TC2xx, TC3xx, TC4xx)</td>
-            <td>TriCore (Độc quyền)</td>
-            <td>MemTool Loader / Lauterbach TRACE32 script</td>
-            <td><b>DMU</b> (Data Memory Unit) / <b>FSI</b></td>
-            <td><b>AURIX Development Studio (ADS)</b></td>
-            <td><b>Tasking (Chuẩn CN)</b>, HighTec (GCC), GHS</td>
-          </tr>
-          <tr>
-            <td><b>Infineon</b></td>
-            <td><b>TRAVEO T2G</b></td>
-            <td>ARM Cortex-M</td>
-            <td>Trực tiếp <code>.FLM</code> (Keil)</td>
-            <td>Flash Controller</td>
-            <td><b>ModusToolbox</b>, IAR, KeilC</td>
-            <td><b>GCC (Free)</b>, IAR, GHS, ARMClang</td>
-          </tr>
-          <tr>
-            <td><b>Renesas</b></td>
-            <td><b>RH850</b></td>
-            <td>V850 (Độc quyền)</td>
-            <td>Renesas Flash Programmer (RFP) Loader</td>
-            <td><b>FACI</b> (Flash Application Command Interface)</td>
-            <td><b>CS+ for CC</b>, e2 studio</td>
-            <td><b>Renesas CC-RH</b>, GHS, IAR</td>
-          </tr>
-          <tr>
-            <td><b>STMicroelectronics</b></td>
-            <td><b>Stellar Series</b></td>
-            <td>ARM Cortex-R52 (Đa lõi Lockstep)</td>
-            <td>Cấu trúc ARM / Lauterbach TRACE32</td>
-            <td><b>PCM / CFlash</b> (Bộ nhớ biến đổi pha)</td>
-            <td><b>Stellar Studio</b></td>
-            <td><b>GCC</b>, GHS, HighTec</td>
-          </tr>
-          <tr>
-            <td><b>STMicroelectronics</b></td>
-            <td><b>SPC5 Series</b></td>
-            <td>Power Architecture (PowerPC)</td>
-            <td>PLS UDE Memtool / Lauterbach</td>
-            <td><b>CFlash / DFlash</b></td>
-            <td><b>SPC5 Studio</b></td>
-            <td><b>HighTec (GCC-Free)</b>, GHS, Wind River</td>
-          </tr>
-          <tr>
-            <td><b>Texas Instruments</b></td>
-            <td><b>Hercules</b> (TMS570)</td>
-            <td>ARM Cortex-R (Lockstep)</td>
-            <td><code>.FLM</code> (Keil) / TI UniFlash Plugin</td>
-            <td><b>F021</b> Flash API Controller</td>
-            <td><b>Code Composer Studio (CCS)</b></td>
-            <td><b>TI ARM Compiler (Free)</b>, GHS</td>
-          </tr>
-          <tr>
-            <td><b>Texas Instruments</b></td>
-            <td><b>C2000 Series</b></td>
-            <td>C28x DSP</td>
-            <td>CCS On-Chip Flash Plugin</td>
-            <td><b>FMC</b> (Flash Memory Controller)</td>
-            <td><b>Code Composer Studio (CCS)</b></td>
-            <td><b>TI C2000 Compiler (Free)</b></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <h3 class="sub-title" id="muc-4-3">4.3. Tại sao ST tách Stellar/SPC5 khỏi STM32CubeIDE? Đối chiếu Hàng không, Đường sắt &amp; Tàu thủy</h3>
-    <ul>
-      <li><b>Lý do ST không gộp Stellar/SPC5 vào STM32CubeMX/CubeIDE:</b> (1) Khác biệt kiến trúc lõi (SPC5 dùng PowerPC, Stellar dùng Cortex-R52 Hypervisor/Lockstep hoàn toàn khác Cortex-M của STM32); (2) STM32Cube sinh ra thư viện HAL/LL dân dụng, trong khi <b>SPC5 Studio / Stellar Studio</b> được thiết kế chuyên biệt để sinh ra cấu hình <b>MCAL chuẩn AUTOSAR đạt chứng chỉ ISO 26262 ASIL-D</b> và tích hợp các trình biên dịch thương mại đắt tiền (Green Hills, HighTec).</li>
-      <li><b>Đối chiếu với Hàng không (Aviation), Đường sắt (Railway) và Tàu thủy (Maritime):</b>
+      <li><b>Thao tác:</b> Nhấn nút <b>Run</b> (biểu tượng hình tròn màu xanh lá có hình tam giác trắng) trên thanh công cụ.</li>
+      <li><b>Các thông số trong <code>Run Configurations -&gt; STM32 C/C++ Application</code>:</b>
         <ul>
-          <li><b>Hàng không (Chuẩn DO-178C / DO-254):</b> Sử dụng hệ điều hành phân vùng thời gian và không gian nghiêm ngặt theo chuẩn <b>ARINC 653</b> (VxWorks 653, Green Hills INTEGRITY-178) cùng kiến trúc phần cứng dự phòng 3 máy tính biểu quyết <b>TMR (Triple Modular Redundancy)</b>.</li>
-          <li><b>Đường sắt / Tàu điện (Chuẩn EN 50128 / EN 50129 — SIL 4):</b> Ưu tiên triết lý <i>Fail-Safe</i> (có bất thường lập tức ngắt điện và phanh khẩn cấp), sử dụng các PLC đạt chuẩn đường sắt và máy tính công nghiệp chạy cơ chế biểu quyết <code>2oo2</code> hoặc <code>2oo3</code>.</li>
-          <li><b>Tàu thủy / Hàng hải (Chuẩn IEC 61508 &amp; Đăng kiểm DNV / Lloyd's / ABS):</b> Vận hành như một nhà máy nổi với mạng lưới SCADA và các PLC công nghiệp cỡ lớn (Siemens, ABB, Wago).</li>
+          <li>Tab <code>Main -&gt; C/C++ Application</code>: <code>Debug/LED_PC13_LL_CUBEIDE.elf</code></li>
+          <li>Tab <code>Debugger -&gt; Debug probe</code>: <code>ST-LINK (ST-LINK GDB server)</code></li>
+          <li>Tab <code>Debugger -&gt; Reset behaviour (Type)</code>: <code>Connect under reset</code></li>
+          <li>Tab <code>Debugger -&gt; Misc</code>: Tích chọn cờ <code>Verify flash download</code></li>
+          <li>Tab <code>Startup -&gt; Runtime Options</code>: Cờ <code>Resume</code> được khóa cứng ở trạng thái bật, giúp chip chạy ngay sau khi nạp.</li>
         </ul>
       </li>
     </ul>
     <a href="#muc-luc" class="back-toc">🔼 Quay về Mục lục</a>
+
+    <h3 class="sub-title" id="phan-3-2">3.2. Chế độ B: Nạp xong chờ bấm Reset vật lý (External Tools)</h3>
+    <p>Do nút <b>Run</b> của STM32CubeIDE bị khóa cứng cờ <code>Resume</code> (luôn tự chạy code ngay sau khi nạp), để thiết lập chế độ <b>"Chỉ nạp code và Verify, sau đó giữ chip đứng im chờ người dùng tự tay bấm nút RESET vật lý trên board"</b> (tương đương phím <code>F8</code> khi bỏ tick <i>Reset and Run</i> bên KeilC), chúng ta tích hợp công cụ dòng lệnh <code>STM32_Programmer_CLI.exe</code> vào mục <b>External Tools</b>.</p>
+
+    <h4 class="mini-title">A. Các bước thiết lập chi tiết</h4>
+    <ol>
+      <li>Trên thanh công cụ của STM32CubeIDE, bấm vào mũi tên nhỏ bên cạnh biểu tượng <b>External Tools</b> (hình chiếc vali màu xanh lá có hình tam giác Play) ➔ Chọn:
+        <pre><code>External Tools Configurations...</code></pre>
+      </li>
+      <li>Nhấp đúp chuột vào mục <b>Program</b> ở cột bên trái để tạo một cấu hình mới.</li>
+      <li>Tại ô <b>Name</b>, đặt tên định danh:
+        <pre><code>Flash_Only_Wait_Reset</code></pre>
+      </li>
+      <li>Tại ô <b>Location</b>, bấm <i>Browse File System...</i> và trỏ đến tệp thực thi <code>STM32_Programmer_CLI.exe</code> nằm trong thư mục cài đặt plugin của STM32CubeIDE:
+        <pre><code>C:\ST\STM32CubeIDE_1.x.x\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.cubeprogrammer.win32_...\tools\bin\STM32_Programmer_CLI.exe</code></pre>
+      </li>
+      <li>Tại ô <b>Working Directory</b>, điền biến thư mục không gian làm việc:
+        <pre><code>${workspace_loc}</code></pre>
+      </li>
+      <li>Tại ô <b>Arguments</b>, điền chuỗi cờ lệnh sử dụng đường dẫn tuyệt đối trỏ thẳng vào tệp <code>.elf</code> của dự án:
+        <pre><button class="copy-btn" onclick="copyCode(this)">Copy Arguments</button><code>-c port=SWD -d "C:\Users\ASUS\Desktop\LED_PC13_LL_CUBEIDE\Debug\LED_PC13_LL_CUBEIDE.elf" -v</code></pre>
+      </li>
+    </ol>
+
+    <div class="callout warn">
+      <span class="callout-title">Lưu ý khắc phục lỗi <code>Variable references empty selection: ${project_loc}</code>:</span>
+      Nếu sử dụng biến động <code>-d "${project_loc}\Debug\${project_name}.elf"</code>, khi con trỏ chuột của bạn đang đặt ở cửa sổ Console hoặc ngoài vùng trống (không click chọn tên Project trong cây thư mục <i>Project Explorer</i>), Eclipse sẽ không phân giải được biến <code>${project_loc}</code> và văng hộp thoại báo lỗi <code>Variable references empty selection: ${project_loc}</code>. Việc thay bằng <b>đường dẫn tuyệt đối</b> <code>"C:\Users\ASUS\Desktop\LED_PC13_LL_CUBEIDE\Debug\LED_PC13_LL_CUBEIDE.elf"</code> giúp nút bấm hoạt động ổn định 100% ở mọi vị trí đặt chuột!
+    </div>
+
+    <h4 class="mini-title">B. Giải thích ý nghĩa từng cờ lệnh trong <code>STM32_Programmer_CLI</code></h4>
+    <ul>
+      <li>Cờ thiết lập kết nối với mạch nạp ST-Link qua giao thức chuẩn SWD:
+        <pre><code>-c port=SWD</code></pre>
+      </li>
+      <li>Cờ yêu cầu xóa và tải (Download) tệp thực thi <code>.elf</code> (hoặc <code>.hex</code> / <code>.bin</code>) xuống bộ nhớ Flash:
+        <pre><code>-d "C:\Users\ASUS\Desktop\LED_PC13_LL_CUBEIDE\Debug\LED_PC13_LL_CUBEIDE.elf"</code></pre>
+      </li>
+      <li>Cờ yêu cầu đọc lại toàn bộ nội dung vừa nạp để đối chiếu xác minh (Verify):
+        <pre><code>-v</code></pre>
+      </li>
+      <li><b>Cơ chế giữ chip đứng im chờ nhấn Reset vật lý:</b> Do trong dòng lệnh trên chúng ta chủ đích <b>lược bỏ</b> cờ <code>-rst</code> (Reset chip) và cờ <code>-run</code> (Chạy CPU), nên ngay sau khi <code>STM32_Programmer_CLI.exe</code> in ra thông báo <code>Download verified successfully</code>, lõi Cortex-M3 vẫn giữ nguyên trạng thái dừng (Halted). Cả chip Thật lẫn chip Clone đều nằm im chờ đến khi bạn bấm nút RESET vật lý trên board mới bắt đầu chớp LED!</li>
+    </ul>
+    <a href="#muc-luc" class="back-toc">🔼 Quay về Mục lục</a>
   </section>
 
   <!-- =====================================================================
-       PHẦN 5: MÃ NGUỒN HOÀN CHỈNH (main.c)
+       PHẦN 4: GHI CHÚ ĐẶC BIỆT VỀ JUMPER BOOT0 TRÊN STM32CUBEIDE
        ===================================================================== -->
-  <section class="section-card" id="phan-5">
+  <section class="section-card" id="phan-4">
     <div class="part-title">
-      <span>PHẦN 5: MÃ NGUỒN HOÀN CHỈNH (<code>main.c</code> CHUẨN LL CHO STM32CUBEIDE &amp; KEILC)</span>
+      <span>PHẦN 4: GHI CHÚ ĐẶC BIỆT VỀ JUMPER BOOT0 TRÊN STM32CUBEIDE</span>
       <a href="#muc-luc" class="back-toc">🔼 Quay về Mục lục</a>
     </div>
 
-    <h3 class="sub-title" id="muc-5-1">5.1. File <code>Core/Src/main.c</code> hoàn chỉnh trên STM32CubeIDE (Đã sửa lỗi khóa SWD &amp; Bọc bảo vệ USER CODE)</h3>
-    <p>Mã nguồn dưới đây đặt đầy đủ trong các cặp thẻ <code>/* USER CODE BEGIN ... */</code> và <code>/* USER CODE END ... */</code> để không bị CubeMX xóa mất khi sinh lại code, đồng thời đã thay thế hàm khóa cổng SWD bằng <code>LL_GPIO_AF_Remap_SWJ_NOJTAG()</code> để nạp lại nhiều lần mượt mà:</p>
+    <h3 class="sub-title" id="phan-4-1">4.1. Hiện tượng thực tế và giả thuyết ban đầu</h3>
+    <ul>
+      <li><b>Hiện tượng quan sát được:</b> Trong quá trình gạt Jumper <code>BOOT0</code> lên mức <code>1</code> để cứu mạch bị khóa cổng SWD, ngay khi bấm nút <b>Run</b> nội bộ của STM32CubeIDE (lúc này tay chưa kịp gạt Jumper <code>BOOT0</code> trả về <code>0</code>), phần mềm không những nạp code thành công mà chương trình trên chip còn tự động chạy ngay lập tức (LED PC13 nhấp nháy ngay cả khi <code>BOOT0</code> vẫn đang cắm ở mức <code>1</code>).</li>
+      <li><b>Ghi chú suy nghĩ cá nhân (Giả thuyết ban đầu):</b>
+        <div class="callout special">
+          <i>"Điểm đặc biệt của CUBEIDE (internal) là mặc dù đang để JUMPER BOOT0 lên 1, chưa kịp gạt về 0 thì chương trình đã chạy luôn rồi. Chỗ này theo tôi nghĩ là do thanh ghi LL quá mạnh, can thiệp sâu vào lõi Cortex-M3 nên nó mới như vậy, chưa kiểm chứng nên chưa biết."</i>
+        </div>
+      </li>
+    </ul>
+    <a href="#muc-luc" class="back-toc">🔼 Quay về Mục lục</a>
 
+    <h3 class="sub-title" id="phan-4-2">4.2. Giải thích cơ chế can thiệp lõi của SWD và GDB Server</h3>
+    <p>Dưới góc độ kiến trúc phần cứng ARM Cortex-M3, hiện tượng chương trình chạy ngay khi <code>BOOT0 = 1</code> là kết quả của việc <b>ST-LINK GDB Server</b> cưỡng ép thanh ghi lõi thông qua cổng SWD, kết hợp với mã khởi tạo của bạn:</p>
+    <ol>
+      <li><b>Vai trò thực sự của chân <code>BOOT0</code>:</b> Chân <code>BOOT0</code> chỉ được phần cứng lấy mẫu để quyết định xem vùng nhớ nào được ánh xạ (alias) vào địa chỉ khởi động <code>0x00000000</code> khi có sự kiện Reset. Khi <code>BOOT0 = 1</code> (và <code>BOOT1 = 0</code>), vùng nhớ System Memory (<code>0x1FFFF000</code> — chứa Bootloader nạp qua UART của hãng ST) được ánh xạ vào <code>0x00000000</code>, nên nếu tự khởi động, CPU sẽ chạy Bootloader chứ không nhảy vào Flash chính (<code>0x08000000</code>).</li>
+      <li><b>Cách GDB Server vượt qua <code>BOOT0 = 1</code> khi bấm nút Run:</b>
+        <ul>
+          <li>Khi bạn nhấn nút <b>Run</b> trên STM32CubeIDE, ST-LINK GDB Server nạp tệp <code>LED_PC13_LL_CUBEIDE.elf</code> thẳng vào địa chỉ tuyệt đối của bộ nhớ Flash chính là <code>0x08000000</code>.</li>
+          <li>Tiếp theo, do tệp <code>.elf</code> chứa đầy đủ thông tin điểm nhập (Entry Point = địa chỉ hàm <code>Reset_Handler</code> tại <code>0x0800xxxx</code>) và bảng Vector Table, GDB Server thông qua cổng Debug SWD <b>ghi đè trực tiếp địa chỉ <code>0x0800xxxx</code> vào thanh ghi bộ đếm chương trình <code>PC</code> (Program Counter - R15)</b> và nạp giá trị đỉnh ngăn xếp vào thanh ghi <code>MSP</code> (R13) của lõi Cortex-M3.</li>
+          <li>Ngay khi GDB Server phát lệnh <code>Resume</code>, lõi Cortex-M3 bắt đầu thực thi lệnh tại địa chỉ mà thanh ghi <code>PC</code> đang trỏ tới (<code>0x0800xxxx</code> trong Flash chính), hoàn toàn bỏ qua việc vùng nhớ <code>0x00000000</code> đang bị chân <code>BOOT0 = 1</code> ánh xạ đi đâu!</li>
+        </ul>
+      </li>
+      <li><b>Lưu ý bắt buộc:</b> Dù GDB Server có thể cưỡng ép thanh ghi <code>PC</code> nhảy vào <code>0x0800xxxx</code> ngay lúc nạp, bạn <b>vẫn bắt buộc phải rút Jumper <code>BOOT0</code> trả về mức <code>0</code></b>. Bởi vì nếu để nguyên <code>BOOT0 = 1</code>, ngay khi bạn rút cáp USB ra cấp nguồn lại hoặc nhấn nút RESET vật lý trên board (không có GDB Server can thiệp), lõi Cortex-M3 sẽ đọc lại địa chỉ <code>0x00000000</code> (lúc này là System Bootloader) và mạch sẽ đứng im không chạy chương trình của bạn nữa.</li>
+    </ol>
+    <a href="#muc-luc" class="back-toc">🔼 Quay về Mục lục</a>
+  </section>
+
+  <!-- =====================================================================
+       PHẦN 5: TOÀN BỘ SOURCE CODE main.c (KEILC & STM32CUBEIDE)
+       ===================================================================== -->
+  <section class="section-card" id="phan-5">
+    <div class="part-title">
+      <span>PHẦN 5: TOÀN BỘ SOURCE CODE <code>main.c</code> (KEILC &amp; STM32CUBEIDE)</span>
+      <a href="#muc-luc" class="back-toc">🔼 Quay về Mục lục</a>
+    </div>
+
+    <h3 class="sub-title" id="phan-5-1">5.1. Bản <code>main.c</code> cải tiến có Timeout an toàn cho KeilC</h3>
+    <p>Đây là phiên bản nâng cấp của tệp <code>main.c</code> bên KeilC, giữ nguyên cấu trúc LL 72 MHz nhưng bổ sung thêm cơ chế <code>WAIT_MAX</code> (Timeout chống treo vĩnh viễn nếu thạch anh ngoài HSE bị lỏng/hỏng), cập nhật biến <code>SystemCoreClock</code>, và chuẩn hóa thông số trễ <code>Reg_Delay_Spin(900000)</code>:</p>
+<pre><button class="copy-btn" onclick="copyCode(this)">Copy Code KeilC</button><code>/* USER CODE BEGIN Header */
+/**
+  ******************************************************************************
+  * @file           : main.c
+  * @brief          : CẤU HÌNH STM32F103 LÊN 72MHZ CHUẨN LL TRÊN KEILC
+  ******************************************************************************
+  */
+/* USER CODE END Header */
+
+/* Includes ------------------------------------------------------------------*/
+#include "stm32f1xx.h"        
+#include "stm32f1xx_ll_bus.h"   
+#include "stm32f1xx_ll_gpio.h"  
+#include "stm32f1xx_ll_rcc.h"   
+#include "stm32f1xx_ll_system.h"
+#include "stm32f1xx_ll_utils.h"
+
+/* Private define ------------------------------------------------------------*/
+/* USER CODE BEGIN PD */
+#define WAIT_MAX 500000UL
+/* USER CODE END PD */
+
+/* Private function prototypes -----------------------------------------------*/
+/* USER CODE BEGIN PFP */
+void Reg_SystemClock_Config_72MHz(void);
+void Reg_Delay_Spin(uint32_t count);
+void Reg_GPIO_Init_Custom(void);
+/* USER CODE END PFP */
+
+int main(void)
+{
+  /* BƯỚC 1: CẤU HÌNH XUNG NHỊP HỆ THỐNG LÊN 72MHZ */
+  Reg_SystemClock_Config_72MHz(); 
+
+  /* BƯỚC 2: KHỞI TẠO NGOẠI VI GPIO PC13 */
+  Reg_GPIO_Init_Custom();
+
+  /* VÒNG LẶP VÔ TẬN */
+  while (1)
+  {
+    LL_GPIO_TogglePin(GPIOC, LL_GPIO_PIN_13);
+    Reg_Delay_Spin(900000); 
+  }
+}
+
+void Reg_SystemClock_Config_72MHz(void)
+{
+    // 1. Mở trước 2 Wait States trên FLASH_ACR cho mức 72MHz
+    LL_FLASH_SetLatency(LL_FLASH_LATENCY_2);
+    while (LL_FLASH_GetLatency() != LL_FLASH_LATENCY_2) {}
+
+    // 2. Bật thạch anh ngoài (HSE) kèm bộ đếm Timeout an toàn
+    LL_RCC_HSE_Enable();
+    uint32_t n = WAIT_MAX;
+    while (LL_RCC_HSE_IsReady() != 1 &amp;&amp; --n) {}
+    if (n == 0) { return; } // Nếu thạch anh hỏng: Ở lại HSI 8MHz an toàn, không treo máy
+    
+    // 3. Cấu hình PLL: HSE / 1 * 9 = 72MHz
+    LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_HSE_DIV_1, LL_RCC_PLL_MUL_9);
+    LL_RCC_PLL_Enable();
+    n = WAIT_MAX;
+    while (LL_RCC_PLL_IsReady() != 1 &amp;&amp; --n) {}
+    if (n == 0) { return; }
+    
+    // 4. Thiết lập bộ chia Bus AHB (/1), APB1 (/2), APB2 (/1) và chuyển SYSCLK sang PLL
+    LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
+    LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_2);
+    LL_RCC_SetAPB2Prescaler(LL_RCC_APB2_DIV_1);
+    LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);
+    while (LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL) {}
+
+    LL_SetSystemCoreClock(72000000);
+}
+
+void Reg_GPIO_Init_Custom(void)
+{
+    LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_GPIOC);
+    LL_GPIO_SetPinMode(GPIOC, LL_GPIO_PIN_13, LL_GPIO_MODE_OUTPUT);             
+    LL_GPIO_SetPinOutputType(GPIOC, LL_GPIO_PIN_13, LL_GPIO_OUTPUT_PUSHPULL);  
+    LL_GPIO_SetPinSpeed(GPIOC, LL_GPIO_PIN_13, LL_GPIO_SPEED_FREQ_MEDIUM); 
+}
+
+void Reg_Delay_Spin(uint32_t count) 
+{
+    for (volatile uint32_t i = 0; i &lt; count; i++) { __asm("NOP"); }
+}</code></pre>
+    <a href="#muc-luc" class="back-toc">🔼 Quay về Mục lục</a>
+
+    <h3 class="sub-title" id="phan-5-2">5.2. Bản <code>main.c</code> hoàn chỉnh trên STM32CubeIDE</h3>
+    <p>Dưới đây là toàn bộ nội dung tệp <code>Core/Src/main.c</code> chạy hoàn chỉnh trên STM32CubeIDE, tuân thủ 100% các cặp thẻ bảo vệ <code>/* USER CODE BEGIN ... */</code> và <code>/* USER CODE END ... */</code> của CubeMX, đã khắc phục lỗi khóa cổng SWD (<code>LL_GPIO_AF_Remap_SWJ_NOJTAG()</code>):</p>
 <pre><button class="copy-btn" onclick="copyCode(this)">Copy Code CubeIDE</button><code>/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
   * @file           : main.c
-  * @brief          : Main program body (STM32CubeIDE - 72MHz HSE LL)
+  * @brief          : Main program body
   ******************************************************************************
   * @attention
   *
@@ -1696,18 +2186,12 @@ Error message from debugger back end: localhost:61234: Connection timed out.</co
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 /* USER CODE BEGIN PFP */
-void Delay(uint32_t count);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void Delay(uint32_t count)
-{
-  for (volatile uint32_t i = 0; i < count; i++)
-  {
-    __asm("NOP");
-  }
-}
+
 /* USER CODE END 0 */
 
 /**
@@ -1733,8 +2217,10 @@ int main(void)
   /* SysTick_IRQn interrupt configuration */
   NVIC_SetPriority(SysTick_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),15, 0));
 
-  /** NOJTAG: JTAG-DP Disabled and SW-DP Enabled (Giữ cổng nạp SWD luôn mở)
-  */
+  /** DISABLE: JTAG-DP Disabled and SW-DP Enabled 
+    * Lưu ý: Đổi từ LL_GPIO_AF_DisableRemap_SWJ() sang LL_GPIO_AF_Remap_SWJ_NOJTAG()
+    * để giữ lại cổng nạp SWD cho những lần nạp tiếp theo.
+    */
   LL_GPIO_AF_Remap_SWJ_NOJTAG();
 
   /* USER CODE BEGIN Init */
@@ -1762,7 +2248,7 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
     LL_GPIO_TogglePin(GPIOC, LL_GPIO_PIN_13);
-    Delay(900000); // Có thể đổi giữa 900000 và 4500000 để kiểm chứng tốc độ nháy ở 72MHz
+    for (volatile int i = 0; i &lt; 900000; i++); 
   }
   /* USER CODE END 3 */
 }
@@ -1830,7 +2316,7 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
   GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
   GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-  LL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+  LL_GPIO_Init(GPIOC, &amp;GPIO_InitStruct);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 
@@ -1848,6 +2334,7 @@ static void MX_GPIO_Init(void)
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
+  /* User can add his own implementation to report the HAL error return state */
   __disable_irq();
   while (1)
   {
@@ -1855,64 +2342,21 @@ void Error_Handler(void)
   /* USER CODE END Error_Handler_Debug */
 }
 #ifdef USE_FULL_ASSERT
+/**
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
+  */
 void assert_failed(uint8_t *file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */
+  /* User can add his own implementation to report the file name and line number,
+     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */</code></pre>
-
-    <h3 class="sub-title" id="muc-5-2">5.2. File <code>main.c</code> trên KeilC (Bản chuẩn hóa cấu trúc)</h3>
-<pre><button class="copy-btn" onclick="copyCode(this)">Copy Code KeilC</button><code>#include "stm32f1xx.h"        
-#include "stm32f1xx_ll_bus.h"   
-#include "stm32f1xx_ll_gpio.h"  
-#include "stm32f1xx_ll_rcc.h"   
-#include "stm32f1xx_ll_system.h"
-
-void SystemClock_Config(void)
-{
-    // 1. Đặt Flash Latency = 2 Wait States trước khi nâng xung lên 72MHz
-    LL_FLASH_SetLatency(LL_FLASH_LATENCY_2);
-    while(LL_FLASH_GetLatency() != LL_FLASH_LATENCY_2);
-
-    // 2. Bật thạch anh ngoài (HSE 8MHz) và đợi ổn định
-    LL_RCC_HSE_Enable();
-    while(LL_RCC_HSE_IsReady() != 1);
-    
-    // 3. Cấu hình PLL: HSE / 1 * 9 = 72MHz
-    LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_HSE_DIV_1, LL_RCC_PLL_MUL_9);
-    LL_RCC_PLL_Enable();
-    while(LL_RCC_PLL_IsReady() != 1);
-    
-    // 4. Cấu hình bộ chia Bus AHB (/1), APB1 (/2 = 36MHz max), APB2 (/1)
-    LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
-    LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_2);
-    LL_RCC_SetAPB2Prescaler(LL_RCC_APB2_DIV_1);
-    
-    // 5. Chuyển SYSCLK sang nguồn PLL
-    LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);
-    while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL);
-}
-
-void Delay(uint32_t count) {
-    for (volatile uint32_t i = 0; i < count; i++) { __asm("NOP"); }
-}
-
-int main(void)
-{
-    SystemClock_Config(); 
-    
-    LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_GPIOC);
-    LL_GPIO_SetPinMode(GPIOC, LL_GPIO_PIN_13, LL_GPIO_MODE_OUTPUT);             
-    LL_GPIO_SetPinOutputType(GPIOC, LL_GPIO_PIN_13, LL_GPIO_OUTPUT_PUSHPULL);  
-    LL_GPIO_SetPinSpeed(GPIOC, LL_GPIO_PIN_13, LL_GPIO_SPEED_FREQ_MEDIUM);       
-    
-    while(1)
-    {
-        LL_GPIO_TogglePin(GPIOC, LL_GPIO_PIN_13);
-        Delay(4500000); // Hoặc 900000 để test nháy nhanh
-    }
-}</code></pre>
     <a href="#muc-luc" class="back-toc">🔼 Quay về Mục lục</a>
   </section>
 
@@ -1947,65 +2391,65 @@ int main(void)
   const UFD_STEPS = [
     {
       phase: 0,
-      title: 'Bước 1 (Giai đoạn 1) — Khởi tạo phiên nạp (UV4.exe)',
-      desc: 'Khi bạn nhấn phím <code>F8</code>, <code>UV4.exe</code> gọi thư viện động <code>ST-LINKIII-KEIL_SWO.dll</code>, kiểm tra cấu hình trong tab <i>Debug</i> và <i>Utilities</i> để bắt đầu phiên làm việc với ST-Link V2.'
+      title: 'Bước 1 (Giai đoạn 1) — Khởi tạo kết nối & Yêu cầu Debug (UV4.exe)',
+      desc: 'Khi nhấn phím <code>F8</code>, <code>UV4.exe</code> khởi tạo phiên nạp với mạch ST-Link V2 qua <code>ST-LINKIII-KEIL_SWO.dll</code> và đọc các tùy chọn trong tab <i>Debug</i> / <i>Utilities</i>.'
     },
     {
       phase: 0,
-      title: 'Bước 2 (Giai đoạn 1) — Kết nối SWD & Halt CPU',
-      desc: 'ST-Link phát tín hiệu qua dây <code>SWDIO</code> & <code>SWCLK</code> để dừng lõi Cortex-M3 (Halt). Nếu chỉ dùng <code>Connect = Normal</code> và không dùng <code>SYSRESETREQ</code>, khối ngoại vi <code>RCC</code> không hề được reset và vẫn giữ nguyên xung nhịp <code>72 MHz</code> của firmware cũ.'
+      title: 'Bước 2 (Giai đoạn 1) — Gửi tín hiệu SWD & Halt CPU',
+      desc: 'ST-Link gửi tín hiệu SWD đến chip STM32F103 và ra lệnh <code>Halt CPU</code> để tạm dừng lõi Cortex-M3. Nếu không có lệnh Reset ngoại vi (như <code>SYSRESETREQ</code>), khối <code>RCC</code> vẫn giữ nguyên xung nhịp <code>72 MHz</code>.'
     },
     {
       phase: 0,
-      title: 'Bước 3 (Giai đoạn 1) — Chốt chặn xử lý xung nhịp (flash_init.ini / Reset)',
-      descFail: '⚠️ <b>[Kịch bản Lỗi 72 MHz]:</b> Không có script <code>flash_init.ini</code> và xung Reset không tới được khối RCC (<code>RCC_CFGR = 0x001D040A</code>). Chip <b>vẫn kẹt ở 72 MHz</b> khi bước sang giai đoạn nạp thuật toán!',
-      descPass: '✅ <b>[Kịch bản Chuẩn 8 MHz]:</b> Script <code>flash_init.ini</code> (hoặc lệnh <code>SYSRESETREQ</code>) ghi trực tiếp vào thanh ghi <code>RCC_CR</code> & <code>RCC_CFGR</code> để tắt PLL, ép chip hạ từ 72 MHz về lại <b>HSI 8 MHz</b> an toàn!'
+      title: 'Bước 3 (Giai đoạn 1) — Chạy flash_init.ini (Chốt chặn hạ xung)',
+      descFail: '⚠️ <b>[Kịch bản Lỗi 72 MHz]:</b> Không dùng <code>flash_init.ini</code> và xung Reset không tới được khối RCC (<code>RCC_CFGR = 0x001D040A</code>). Chip <b>vẫn chạy ở 72 MHz</b> khi bước sang giai đoạn nạp thuật toán!',
+      descPass: '✅ <b>[Kịch bản Chuẩn 8 MHz]:</b> Script <code>flash_init.ini</code> (hoặc <code>SYSRESETREQ</code>) ghi trực tiếp thanh ghi <code>RCC</code> để tắt PLL, ép chip hạ từ 72 MHz về lại <b>HSI 8 MHz</b> an toàn!'
     },
     {
       phase: 1,
-      title: 'Bước 4 (Giai đoạn 2) — Đọc file thuật toán STM32F10x_128.FLM',
-      desc: '<code>UV4.exe</code> đọc file <code>STM32F10x_128.FLM</code> từ ổ cứng máy tính. Bản chất file <code>.FLM</code> là một ảnh thực thi ELF cỡ nhỏ được biên dịch để chạy độc lập vị trí (Position-Independent) trên RAM của vi điều khiển.'
+      title: 'Bước 4 (Giai đoạn 2) — Đọc file STM32F10x_128.FLM trên ổ cứng',
+      desc: '<code>UV4.exe</code> đọc tệp <code>STM32F10x_128.FLM</code> từ ổ cứng máy tính — đây là mã nhị phân chứa thuật toán nạp Flash cho dòng STM32F10x.'
     },
     {
       phase: 1,
-      title: 'Bước 5 (Giai đoạn 2) — Bơm khối mã .FLM vào SRAM (0x20000000)',
-      desc: 'Thông qua cổng AHB-AP của giao thức SWD, ST-Link chép toàn bộ mã máy của <code>.FLM</code> vào vùng nhớ <code>SRAM (0x20000000)</code> của STM32F103, đồng thời chia một vùng Buffer kế bên để chuẩn bị nhận dữ liệu Firmware.'
+      title: 'Bước 5 (Giai đoạn 2) — Đẩy toàn bộ mã nhị phân .FLM vào RAM chip',
+      desc: 'Toàn bộ mã nhị phân của tệp <code>.FLM</code> được đẩy qua ST-Link vào vùng nhớ <code>SRAM (0x20000000)</code> của chip STM32F103.'
     },
     {
       phase: 2,
       warnAlways: true,
-      title: '🚨 Bước 6 (Giai đoạn 3) — CPU thực thi FLM_Init() trong RAM (Thủ phạm ép ACR = 0)',
-      desc: '<code>UV4.exe</code> điều khiển thanh ghi <code>PC</code> của Cortex-M3 nhảy vào hàm <code>Init()</code> của <code>.FLM</code> trong SRAM. Hàm này thực thi lệnh ghi cứng <b><code>FLASH->ACR = 0</code> (0 Wait State, tắt Prefetch)</b> vì tác giả viết file <code>.FLM</code> mặc định giả sử rằng chip lúc nào cũng đang ở 8 MHz!'
+      title: '🚨 Bước 6 (Giai đoạn 3) — CPU chạy FLM_Init() trong RAM (Thủ phạm ép ACR = 0)',
+      desc: 'KeilC ra lệnh cho CPU chạy hàm <code>Init()</code> của khối FLM trong RAM. Hàm này <b>ghi cứng <code>FLASH->ACR = 0</code> (0 Wait State, tắt Prefetch)</b> vì giả định chip đang ở 8 MHz!'
     },
     {
       phase: 2,
-      title: 'Bước 7 (Giai đoạn 3) — Mở khóa Flash & Thực thi EraseChip() / EraseSector()',
-      desc: 'CPU chạy hàm xóa nằm trong SRAM: mở khóa <code>FLASH_KEYR</code> và xóa sạch vùng nhớ Flash. Do việc xóa sử dụng bộ tạo xung nội của khối Flash nên dù ở 72 MHz hay 8 MHz đều báo <code>Full Chip Erase Done.</code> thành công.'
+      title: 'Bước 7 (Giai đoạn 3) — Xóa Flash & Bơm mã Firmware vào Buffer RAM',
+      desc: 'Hàm xóa thực thi hoàn tất (<code>Full Chip Erase Done.</code>), sau đó Firmware (<code>.axf</code>) của bạn được đẩy vào Buffer trong SRAM chờ ghi xuống Flash.'
     },
     {
       phase: 2,
-      title: 'Bước 8 (Giai đoạn 3) — Bơm Firmware vào Buffer SRAM & Ghi xuống Flash',
-      desc: '<code>UV4.exe</code> cắt file <code>STM32F103C8.axf</code> thành từng khối đẩy vào Buffer SRAM. CPU chạy hàm <code>ProgramPage()</code> chép từng Half-Word (16-bit) xuống Flash <code>0x08000000</code>. Quá trình ghi có cờ <code>BSY</code> đồng bộ nên dữ liệu ghi vào Flash <b>ĐÚNG 100%</b> (<code>Programming Done.</code>).'
+      title: 'Bước 8 (Giai đoạn 3) — CPU chạy hàm ProgramPage() của FLM',
+      desc: 'CPU chạy hàm <code>ProgramPage()</code> của FLM để ghi từng Half-Word từ Buffer RAM xuống Flash (<code>0x08000000</code>). Quá trình ghi hoàn tất 100% (<code>Programming Done.</code>).'
     },
     {
       phase: 3,
       isVerifyStep: true,
       titleFail: '💥 Bước 9 (Giai đoạn 4) — LỖI CONTENTS MISMATCH KHI VERIFY Ở 72 MHz!',
-      descFail: 'Khi đọc lại Flash để Verify ở <b>72 MHz</b> với <b><code>FLASH_ACR = 0</code> (0 Wait State)</b>, bộ đệm 64-bit (8-byte) của Flash bị hụt chu kỳ chốt! Word 32-bit đầu tiên của mỗi cụm 8-byte (địa chỉ tận cùng <code>0..3</code> và <code>8..B</code>) trả về dữ liệu cũ của <code>địa chỉ − 8</code>, làm nổ hàng loạt lỗi <code>Contents mismatch at: 08000000H...</code>!',
+      descFail: 'Khi đọc lại Flash để Verify ở <b>72 MHz</b> với <b><code>FLASH_ACR = 0</code> (0 Wait State)</b>, thanh ghi chốt 64-bit (8-byte) bị đọc sớm khi dữ liệu mới chưa kịp ra tới chốt! Word đầu của mỗi khối 8-byte trả về dữ liệu cũ của <code>địa chỉ − 8</code>, gây nổ lỗi <code>Contents mismatch</code>!',
       titlePass: '🎉 Bước 9 (Giai đoạn 4) — VERIFY THÀNH CÔNG 100% Ở 8 MHz!',
-      descPass: 'Do chip đã được đưa về <b>HSI 8 MHz</b> ngay từ Bước 3, việc đọc Flash với <code>FLASH_ACR = 0</code> (0 Wait State) hoàn toàn khớp với đặc tả phần cứng (0–24 MHz dùng 0 WS). Mọi byte đọc về khớp 100% với file <code>.axf</code>!'
+      descPass: 'Do chip đã được đưa về <b>HSI 8 MHz</b> từ Bước 3, việc đọc lại Flash với <code>FLASH_ACR = 0</code> (0 Wait State) hoàn toàn hợp lệ. Toàn bộ dữ liệu đọc về khớp 100% với tệp <code>.axf</code>!'
     },
     {
       phase: 3,
-      title: 'Bước 10 (Giai đoạn 4) — Chạy UnInit() & Khởi động lại Firmware (Reset and Run)',
-      desc: '<code>UV4.exe</code> gọi hàm <code>UnInit()</code> (hàm này không khôi phục <code>FLASH_ACR</code>) và phát lệnh Reset để chip chạy code mới. Nếu dùng <code>SYSRESETREQ</code> hoặc bấm nút RESET vật lý, toàn bộ thanh ghi được làm sạch và chip lên 72 MHz với <code>FLASH_ACR = 0x32</code>.'
+      title: 'Bước 10 (Giai đoạn 4) — Ra lệnh Reset và Chạy (Resume)',
+      desc: 'KeilC gọi <code>UnInit()</code> và phát lệnh Reset &amp; Resume để chip khởi động lại và chạy Firmware mới.'
     }
   ];
 
-  let ufdCurrent = -1; // -1 means Overview Mode (all rows clearly visible)
+  let ufdCurrent = -1;
   let ufdPlaying = false;
   let ufdTimer = null;
-  let ufdIsPassMode = false; // false = 72MHz Fail Scenario, true = 8MHz Pass Scenario
+  let ufdIsPassMode = false;
 
   function ufdRender() {
     const rows = document.querySelectorAll('.ufd-row');
@@ -2016,13 +2460,12 @@ int main(void)
     const row3Mc = document.getElementById('ufdRow3Mc');
     const row9Mc = document.getElementById('ufdRow9Mc');
 
-    // Update dynamic scenario content in Row 3 & Row 9
     if (ufdIsPassMode) {
-      row3Mc.innerHTML = `<span class="ufd-step-tag" style="background:rgba(16,185,129,0.25);color:#6ee7b7;">✅ ĐÃ VỀ HSI 8 MHz</span><div><b>Kịch bản Chuẩn:</b> Nhờ <code>flash_init.ini</code> / <code>SYSRESETREQ</code>, PLL đã tắt và chip về lại <b>8 MHz</b> an toàn!</div>`;
-      row9Mc.innerHTML = `<span class="ufd-step-tag" style="background:rgba(16,185,129,0.25);color:#6ee7b7;">🎉 VERIFY OK (PASS)</span><div>Ở <b>8 MHz</b> với <code>FLASH_ACR = 0</code> (0 WS), bộ đệm Flash đọc chuẩn xác từng byte 100%!</div>`;
+      row3Mc.innerHTML = `<span class="ufd-step-tag" style="background:rgba(16,185,129,0.25);color:#6ee7b7;">🔄 BƯỚC 3: VỀ 8 MHz</span><div>✅ <b>Kịch bản Chuẩn:</b> Nhờ <code>flash_init.ini</code> / <code>SYSRESETREQ</code>, chip đã về lại <b>HSI 8 MHz</b> an toàn!</div>`;
+      row9Mc.innerHTML = `<span class="ufd-step-tag" style="background:rgba(16,185,129,0.25);color:#6ee7b7;">🎉 BƯỚC 9: VERIFY OK!</span><div>Ở <b>8 MHz</b> với <code>FLASH_ACR = 0</code> (0 WS), CPU đọc lại Flash chính xác 100%!</div>`;
     } else {
-      row3Mc.innerHTML = `<span class="ufd-step-tag" style="background:rgba(244,63,94,0.25);color:#fda4af;">⚠️ VẪN KẸT Ở 72 MHz</span><div><b>Kịch bản Lỗi:</b> Không có <code>.ini</code> &amp; không Reset RCC ➔ Chip <b>VẪN CHẠY 72 MHz</b> khi bước vào nạp!</div>`;
-      row9Mc.innerHTML = `<span class="ufd-step-tag" style="background:rgba(244,63,94,0.25);color:#fda4af;">💥 ĐIỂM NỔ LỖI MISMATCH</span><div>Ở <b>72 MHz</b> mà <code>FLASH_ACR = 0</code> (0 WS): Bộ đệm 64-bit bị hụt nhịp! Word đầu mỗi cụm 8-byte trả về dữ liệu của <code>Addr - 8</code>!</div>`;
+      row3Mc.innerHTML = `<span class="ufd-step-tag" style="background:rgba(244,63,94,0.25);color:#fda4af;">⚠️ BƯỚC 3: KẸT 72 MHz</span><div><b>Kịch bản Lỗi:</b> Không có <code>.ini</code> &amp; không Reset RCC ➔ Chip <b>VẪN CHẠY 72 MHz</b>!</div>`;
+      row9Mc.innerHTML = `<span class="ufd-step-tag" style="background:rgba(244,63,94,0.25);color:#fda4af;">💥 BƯỚC 9: LỖI MISMATCH!</span><div><b>[!] NẾU CHIP ĐANG Ở 72 MHz (mà ACR = 0):</b><br/>➔ Trượt 8-byte Latch (trả về dữ liệu của <code>Addr - 8</code>) ➔ <b>Nổ lỗi Contents mismatch!</b></div>`;
     }
 
     statusBar.classList.remove('danger', 'ok');
@@ -2033,7 +2476,7 @@ int main(void)
         r.classList.add('passed');
       });
       statusTitle.innerHTML = '👋 Chế độ Xem Tổng Quan (Tất cả 10 bước đang hiển thị sáng rõ)';
-      statusDesc.innerHTML = 'Nhấn <b>▶ Chạy tự động</b>, <b>Bước tiếp ▶</b>, hoặc <b>click trực tiếp vào bất kỳ hàng nào bên dưới</b> để soi chi tiết từng bước.';
+      statusDesc.innerHTML = 'Nhấn <b>▶ Chạy tự động</b>, <b>Bước tiếp ▶</b>, hoặc <b>click trực tiếp vào bất kỳ hàng nào bên dưới</b> để xem chi tiết từng bước.';
       return;
     }
 
@@ -2155,7 +2598,12 @@ int main(void)
     ufdRender();
   }
 
-  // Initialize diagram in overview state
+  /* Keyboard shortcuts for diagram */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') { ufdStopPlay(); ufdNext(); }
+    if (e.key === 'ArrowLeft')  { ufdStopPlay(); ufdPrev(); }
+  });
+
   ufdRender();
 </script>
 </body>
