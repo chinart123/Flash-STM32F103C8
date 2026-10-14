@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KeilC Hornet Swarm War — Bạo Loạn Vỡ Tổ, Rào Chắn 8MHz & Sân Bay Quân Sự ST-Link</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 100%; height: 100vh; overflow: hidden;
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    background: #FEF2F2; color: #0F172A;
+  }
+
+  .app {
+    display: flex; flex-direction: column;
+    width: 100%; height: 100vh; padding: 14px 20px; gap: 12px;
+  }
+
+  /* ===== HEADER & CONTROLS ===== */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    background: #FFFFFF; border: 2px solid #EF4444; border-radius: 14px;
+    padding: 10px 18px; box-shadow: 0 4px 12px rgba(239,68,68,0.12);
+    flex-wrap: wrap; gap: 10px;
+  }
+  .brand {
+    font-size: 18px; font-weight: 800; color: #991B1B;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .scenario-group, .ctrl-group {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .btn {
+    padding: 8px 12px; border-radius: 10px; font-size: 12px; font-weight: 700;
+    cursor: pointer; border: 2px solid #CBD5E1; background: #F8FAFC; color: #334155;
+    transition: background 0.15s, transform 0.1s; font-family: inherit;
+    user-select: none;
+  }
+  .btn:hover { transform: translateY(-1px); border-color: #DC2626; }
+  .btn:active { transform: translateY(0); }
+  .btn.primary { background: #FEE2E2; border-color: #DC2626; color: #991B1B; }
+  .btn.sc-raid.active     { background: #FEE2E2; border-color: #DC2626; color: #991B1B; box-shadow: 0 0 12px rgba(220,38,38,0.3); }
+  .btn.sc-fence.active    { background: #FEF3C7; border-color: #D97706; color: #92400E; box-shadow: 0 0 12px rgba(217,119,6,0.3); }
+  .btn.sc-fortress.active { background: #DCFCE7; border-color: #16A34A; color: #14532D; box-shadow: 0 0 12px rgba(22,163,74,0.3); }
+
+  /* ===== MAIN SPLIT SCREEN ===== */
+  .workspace {
+    flex: 1; display: grid;
+    grid-template-columns: 1.38fr 1fr;
+    gap: 16px; min-height: 0;
+  }
+
+  /* ===== LEFT: BATTLEFIELD CANVAS ===== */
+  .board-panel {
+    background: #18101C; border: 3px solid #991B1B; border-radius: 16px;
+    position: relative; overflow: hidden;
+    display: flex; flex-direction: column; justify-content: space-between;
+    box-shadow: inset 0 0 60px rgba(0,0,0,0.8);
+  }
+  .raid-grid {
+    position: absolute; inset: 0;
+    background-image: 
+      radial-gradient(circle, rgba(244,63,94,0.12) 2px, transparent 2px),
+      linear-gradient(rgba(244,63,94,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(244,63,94,0.05) 1px, transparent 1px);
+    background-size: 28px 28px;
+    pointer-events: none;
+  }
+
+  .board-hud {
+    position: relative; z-index: 5;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 11px 18px; background: rgba(24,16,28,0.92);
+    border-bottom: 1px solid #991B1B; color: #FFE4E6;
+  }
+  .hud-chips { display: flex; gap: 10px; font-size: 12px; font-weight: 700; flex-wrap: wrap; }
+  .hud-pill {
+    padding: 4px 12px; border-radius: 999px;
+    background: #2E1025; border: 1px solid #F43F5E; color: #FDA4AF;
+  }
+  .hud-pill.ok   { color: #4ADE80; border-color: #22C55E; background: rgba(20,83,45,0.45); }
+  .hud-pill.warn { color: #FCA5A5; border-color: #EF4444; background: rgba(153,27,27,0.6); }
+  .hud-pill.gold { color: #FDE047; border-color: #EAB308; background: rgba(113,63,18,0.55); }
+
+  .map-stage {
+    position: relative; flex: 1; width: 100%; height: 100%;
+  }
+
+  /* SVG Orthogonal Paths */
+  .wires-svg {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 1;
+  }
+  .wire-bg {
+    fill: none; stroke: #3B2842; stroke-width: 7;
+    stroke-linecap: round; stroke-linejoin: round;
+  }
+  .wire-flow {
+    fill: none; stroke: #F43F5E; stroke-width: 7;
+    stroke-linecap: round; stroke-linejoin: round;
+    stroke-dasharray: 12 10; animation: dashFlow 0.85s linear infinite;
+    opacity: 0.15; transition: opacity 0.25s, stroke 0.25s;
+  }
+  .wire-flow.active   { opacity: 1; }
+  .wire-flow.tamed    { stroke: #FBBF24; }
+  .wire-flow.fortress { stroke: #4ADE80; }
+  @keyframes dashFlow { to { stroke-dashoffset: -22; } }
+
+  .wire-joint { fill: #881337; stroke: #F43F5E; stroke-width: 2; }
+
+  /* Stations */
+  .hw-node {
+    position: absolute; transform: translate(-50%, -50%);
+    width: 192px; padding: 10px 12px; border-radius: 12px;
+    background: #FEF3C7; border: 3px solid #D97706; color: #78350F;
+    text-align: center; z-index: 2;
+    box-shadow: 0 8px 0 #B45309, 0 12px 20px rgba(0,0,0,0.55);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  }
+  .hw-node .n-title { font-size: 13.2px; font-weight: 800; line-height: 1.2; }
+  .hw-node .n-sub   { font-size: 11px; font-weight: 600; margin-top: 4px; opacity: 0.92; font-family: Consolas, monospace; }
+
+  .hw-node.purple {
+    background: #F3E8FF; border-color: #9333EA; color: #581C87;
+    box-shadow: 0 8px 0 #7E22CE, 0 12px 20px rgba(0,0,0,0.55);
+  }
+  .hw-node.green {
+    background: #DCFCE7; border-color: #16A34A; color: #14532D;
+    box-shadow: 0 8px 0 #15803D, 0 12px 20px rgba(0,0,0,0.55);
+  }
+  .hw-node.red {
+    background: #FEE2E2; border-color: #DC2626; color: #7F1D1D;
+    box-shadow: 0 8px 0 #B91C1C, 0 12px 20px rgba(0,0,0,0.55);
+  }
+  .hw-node.blue {
+    background: #DBEAFE; border-color: #2563EB; color: #1E3A8A;
+    box-shadow: 0 8px 0 #1D4ED8, 0 12px 20px rgba(0,0,0,0.55);
+  }
+
+  .hw-node.current {
+    transform: translate(-50%, -55%) scale(1.06);
+    box-shadow: 0 12px 0 #F43F5E, 0 0 30px rgba(244,63,94,0.95);
+  }
+
+  /* Splatter / Explosion / Trophy badge on Station 6 & 7 */
+  .splatter-fx {
+    position: absolute; top: -18px; right: -12px;
+    font-size: 22px; display: none;
+    animation: popSplatter 0.45s ease-in-out infinite alternate;
+  }
+  .splatter-fx.show { display: block; }
+  @keyframes popSplatter {
+    from { transform: scale(0.9) rotate(-10deg); }
+    to   { transform: scale(1.2) rotate(12deg); }
+  }
+
+  /* ===== THE HORNET / HONEYBEE SWARM ===== */
+  .avatar-wrap {
+    position: absolute; left: 16%; top: 18%;
+    transform: translate(-50%, -50%);
+    z-index: 10; pointer-events: none;
+    will-change: left, top;
+  }
+  .swarm-cluster {
+    position: relative; width: 78px; height: 78px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .main-hornet {
+    width: 50px; height: 50px; border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #FDA4AF, #E11D48 65%, #4C0519);
+    border: 3px solid #FDE047;
+    box-shadow: 0 0 24px #F43F5E, 0 0 45px rgba(225,29,72,0.8);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 25px; z-index: 3;
+    animation: hoverHornet 0.65s ease-in-out infinite alternate;
+  }
+  .main-hornet.attacking {
+    animation: attackChaos 0.22s linear infinite;
+    box-shadow: 0 0 35px #FF0055, 0 0 65px #FF0000;
+  }
+  .main-hornet.slowed {
+    background: radial-gradient(circle at 30% 30%, #FEF08A, #D97706 70%, #78350F);
+    border-color: #FFFFFF;
+    box-shadow: 0 0 22px #FBBF24, 0 0 40px rgba(251,191,36,0.7);
+    animation: hoverSlow 1.4s ease-in-out infinite alternate;
+  }
+  .main-hornet.military {
+    background: radial-gradient(circle at 30% 30%, #86EFAC, #16A34A 70%, #064E3B);
+    border-color: #FFFFFF;
+    box-shadow: 0 0 24px #4ADE80, 0 0 45px rgba(34,197,94,0.75);
+  }
+
+  .mini-hornet {
+    position: absolute; font-size: 17px; z-index: 4;
+    filter: drop-shadow(0 0 6px #F43F5E);
+  }
+  .mini-hornet.h1 { top: -8px; left: -6px; animation: swarmDart1 0.45s ease-in-out infinite alternate; }
+  .mini-hornet.h2 { top: -6px; right: -8px; animation: swarmDart2 0.5s ease-in-out infinite alternate; }
+  .mini-hornet.h3 { bottom: -6px; left: -8px; animation: swarmDart2 0.4s ease-in-out infinite alternate-reverse; }
+  .mini-hornet.h4 { bottom: -8px; right: -6px; animation: swarmDart1 0.55s ease-in-out infinite alternate-reverse; }
+
+  @keyframes hoverHornet {
+    from { transform: translateY(-4px) rotate(-5deg); }
+    to   { transform: translateY(4px) rotate(5deg); }
+  }
+  @keyframes hoverSlow {
+    from { transform: translateY(-2px); }
+    to   { transform: translateY(2px); }
+  }
+  @keyframes attackChaos {
+    0%   { transform: translate(-5px, -3px) scale(1.1); }
+    50%  { transform: translate(6px, 4px) scale(1.16); }
+    100% { transform: translate(-4px, 3px) scale(1.1); }
+  }
+  @keyframes swarmDart1 {
+    from { transform: translate(-4px, -4px) rotate(-12deg); }
+    to   { transform: translate(5px, 4px) rotate(12deg); }
+  }
+  @keyframes swarmDart2 {
+    from { transform: translate(4px, -4px) rotate(10deg); }
+    to   { transform: translate(-5px, 4px) rotate(-10deg); }
+  }
+
+  .speech-bubble {
+    position: absolute; bottom: 74px; left: 50%;
+    transform: translateX(-50%);
+    width: 285px; background: #FEF2F2; color: #7F1D1D;
+    border: 2px solid #DC2626; border-radius: 12px;
+    padding: 8px 11px; font-size: 12.4px; font-weight: 700;
+    line-height: 1.35; text-align: center;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.65);
+  }
+  .speech-bubble::after {
+    content: ""; position: absolute; top: 100%; left: 50%;
+    transform: translateX(-50%);
+    border-width: 7px; border-style: solid;
+    border-color: #DC2626 transparent transparent transparent;
+  }
+  .speech-bubble.tamed-bubble {
+    background: #FFFBEB; border-color: #D97706; color: #78350F;
+  }
+  .speech-bubble.fortress-bubble {
+    background: #ECFDF5; border-color: #16A34A; color: #064E3B;
+  }
+
+  .story-bar {
+    position: relative; z-index: 5;
+    background: rgba(24,16,28,0.95); border-top: 1px solid #991B1B;
+    padding: 12px 18px; color: #FFE4E6; font-size: 13.5px; line-height: 1.45;
+  }
+  .story-bar b { color: #FDA4AF; }
+
+  /* ===== RIGHT: SYNCHRONIZED CODE & LOG PANEL ===== */
+  .code-panel {
+    background: #FFFFFF; border: 2px solid #EF4444; border-radius: 16px;
+    display: flex; flex-direction: column; overflow: hidden;
+    box-shadow: 0 4px 14px rgba(15,23,42,0.06);
+  }
+  .code-header {
+    padding: 12px 16px; background: #FEE2E2; border-bottom: 2px solid #EF4444;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .code-header .ch-title { font-size: 14.5px; font-weight: 800; color: #991B1B; }
+  .code-header .ch-sub   { font-size: 12px; font-weight: 600; color: #7F1D1D; }
+
+  .code-list {
+    flex: 1; padding: 10px 12px; overflow-y: auto;
+    font-family: "Consolas", "Courier New", monospace; font-size: 12.4px;
+    display: flex; flex-direction: column; gap: 4px;
+    background: #140D18; color: #E2E8F0;
+  }
+  .c-line {
+    display: flex; align-items: center; padding: 6px 8px;
+    border-radius: 8px; border-left: 4px solid transparent;
+    transition: background 0.15s; cursor: pointer;
+  }
+  .c-line:hover { background: rgba(244,63,94,0.1); }
+  .c-num { width: 26px; color: #94A3B8; font-size: 12px; user-select: none; }
+  .c-ptr { width: 24px; font-size: 14px; opacity: 0; }
+  .c-text { flex: 1; white-space: pre; }
+
+  .c-line.active-raid {
+    background: rgba(244,63,94,0.28); border-left-color: #F43F5E;
+    color: #FFE4E6; font-weight: 700;
+  }
+  .c-line.active-raid .c-ptr { opacity: 1; }
+
+  .c-line.active-fence {
+    background: rgba(251,191,36,0.22); border-left-color: #FBBF24;
+    color: #FEF08A; font-weight: 700;
+  }
+  .c-line.active-fence .c-ptr { opacity: 1; }
+
+  .c-line.active-fortress {
+    background: rgba(16,185,129,0.25); border-left-color: #10B981;
+    color: #D1FAE5; font-weight: 700;
+  }
+  .c-line.active-fortress .c-ptr { opacity: 1; }
+
+  .code-footer {
+    padding: 10px 14px; background: #FEF2F2; border-top: 2px solid #EF4444;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 12px; font-weight: 600; color: #7F1D1D;
+  }
+  .legend-dots { display: flex; gap: 12px; align-items: center; }
+  .ld { display: flex; align-items: center; gap: 5px; }
+  .sw { width: 15px; height: 15px; border-radius: 4px; display: inline-block; }
+  .sw-r { background: #FEE2E2; border: 2px solid #DC2626; }
+  .sw-y { background: #FEF3C7; border: 2px solid #D97706; }
+  .sw-g { background: #DCFCE7; border: 2px solid #16A34A; }
+  .sw-b { background: #DBEAFE; border: 2px solid #2563EB; }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ==================== TOP BAR ==================== -->
+  <div class="topbar">
+    <div class="brand">🐝💢 KeilC Hornet War — Bạo Loạn Giết Ong Chúa, Rào Tự Chế 8MHz &amp; Sân Bay Quân Sự ST-Link</div>
+
+    <div class="scenario-group">
+      <button class="btn sc-raid active" id="sc-raid" onclick="setScenario('raid')">💥 1. Dựng Khiên .ini Muộn: Xô Xát Giết Ong Chúa &amp; Vỡ Tổ (Crash UV4.exe)</button>
+      <button class="btn sc-fence" id="sc-fence" onclick="setScenario('fence')">🛡️ 2. Ong Tự Dựng Rào .ini (8MHz): Đủ Nuôi Tổ Nhưng Thiếu Mật Thu Hoạch</button>
+      <button class="btn sc-fortress" id="sc-fortress" onclick="setScenario('fortress')">✈️ 3. Sân Bay Quân Sự (ST-Link Loader): Bẫy Bắp Cày, Chạy 72MHz &amp; Tự Quyết Giao Mật</button>
+    </div>
+
+    <div class="ctrl-group">
+      <button class="btn primary" id="btn-play" onclick="togglePlay()">▶ Chạy Animation</button>
+      <button class="btn" onclick="prevStep()">◀ Lùi</button>
+      <button class="btn" onclick="nextStep()">Tiếp ▶</button>
+      <button class="btn" onclick="resetSim()">⟲ Đầu</button>
+    </div>
+  </div>
+
+  <!-- ==================== SPLIT WORKSPACE ==================== -->
+  <div class="workspace">
+
+    <!-- ---------- LEFT: BATTLEFIELD MAP ---------- -->
+    <div class="board-panel">
+      <div class="raid-grid"></div>
+
+      <div class="board-hud">
+        <div style="font-weight:800; font-size:13.5px;">⚔️ CUỘC ĐỐI ĐẦU GIỮA BẦY ONG BẮP CÀY (`.FLM`) VÀ ĐÀN ONG MẬT (STM32F103)</div>
+        <div class="hud-chips">
+          <span class="hud-pill" id="hud-speed">Tốc độ tổ: 72 MHz</span>
+          <span class="hud-pill" id="hud-shield">Phòng thủ: Khiên .ini muộn</span>
+          <span class="hud-pill warn" id="hud-status">Kết cục: Vỡ tổ &amp; Mất mật!</span>
+        </div>
+      </div>
+
+      <div class="map-stage">
+        <!-- SVG Orthogonal Paths -->
+        <svg class="wires-svg" viewBox="0 0 1000 600" preserveAspectRatio="none">
+          <!-- Main Highway: 1 -> 2 -> 3 -> (810,300) -> 4 -> 5 -> (200,492) -> 6 -> 7 -->
+          <path class="wire-bg" d="M 160 108 L 480 108 L 810 108" />
+          <path class="wire-bg" d="M 810 108 L 810 300 L 500 300" />
+          <path class="wire-bg" d="M 500 300 L 200 300 L 200 492 L 500 492 L 820 492" />
+          <!-- Military Airfield Direct Route: 4 (500,300) straight down to 6 (500,492) -->
+          <path class="wire-bg" d="M 500 300 L 500 492" stroke-dasharray="8 8" />
+
+          <circle class="wire-joint" cx="810" cy="300" r="7" />
+          <circle class="wire-joint" cx="200" cy="492" r="7" />
+
+          <path class="wire-flow active" id="w-1-2" d="M 160 108 L 480 108" />
+          <path class="wire-flow" id="w-2-3" d="M 480 108 L 810 108" />
+          <path class="wire-flow" id="w-3-4" d="M 810 108 L 810 300 L 500 300" />
+          <path class="wire-flow" id="w-4-5" d="M 500 300 L 200 300" />
+          <path class="wire-flow" id="w-5-6" d="M 200 300 L 200 492 L 500 492" />
+          <path class="wire-flow" id="w-6-7" d="M 500 492 L 820 492" />
+          <!-- Military Airfield Express Lane -->
+          <path class="wire-flow fortress" id="w-tunnel" d="M 500 300 L 500 492" />
+        </svg>
+
+        <!-- STATION 1 (16%, 18%) -->
+        <div class="hw-node red" id="node-1" style="left: 16%; top: 18%;">
+          <div class="n-title" id="title-1">1. Chúa UV4.exe (KeilC)</div>
+          <div class="n-sub" id="sub-1">Xua bầy .FLM đi cướp mật</div>
+        </div>
+
+        <!-- STATION 2 (48%, 18%) -->
+        <div class="hw-node" id="node-2" style="left: 48%; top: 18%;">
+          <div class="n-title" id="title-2">2. Cửa Tổ SWD (72MHz)</div>
+          <div class="n-sub" id="sub-2">Bầy .FLM tràn qua quá nhanh!</div>
+        </div>
+
+        <!-- STATION 3 (81%, 18%) -->
+        <div class="hw-node purple" id="node-3" style="left: 81%; top: 18%;">
+          <div class="n-title" id="title-3">3. Địa Bàn SRAM</div>
+          <div class="n-sub" id="sub-3">0x20000000: .FLM chiếm đóng</div>
+        </div>
+
+        <!-- STATION 4 (50%, 50%) -->
+        <div class="hw-node red" id="node-4" style="left: 50%; top: 50%; width: 215px;">
+          <div class="n-title" id="title-4">4. Trạm Canh Nhịp ACR</div>
+          <div class="n-sub" id="sub-4">FLM_Init() ép ACR = 0 (0 WS)!</div>
+        </div>
+
+        <!-- STATION 5 (20%, 50%) -->
+        <div class="hw-node" id="node-5" style="left: 20%; top: 50%;">
+          <div class="n-title" id="title-5">5. Kho Mật &amp; Khiên .ini</div>
+          <div class="n-sub" id="sub-5">Dựng khiên .ini muộn -> Lỗi!</div>
+        </div>
+
+        <!-- STATION 6 (50%, 82%) -->
+        <div class="hw-node red" id="node-6" style="left: 50%; top: 82%; width: 218px;">
+          <div class="splatter-fx" id="splatter-6">💥⚔️💦</div>
+          <div class="n-title" id="title-6">6. Bạo Loạn Trên Khay 64-Bit</div>
+          <div class="n-sub" id="sub-6">2 bên xô xát: Trượt Addr - 8!</div>
+        </div>
+
+        <!-- STATION 7 (82%, 82%) -->
+        <div class="hw-node red" id="node-7" style="left: 82%; top: 82%; width: 215px;">
+          <div class="splatter-fx" id="splatter-7">💀👑💔</div>
+          <div class="n-title" id="title-7">7. Ong Chúa Chết &amp; Vỡ Tổ</div>
+          <div class="n-sub" id="sub-7">UV4.exe thoát (0xC000041D)!</div>
+        </div>
+
+        <!-- THE SWARM AVATAR -->
+        <div class="avatar-wrap" id="avatar" style="left: 16%; top: 18%;">
+          <div class="speech-bubble" id="bubble">Ong Bắp Cày Chúa UV4.exe ra lệnh: Xua cả bầy .FLM đi cướp mật miễn phí!</div>
+          <div class="swarm-cluster">
+            <span class="mini-hornet h1" id="mh1">🐝</span>
+            <span class="mini-hornet h2" id="mh2">🐝</span>
+            <div class="main-hornet" id="main-hornet">🐝</div>
+            <span class="mini-hornet h3" id="mh3">🐝</span>
+            <span class="mini-hornet h4" id="mh4">🐝</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="story-bar" id="story-bar">
+        <b>Tư duy 3 kịch bản:</b> Bấm chọn 1 trong 3 kịch bản phía trên để xem: (1) Dựng khiên `.ini` muộn gây xô xát giết chết Ong Chúa &amp; sập KeilC, (2) Ong mật tự dựng rào `.ini` 8MHz chỉ đủ nuôi tổ, và (3) Sân bay Quân sự `ST-Link` của Nông Dân!
+      </div>
+    </div>
+
+    <!-- ---------- RIGHT: SYNCHRONIZED CODE & LOG ---------- -->
+    <div class="code-panel">
+      <div class="code-header">
+        <div class="ch-title">💻 Diễn Biến Chiến Sự &amp; Dòng Lệnh Thực Thi</div>
+        <div class="ch-sub">Click vào dòng bất kỳ để nhảy tức thì tới trạm đó</div>
+      </div>
+
+      <div class="code-list" id="code-list"></div>
+
+      <div class="code-footer">
+        <div class="legend-dots">
+          <span class="ld"><span class="sw sw-r"></span>Xô Xát Vỡ Tổ</span>
+          <span class="ld"><span class="sw sw-y"></span>Rào Tự Chế 8MHz</span>
+          <span class="ld"><span class="sw sw-g"></span>Sân Bay Quân Sự 72MHz</span>
+        </div>
+        <div>Phím tắt: <b>Space</b> (Auto) · <b>←/→</b> (Nhảy tức thì)</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const SCENARIOS = {
+  /* =========================================================================
+     KỊCH BẢN 1: DỰNG KHIÊN .INI MUỘN -> XÔ XÁT GIẾT ONG CHÚA & VỠ TỔ (CRASH)
+     ========================================================================= */
+  raid: {
+    code: [
+      { line: 1, text: "// [KỊCH BẢN 1: DỰNG KHIÊN .INI KHÔNG KỊP -> XÔ XÁT GIẾT ONG CHÚA & VỠ TỔ]" },
+      { line: 2, text: "UV4.exe (Ong Bắp Cày Chúa) -> Xua bầy ong thợ STM32F10x_128.FLM đi cướp mật" },
+      { line: 3, text: "SWD Gate -> Bầy bắp cày lao vào quá nhanh khi tổ đang quay ở 72 MHz!" },
+      { line: 4, text: "SRAM (0x20000000) -> Bầy .FLM chiếm giữ địa bàn RAM ngay trong bụng tổ" },
+      { line: 5, text: "FLM_Init() -> FLASH->ACR = 0; // Đánh gục lính canh nhịp Wait State về 0!" },
+      { line: 6, text: "Late .ini Shield -> Đàn ong mật vội vàng tự dựng khiên .ini nhưng không kịp!" },
+      { line: 7, text: "💥 Brawl & Mismatch -> 2 bên xô xát, mật bắn tung tóe (Too many errors display)!" },
+      { line: 8, text: "💀 Queen Killed (Event Viewer 0xC000041D): KeilC bị thoát, Nông Dân mất sạch mật!" }
+    ],
+    steps: [
+      {
+        codeIdx: 1, node: "node-1", x: 16, y: 18,
+        pathFromPrev: [{x: 16, y: 18}],
+        speed: "Tốc độ: 72 MHz (Quá nhanh)", shield: "Khiên .ini: Chưa chuẩn bị kịp", status: "Bầy .FLM xuất kích!",
+        bubble: "Ta là Ong Bắp Cày Chúa UV4.exe! Hỡi bầy ong thợ .FLM, hãy lao vào cướp mật miễn phí và chiếm địa bàn!",
+        story: "<b>Bước 1 (Ong Bắp Cày Chúa <code>UV4.exe</code> phát lệnh):</b> Khi nhấn <code>F8</code>, Chúa <code>UV4.exe</code> xua cả bầy ong bắp cày thợ <code>STM32F10x_128.FLM</code> lao đi chiếm tổ ong mật STM32.",
+        wires: ["w-1-2"]
+      },
+      {
+        codeIdx: 2, node: "node-2", x: 48, y: 18,
+        pathFromPrev: [{x: 16, y: 18}, {x: 48, y: 18}],
+        speed: "Tổ ong: Đang quay 72 MHz!", shield: "Cửa tổ bị đột kích bất ngờ", status: "Không kịp hạ xung!",
+        bubble: "Bầy ong bắp cày tụi mình bay với tốc độ 72 MHz! Đàn ong mật ở cửa tổ chưa kịp trở tay!",
+        story: "<b>Bước 2 (Đột kích tốc độ cao 72 MHz):</b> Bầy ong bắp cày tràn qua cửa SWD quá nhanh khi tổ ong mật vẫn đang chạy ở xung nhịp <b>72 MHz (<code>0x001D040A</code>)</b>.",
+        wires: ["w-1-2", "w-2-3"]
+      },
+      {
+        codeIdx: 3, node: "node-3", x: 81, y: 18,
+        pathFromPrev: [{x: 48, y: 18}, {x: 81, y: 18}],
+        speed: "Tốc độ: 72 MHz", shield: "SRAM bị chiếm đóng!", status: "Bầy .FLM đóng quân trong RAM",
+        bubble: "Chiếm giữ ngay sảnh SRAM (0x20000000)! Biến vùng nhớ RAM thành căn cứ của bầy ong bắp cày!",
+        story: "<b>Bước 3 (Chiếm giữ địa bàn <code>SRAM 0x20000000</code>):</b> Bầy <code>.FLM</code> tràn vào nằm ngay trong bộ nhớ RAM của vi điều khiển.",
+        wires: ["w-1-2", "w-2-3", "w-3-4"]
+      },
+      {
+        codeIdx: 4, node: "node-4", x: 50, y: 50,
+        pathFromPrev: [{x: 81, y: 18}, {x: 81, y: 50}, {x: 50, y: 50}],
+        speed: "Tốc độ: Vẫn 72 MHz!", shield: "FLASH_ACR bị ép = 0!", status: "Mất lá chắn 2 Wait States!",
+        bubble: "Tấn công Trạm Canh Nhịp! Chạy hàm FLM_Init() ép FLASH_ACR = 0 (xóa sổ 2 Wait States)!",
+        story: "<b>Bước 4 (Phá chốt canh nhịp <code>FLASH_ACR = 0</code>):</b> Thuật toán <code>.FLM</code> tự ý ghi đè thanh ghi <code>FLASH_ACR = 0</code> (0 Wait State) ngay khi hệ thống đang chạy ở 72 MHz.",
+        wires: ["w-1-2", "w-2-3", "w-3-4", "w-4-5"], attacking: true
+      },
+      {
+        codeIdx: 5, node: "node-5", x: 20, y: 50,
+        pathFromPrev: [{x: 50, y: 50}, {x: 20, y: 50}],
+        speed: "Đàn ong mật hoảng loạn!", shield: "Cố dựng khiên .ini nhưng MUỘN!", status: "Xung đột kịch bản .ini & .FLM!",
+        bubble: "Đàn ong mật cố gắng tự dựng khiên .ini (Bản 2) để chống trả nhưng chuẩn bị không kịp thời, làm 2 bên lao vào đụng độ!",
+        story: "<b>Bước 5 (Đàn Ong Mật Cố Tự Dựng Khiên <code>.ini</code> Nhưng Không Kịp Thời):</b> Đàn ong mật vội vã dựng khiên bảo vệ <code>.ini</code> (như kịch bản <code>.ini</code> Bản 2 chưa chuẩn bị kỹ ở Thí nghiệm #11), dẫn đến xung đột trực diện với thuật toán nạp <code>.FLM</code>!",
+        wires: ["w-1-2", "w-2-3", "w-3-4", "w-4-5", "w-5-6"], attacking: true
+      },
+      {
+        codeIdx: 6, node: "node-6", x: 50, y: 82,
+        pathFromPrev: [{x: 20, y: 50}, {x: 20, y: 82}, {x: 50, y: 82}],
+        speed: "Bạo loạn ở 72 MHz + 0 WS!", shield: "Trượt 8-byte (Addr - 8)", status: "💥 Mật bắn tung tóe!",
+        bubble: "XOẸT!! Hai bầy ong xô xát hỗn loạn trên khay sáp 64-bit! Mật bắn tung tóe khắp nơi (Too many errors to display)!!",
+        story: "<b>💥 Bước 6 (Hai Bên Xô Xát — Mật Bắn Tung Tóe <code>Contents mismatch</code>):</b> Cuộc xô xát ở tốc độ 72 MHz với <code>0 Wait State</code> làm khay mật 64-bit bị giật trượt nhịp 8-byte (<code>Addr - 8</code>), mật văng tung tóe thành hàng trăm dòng lỗi <code>Contents mismatch... Too many errors to display!</code>",
+        wires: ["w-1-2", "w-2-3", "w-3-4", "w-4-5", "w-5-6", "w-6-7"],
+        attacking: true, splatter6: true
+      },
+      {
+        codeIdx: 7, node: "node-7", x: 82, y: 82,
+        pathFromPrev: [{x: 50, y: 82}, {x: 82, y: 82}],
+        speed: "💀 Ong Chúa bị giết!", shield: "Event Viewer: 0xC000041D", status: "💔 Vỡ tổ! Nông dân trắng tay!",
+        bubble: "BẠO LOẠN ĐỈNH ĐIỂM!! Ong Chúa không may bị giết, cả tổ ong vỡ nát! KeilC (UV4.exe) bị thoát luôn, Bác Nông Dân mất sạch mật!",
+        story: "<b>💀💔 Bước 7 (Ong Chúa Bị Giết, Vỡ Tổ &amp; KeilC Bị Thoát — <code>Event Viewer 0xC000041D</code>):</b> Cuộc bạo loạn giữa khiên <code>.ini</code> lỗi và thuật toán <code>.FLM</code> khiến Ong Chúa tử trận và cả tổ ong vỡ tan tành! Windows Event Viewer ghi nhận <code>UV4.exe</code> bị sập và thoát ngay lập tức (<code>Exception code: 0xC000041D</code>). Kết quả: Không còn một giọt mật hoa nào để Người Nông Dân thu hoạch!",
+        wires: ["w-1-2", "w-2-3", "w-3-4", "w-4-5", "w-5-6", "w-6-7"],
+        attacking: true, splatter6: true, splatter7: true
+      }
+    ]
+  },
+
+  /* =========================================================================
+     KỊCH BẢN 2: ĐÀN ONG TỰ DỰNG RÀO .INI CHUẨN -> SỐNG Ở 8MHz NHƯNG CHỈ ĐỦ NUÔI TỔ
+     ========================================================================= */
+  fence: {
+    code: [
+      { line: 1, text: "// [KỊCH BẢN 2: ĐÀN ONG TỰ LÀM RÀO .INI CHUẨN -> CHỈ ĐỦ DUY TRÌ TỔ Ở 8 MHz]" },
+      { line: 2, text: "// Mọi thứ do đàn ong mật tự làm (file flash_init.ini chuẩn tại Utilities)" },
+      { line: 3, text: "FUNC void ResetClocks(void) { // Hàng rào tự chế của đàn ong mật" },
+      { line: 4, text: "  _WDWORD(0x40021000, _RDWORD(0x40021000) | 1); // Bật nguồn nội HSI 8MHz" },
+      { line: 5, text: "  _WDWORD(0x40021004, 0x00000000); // Kéo tốc độ cả tổ xuống 8 MHz!" },
+      { line: 6, text: "} // Ngăn được 1 phần đàn ong bắp cày -> Không bị lỗi Contents mismatch!" },
+      { line: 7, text: "Result -> Vừa nuôi được Ong Chúa, vừa có mật (Verify OK ở 8MHz)..." },
+      { line: 8, text: "⚠️ Hạn chế: Do 8 MHz hơi chậm, mật chỉ đủ duy trì tổ, KHÔNG ĐỦ cho Nông Dân thu hoạch!" }
+    ],
+    steps: [
+      {
+        codeIdx: 1, node: "node-1", x: 16, y: 18,
+        pathFromPrev: [{x: 16, y: 18}],
+        speed: "Đàn ong mật tự xoay xở", shield: "Tự đắp rào flash_init.ini", status: "Trí tuệ loài ong (Có giới hạn)",
+        bubble: "Lần này không đợi Bác Nông Dân nữa, đàn ong mật tụi mình tự tay đắp hàng rào flash_init.ini từ sớm!",
+        story: "<b>Bước 1 (Mọi Thứ Đều Do Đàn Ong Tự Làm — <code>flash_init.ini</code> Chuẩn):</b> Đàn ong mật tự lực cánh sinh, tự viết kịch bản <code>flash_init.ini</code> chuẩn đặt trước cửa tổ để phòng thủ bầy Ong Bắp Cày.",
+        wires: ["w-1-2"], tamed: true,
+        t1: "1. Đàn Ong Tự Xoay Xở", s1: "Tự chuẩn bị rào flash_init.ini",
+        t2: "2. Hàng Rào Tự Chế (.ini)", s2: "Ngăn bắp cày được 1 phần"
+      },
+      {
+        codeIdx: 4, node: "node-2", x: 48, y: 18,
+        pathFromPrev: [{x: 16, y: 18}, {x: 48, y: 18}],
+        speed: "Hạ tốc từ 72MHz ➔ 8MHz!", shield: "Ngăn bắp cày được 1 phần", status: "Giảm tải xuống HSI 8 MHz",
+        bubble: "Vì tụi mình không quá thông minh nên chỉ biết dựng rào .ini ép tốc độ cả tổ lùi từ 72 MHz xuống 8 MHz để cản bầy bắp cày!",
+        story: "<b>🛡️ Bước 2 (Rào Chắn Ngăn Được 1 Phần — Ép Tốc Độ Xuống 8 MHz):</b> Do đàn ong không quá thông minh (chỉ dùng được script <code>.ini</code> đơn giản), cách duy nhất chúng làm được là ghi <code>RCC_CFGR = 0</code> để kéo toàn bộ nhịp đập của tổ từ 72 MHz tụt xuống <b>8 MHz (HSI)</b>.",
+        wires: ["w-1-2", "w-2-3"], tamed: true,
+        t1: "1. Đàn Ong Tự Xoay Xở", s1: "Tự chuẩn bị rào flash_init.ini",
+        t2: "2. Hàng Rào Tự Chế (.ini)", s2: "Ép tốc độ tụt xuống 8 MHz!"
+      },
+      {
+        codeIdx: 5, node: "node-3", x: 81, y: 18,
+        pathFromPrev: [{x: 48, y: 18}, {x: 81, y: 18}],
+        speed: "Tốc độ tổ: 8 MHz (Hơi chậm)", shield: "Bầy .FLM vẫn vào được SRAM", status: "Nhưng bị ghìm chân lại!",
+        bubble: "Rào chắn chỉ ngăn được 1 phần: Bầy bắp cày .FLM vẫn chui vào được SRAM, nhưng đã bị ghìm tốc xuống 8 MHz!",
+        story: "<b>Bước 3 (Bầy Ong Bắp Cày Vẫn Vào Tổ Nhưng Bị Giảm Tải):</b> Hàng rào <code>.ini</code> không đuổi được bầy <code>.FLM</code> (chúng vẫn vào <code>SRAM</code>), nhưng đã kìm hãm tốc độ của chúng xuống mức chậm 8 MHz.",
+        wires: ["w-1-2", "w-2-3", "w-3-4"], tamed: true
+      },
+      {
+        codeIdx: 5, node: "node-4", x: 50, y: 50,
+        pathFromPrev: [{x: 81, y: 18}, {x: 81, y: 50}, {x: 50, y: 50}],
+        speed: "Tốc độ: 8 MHz (125 ns)", shield: "ACR = 0 không gây bạo loạn", status: "Tổ ong không bị vỡ!",
+        bubble: "Ở tốc độ rùa bò 8 MHz này, dù bầy .FLM có gạt FLASH_ACR = 0 thì cũng không làm nổ ra xô xát nữa!",
+        story: "<b>Bước 4 (Tránh Được Bạo Loạn):</b> Nhờ chạy ở 8 MHz, việc <code>.FLM</code> đặt <code>FLASH_ACR = 0</code> (0 Wait State) không còn gây xung đột vật lý với bộ nhớ Flash nữa.",
+        wires: ["w-1-2", "w-2-3", "w-3-4", "w-4-5"], tamed: true,
+        t4: "4. Trạm Nhịp Chậm (8MHz)", s4: "ACR = 0 không còn gây vỡ tổ"
+      },
+      {
+        codeIdx: 6, node: "node-5", x: 20, y: 50,
+        pathFromPrev: [{x: 50, y: 50}, {x: 20, y: 50}],
+        speed: "Tốc độ: 8 MHz", shield: "Giữ được kho mật nhỏ", status: "Ong Chúa được an toàn!",
+        bubble: "Tụi mình bảo vệ được mạng sống cho Ong Chúa và cất được mật vào kho 0x08000000!",
+        story: "<b>Bước 5 (Nuôi Được Ong Chúa &amp; Có Mật):</b> Đàn ong mật giữ cho Ong Chúa bình an vô sự và nạp được mật vào kho Flash.",
+        wires: ["w-1-2", "w-2-3", "w-3-4", "w-4-5", "w-5-6"], tamed: true,
+        t5: "5. Kho Mật Tự Duy Trì", s5: "Bảo vệ được Ong Chúa!"
+      },
+      {
+        codeIdx: 6, node: "node-6", x: 50, y: 82,
+        pathFromPrev: [{x: 20, y: 50}, {x: 20, y: 82}, {x: 50, y: 82}],
+        speed: "8 MHz: Verify OK", shield: "Không trượt 8-byte", status: "Nhưng sản lượng quá ít!",
+        bubble: "Kiểm tra khay mật đạt Verify OK! Nhưng vì cả tổ bị ghìm ở 8 MHz chậm quá nên làm ra được ít mật lắm...",
+        story: "<b>Bước 6 (Verify OK Nhưng Tốc Độ 8 MHz Quá Chậm):</b> Quá trình nạp không bị lỗi <code>Contents mismatch</code>, nhưng việc bị kìm chân ở 8 MHz làm năng suất của tổ sụt giảm nghiêm trọng.",
+        wires: ["w-1-2", "w-2-3", "w-3-4", "w-4-5", "w-5-6", "w-6-7"], tamed: true,
+        t6: "6. Khay Mật 8MHz (Verify OK)", s6: "Có mật nhưng năng suất thấp"
+      },
+      {
+        codeIdx: 7, node: "node-7", x: 82, y: 82,
+        pathFromPrev: [{x: 50, y: 82}, {x: 82, y: 82}],
+        speed: "⚠️ 8 MHz là hơi chậm!", shield: "Chỉ đủ tự nuôi sống tổ", status: "🍯 Không đủ mật cho Nông Dân!",
+        bubble: "Mật làm ra ở 8 MHz chỉ vừa đủ nuôi Ong Chúa và duy trì tổ thôi! Chẳng dư giọt nào để Bác Nông Dân thu hoạch cả!",
+        story: "<b>⚠️ Bước 7 (Chỉ Đủ Duy Trì Tổ — Không Đủ Cho Người Nông Dân Thu Hoạch):</b> Giải pháp tự chế <code>.ini</code> của đàn ong giúp tổ không vỡ và nuôi sống được Ong Chúa, nhưng vì <b>8 MHz là quá chậm</b> nên lượng mật tạo ra chỉ đủ cầm hơi duy trì tổ, người nông dân vẫn chưa thu hoạch được mùa mật năng suất cao!",
+        wires: ["w-1-2", "w-2-3", "w-3-4", "w-4-5", "w-5-6", "w-6-7"], tamed: true,
+        t7: "7. Chỉ Đủ Duy Trì Tổ (8MHz)", s7: "⚠️ Chậm! Không dư mật thu hoạch!"
+      }
+    ]
+  },
+
+  /* =========================================================================
+     KỊCH BẢN 3: NÔNG DÂN XÂY SÂN BAY QUÂN SỰ (EXTERNAL LOADER ST-LINK)
+     ========================================================================= */
+  fortress: {
+    code: [
+      { line: 1, text: "// [KỊCH BẢN 3: SÂN BAY QUÂN SỰ ST-LINK LOADER — CHẠY MỌI TẦN SỐ & TỰ QUYẾT]" },
+      { line: 2, text: "1. Farmer Builds Military Base: External Loader (ST-LINK Utility / ST-LINK_CLI)" },
+      { line: 3, text: "   -> Công nghệ quá xịn! Hỗ trợ set up mượt mà với MỌI TẦN SỐ (72 MHz Max)!" },
+      { line: 4, text: "2. Hornet Trap: Đã set chuẩn cờ thanh ghi -> Bầy ong bắp cày lao vào sập bẫy ngay!" },
+      { line: 5, text: "   -> Ngăn chặn 100% lỗi Contents mismatch & Event Viewer crash!" },
+      { line: 6, text: "3. Bees Command Airfield: Đàn ong mật nắm trọn Sân Bay Quân Sự (ST-Link Debugger)" },
+      { line: 7, text: "   -> Tự do thu thập mật hoa, nuôi Ong Chúa khỏe mạnh ở tốc độ siêu thanh 72 MHz!" },
+      { line: 8, text: "4. Bee's Choice: Đàn ong tự quyết định cho mật tự trào (-rst) hoặc chờ bấm nút RESET!" }
+    ],
+    steps: [
+      {
+        codeIdx: 1, node: "node-1", x: 16, y: 18,
+        pathFromPrev: [{x: 16, y: 18}],
+        speed: "Công nghệ: Sân Bay Quân Sự", shield: "External Loader (ST-Link)", status: "Chạy mọi tần số (72MHz)!",
+        bubble: "Bác Nông Dân ra tay xây hẳn Khu Quân Sự & Sân Bay tối tân bằng External Loader (ST-LINK Utility / CLI) cho tụi mình!",
+        story: "<b>Bước 1 (Người Nông Dân Xây Khu Quân Sự Bằng <code>External Loader - ST-LINK Debugger</code>):</b> Thấy đàn ong tự xoay xở ở 8 MHz vất vả quá, Người Nông Dân trực tiếp xây dựng <b>Khu Quân Sự hiện đại (<code>ST-LINK Utility / ST-LINK_CLI</code>)</b> có công nghệ cực xịn, tương thích với mọi tần số xung nhịp!",
+        wires: ["w-1-2"], fortress: true,
+        t1: "1. Căn Cứ Quân Sự Nông Dân", s1: "External Loader (ST-Link CLI)",
+        t2: "2. Bẫy Điện Tử Thanh Ghi", s2: "Đã set cờ: Bẫy sống bắp cày!"
+      },
+      {
+        codeIdx: 3, node: "node-2", x: 48, y: 18,
+        pathFromPrev: [{x: 16, y: 18}, {x: 48, y: 18}],
+        speed: "Set cờ thanh ghi chuẩn xác!", shield: "Bẫy sập bầy ong bắp cày!", status: "Diệt gọn lỗi Mismatch!",
+        bubble: "Khu Quân Sự đã set sẵn cờ thanh ghi! Bầy ong bắp cày lao vào liền sập bẫy gọn gàng, hết đường gây lỗi Mismatch!",
+        story: "<b>🪤 Bước 2 (Bầy Ong Bắp Cày Lao Vào Bẫy — Ngăn Chặn Hoàn Toàn Lỗi Mismatch):</b> Nhờ công nghệ của ST-Link Debugger đã thiết lập chuẩn các cờ và thanh ghi điều khiển, bầy ong bắp cày vừa mon men lao vào liền sập bẫy ngay tại vòng ngoài! Lỗi <code>Contents mismatch</code> và lỗi sập <code>Event Viewer</code> bị triệt tiêu vĩnh viễn!",
+        wires: ["w-1-2", "w-2-3"], fortress: true,
+        t1: "1. Căn Cứ Quân Sự Nông Dân", s1: "External Loader (ST-Link CLI)",
+        t2: "2. Bẫy Điện Tử Thanh Ghi", s2: "🪤 Bắp cày sập bẫy 100%!"
+      },
+      {
+        codeIdx: 5, node: "node-3", x: 81, y: 18,
+        pathFromPrev: [{x: 48, y: 18}, {x: 81, y: 18}],
+        speed: "Đàn ong nắm Sân Bay!", shield: "Làm chủ ST-Link Debugger", status: "Hỗ trợ mọi tần số 8–72MHz!",
+        bubble: "Giờ đây Đàn Ong Mật tụi mình đã nắm trọn cái Sân Bay Quân Sự (ST-Link Debugger) trong tay rồi!",
+        story: "<b>✈️ Bước 3 (Đàn Ong Mật Làm Chủ Sân Bay Quân Sự <code>ST-Link Debugger</code>):</b> Không còn bóng dáng ong bắp cày, toàn bộ đường băng tốc độ cao nằm dưới sự chỉ huy trực tiếp của Đàn Ong Mật.",
+        wires: ["w-1-2", "w-2-3", "w-3-4"], fortress: true,
+        t3: "3. Sân Bay Quân Sự ST-Link", s3: "Đàn Ong Mật nắm quyền chỉ huy!"
+      },
+      {
+        codeIdx: 6, node: "node-4", x: 50, y: 50,
+        pathFromPrev: [{x: 81, y: 18}, {x: 81, y: 50}, {x: 50, y: 50}],
+        speed: "Max Speed: 72 MHz HSE PLL!", shield: "LATENCY = 2 WS + WAIT_MAX", status: "Công nghệ tối tân!",
+        bubble: "Công nghệ quá xịn! Tụi mình bật 2 Wait States (FLASH_ACR = 0x32) và vít ga tối đa 72 MHz mà không sợ bất kỳ lỗi nào!",
+        story: "<b>🚀 Bước 4 (Set Up Mượt Mà Ở Mọi Tần Số — Vít Ga Lên 72 MHz):</b> Với công nghệ của Khu Quân Sự kết hợp hàm <code>SystemClock_Config()</code> chuẩn, đàn ong tự tin đẩy xung nhịp lên tối đa <b>72 MHz</b> (kèm phao cứu hộ <code>WAIT_MAX</code> an toàn tuyệt đối).",
+        wires: ["w-1-2", "w-2-3", "w-3-4", "w-4-5", "w-tunnel"], fortress: true,
+        t4: "4. Đài Chỉ Huy Tần Số", s4: "Chạy mượt mọi tần số (72MHz)!"
+      },
+      {
+        codeIdx: 6, node: "node-5", x: 20, y: 50,
+        pathFromPrev: [{x: 50, y: 50}, {x: 20, y: 50}],
+        speed: "Tốc độ: 72 MHz Siêu năng suất", shield: "Kho mật: Đầy ắp 0x08000000", status: "Ong Chúa cực kỳ khỏe mạnh!",
+        bubble: "Tụi mình bay đi hút mật hoa, đem về đổ đầy kho 0x08000000 và nuôi Ong Chúa lớn nhanh như thổi ở 72 MHz!",
+        story: "<b>👑 Bước 5 (Thu Thập Mật Hoa &amp; Nuôi Ong Chúa Siêu Năng Suất):</b> Ở tốc độ 72 MHz, đàn ong mật thu thập mật hoa nhanh gấp 9 lần so với mức 8 MHz cũ, nuôi Ong Chúa khỏe mạnh và làm đầy ắp kho Flash.",
+        wires: ["w-1-2", "w-2-3", "w-3-4", "w-4-5", "w-5-6", "w-tunnel"], fortress: true,
+        t5: "5. Kho Mật & Cung Ong Chúa", s5: "Ong Chúa khỏe & Đầy ắp mật!"
+      },
+      {
+        codeIdx: 6, node: "node-6", x: 50, y: 82,
+        pathFromPrev: [{x: 20, y: 50}, {x: 20, y: 82}, {x: 50, y: 82}],
+        speed: "Kiểm định Radar: -V (OK 100%)", shield: "Đường băng thẳng tắp", status: "Sẵn sàng xuất kho cho Nông Dân!",
+        bubble: "Radar quân sự (-V) báo mật đạt chuẩn 100%! Giờ giao mật cho Bác Nông Dân kiểu gì là do tụi mình quyết định!",
+        story: "<b>🔍 Bước 6 (Kiểm Định Chuẩn 100% Tại Sân Bay):</b> Toàn bộ mật ong vượt qua bước Verify (<code>-V</code>) tuyệt đối chính xác ở 72 MHz.",
+        wires: ["w-1-2", "w-2-3", "w-3-4", "w-4-5", "w-5-6", "w-6-7", "w-tunnel"], fortress: true,
+        t6: "6. Trạm Kiểm Định Quân Sự", s6: "✅ Verify OK 100% ở 72MHz!"
+      },
+      {
+        codeIdx: 7, node: "node-7", x: 82, y: 82,
+        pathFromPrev: [{x: 50, y: 82}, {x: 82, y: 82}],
+        speed: "Quyền quyết định: ĐÀN ONG MẬT", shield: "Nắm trọn ST-Link Debugger!", status: "🏆 Tự trào (-rst) HOẶC Chờ bấm RST!",
+        bubble: "Vì tụi mình nắm Sân Bay ST-Link trong tay rồi: Muốn mật tự trào ngay (-rst) hay chờ Bác Nông Dân bấm nút RESET mới đưa là do tụi mình quyết hết!",
+        story: "<b>🏆✈️ Bước 7 (Đàn Ong Mật Tự Quyết Định Cách Giao Mật Cho Nông Dân):</b> Vì lúc này Đàn Ong Mật đã nắm trọn Sân Bay Quân Sự (<code>ST-Link Debugger</code>) trong tay, quyền phân phối mật hoàn toàn do đàn ong quyết định:<br/>• <b>Cách 1 (Thêm cờ <code>-rst</code>):</b> Cho mật ong tự trào ra ngoài ngay lập tức sau khi nạp!<br/>• <b>Cách 2 (Bỏ cờ <code>-rst</code>):</b> Cất kín trong kho, khi nào Người Nông Dân nhấn nút <code>RESET</code> vật lý trên mạch thì đàn ong mới mở cửa giao mật!",
+        wires: ["w-1-2", "w-2-3", "w-3-4", "w-4-5", "w-5-6", "w-6-7", "w-tunnel"], fortress: true,
+        t7: "7. Đàn Ong Tự Quyết Giao Mật", s7: "🏆 Tự trào (-rst) / Chờ bấm RST!"
+      }
+    ]
+  }
+};
+
+let currentScenario = "raid";
+let stepIdx = 0;
+let playing = false;
+let autoDwellTimer = null;
+let animFrameId = null;
+
+function buildCodeList() {
+  const listEl = document.getElementById("code-list");
+  const lines = SCENARIOS[currentScenario].code;
+  const icon = currentScenario === "raid" ? "💥" : (currentScenario === "fence" ? "🛡️" : "✈️");
+  listEl.innerHTML = lines.map((item, idx) => `
+    <div class="c-line" id="cline-${idx}" onclick="jumpToCode(${idx})">
+      <span class="c-num">${item.line}</span>
+      <span class="c-ptr">${icon}</span>
+      <span class="c-text">${item.text}</span>
+    </div>
+  `).join("");
+}
+
+function stopCurrentMotion() {
+  if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
+  if (autoDwellTimer) { clearTimeout(autoDwellTimer); autoDwellTimer = null; }
+}
+
+function moveSwarmAlongWaypoints(waypoints, instant, onArrived) {
+  const avatar = document.getElementById("avatar");
+  if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
+
+  if (instant || !waypoints || waypoints.length < 2) {
+    const dest = waypoints ? waypoints[waypoints.length - 1] : {x: 16, y: 18};
+    avatar.style.left = dest.x + "%";
+    avatar.style.top  = dest.y + "%";
+    if (onArrived) onArrived();
+    return;
+  }
+
+  let segIdx = 0;
+  const segDuration = 650; // 650ms mỗi đoạn thẳng vuông góc
+  let segStartTime = null;
+
+  function stepFrame(timestamp) {
+    if (!segStartTime) segStartTime = timestamp;
+    const p0 = waypoints[segIdx];
+    const p1 = waypoints[segIdx + 1];
+    const elapsed = timestamp - segStartTime;
+    const t = Math.min(1, elapsed / segDuration);
+    const ease = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+    avatar.style.left = (p0.x + (p1.x - p0.x) * ease) + "%";
+    avatar.style.top  = (p0.y + (p1.y - p0.y) * ease) + "%";
+
+    if (t < 1) {
+      animFrameId = requestAnimationFrame(stepFrame);
+    } else {
+      segIdx++;
+      if (segIdx < waypoints.length - 1) {
+        segStartTime = null;
+        animFrameId = requestAnimationFrame(stepFrame);
+      } else {
+        animFrameId = null;
+        if (onArrived) onArrived();
+      }
+    }
+  }
+  animFrameId = requestAnimationFrame(stepFrame);
+}
+
+function renderState(instant = true, onArrivedCallback = null) {
+  const sc = SCENARIOS[currentScenario];
+  const st = sc.steps[stepIdx];
+
+  const mainHornet = document.getElementById("main-hornet");
+  const bubble     = document.getElementById("bubble");
+  bubble.textContent = st.bubble;
+
+  mainHornet.className = "main-hornet";
+  bubble.className     = "speech-bubble";
+
+  if (st.fortress) {
+    mainHornet.classList.add("military");
+    mainHornet.textContent = "🐝";
+    bubble.classList.add("fortress-bubble");
+  } else if (st.tamed) {
+    mainHornet.classList.add("slowed");
+    mainHornet.textContent = "🐝";
+    bubble.classList.add("tamed-bubble");
+  } else {
+    mainHornet.textContent = st.attacking ? "💢" : "🐝";
+    if (st.attacking) mainHornet.classList.add("attacking");
+  }
+
+  document.querySelectorAll(".hw-node").forEach(n => n.classList.remove("current"));
+  const activeNode = document.getElementById(st.node);
+  if (activeNode) activeNode.classList.add("current");
+
+  const isSafe = st.tamed || st.fortress;
+  document.getElementById("node-1").className = "hw-node " + (st.fortress ? "green" : (st.tamed ? "" : "red")) + (st.node === "node-1" ? " current" : "");
+  document.getElementById("node-2").className = "hw-node " + (st.fortress ? "blue" : "") + (st.node === "node-2" ? " current" : "");
+  document.getElementById("node-4").className = "hw-node " + (isSafe ? "green" : "red") + (st.node === "node-4" ? " current" : "");
+  document.getElementById("node-6").className = "hw-node " + (isSafe ? "green" : "red") + (st.node === "node-6" ? " current" : "");
+  document.getElementById("node-7").className = "hw-node " + (st.fortress ? "green" : (st.tamed ? "" : "red")) + (st.node === "node-7" ? " current" : "");
+
+  document.getElementById("title-1").textContent = st.t1 || "1. Chúa UV4.exe (KeilC)";
+  document.getElementById("sub-1").textContent   = st.s1 || "Xua bầy .FLM đi cướp mật";
+  document.getElementById("title-2").textContent = st.t2 || "2. Cửa Tổ SWD (72MHz)";
+  document.getElementById("sub-2").textContent   = st.s2 || "Bầy .FLM tràn qua quá nhanh!";
+  document.getElementById("title-3").textContent = st.t3 || "3. Địa Bàn SRAM";
+  document.getElementById("sub-3").textContent   = st.s3 || "0x20000000: .FLM chiếm đóng";
+  document.getElementById("title-4").textContent = st.t4 || "4. Trạm Canh Nhịp ACR";
+  document.getElementById("sub-4").textContent   = st.s4 || "FLM_Init() ép ACR = 0 (0 WS)!";
+  document.getElementById("title-5").textContent = st.t5 || "5. Kho Mật & Khiên .ini";
+  document.getElementById("sub-5").textContent   = st.s5 || "Dựng khiên .ini muộn -> Lỗi!";
+  document.getElementById("title-6").textContent = st.t6 || "6. Bạo Loạn Trên Khay 64-Bit";
+  document.getElementById("sub-6").textContent   = st.s6 || "2 bên xô xát: Trượt Addr - 8!";
+  document.getElementById("title-7").textContent = st.t7 || "7. Ong Chúa Chết & Vỡ Tổ";
+  document.getElementById("sub-7").textContent   = st.s7 || "UV4.exe thoát (0xC000041D)!";
+
+  document.getElementById("splatter-6").className = "splatter-fx" + (st.splatter6 ? " show" : "");
+  document.getElementById("splatter-7").className = "splatter-fx" + (st.splatter7 ? " show" : "");
+
+  document.querySelectorAll(".wire-flow").forEach(w => {
+    w.classList.remove("active", "tamed", "fortress");
+    if (st.wires && st.wires.includes(w.id)) {
+      w.classList.add("active");
+      if (st.tamed)    w.classList.add("tamed");
+      if (st.fortress) w.classList.add("fortress");
+    }
+  });
+
+  document.getElementById("hud-speed").textContent  = st.speed;
+  document.getElementById("hud-shield").textContent = st.shield;
+  const hudStatus = document.getElementById("hud-status");
+  hudStatus.textContent = st.status;
+  hudStatus.className   = "hud-pill " + (st.fortress ? "ok" : (st.tamed ? "gold" : "warn"));
+
+  document.getElementById("story-bar").innerHTML = st.story;
+
+  document.querySelectorAll(".c-line").forEach((el, idx) => {
+    el.className = "c-line";
+    if (idx === st.codeIdx) {
+      if (st.fortress) el.classList.add("active-fortress");
+      else if (st.tamed) el.classList.add("active-fence");
+      else el.classList.add("active-raid");
+    }
+  });
+
+  moveSwarmAlongWaypoints(st.pathFromPrev, instant, onArrivedCallback);
+}
+
+function setScenario(scName) {
+  stopPlay();
+  currentScenario = scName;
+  stepIdx = 0;
+  document.querySelectorAll(".scenario-group .btn").forEach(b => b.classList.remove("active"));
+  document.getElementById("sc-" + scName).classList.add("active");
+  buildCodeList();
+  renderState(true);
+  togglePlay();
+}
+
+function nextStep() {
+  stopPlay();
+  const steps = SCENARIOS[currentScenario].steps;
+  if (stepIdx < steps.length - 1) stepIdx++;
+  renderState(true);
+}
+
+function prevStep() {
+  stopPlay();
+  if (stepIdx > 0) stepIdx--;
+  renderState(true);
+}
+
+function resetSim() {
+  stopPlay();
+  stepIdx = 0;
+  renderState(true);
+}
+
+function jumpToCode(cIdx) {
+  stopPlay();
+  const steps = SCENARIOS[currentScenario].steps;
+  const found = steps.findIndex(s => s.codeIdx === cIdx);
+  if (found !== -1) {
+    stepIdx = found;
+    renderState(true);
+  }
+}
+
+function scheduleNextAutoStep() {
+  if (!playing) return;
+  const steps = SCENARIOS[currentScenario].steps;
+  autoDwellTimer = setTimeout(() => {
+    if (!playing) return;
+    if (stepIdx < steps.length - 1) {
+      stepIdx++;
+      renderState(false, () => { scheduleNextAutoStep(); });
+    } else {
+      stopPlay();
+    }
+  }, 2800);
+}
+
+function togglePlay() {
+  if (playing) { stopPlay(); return; }
+  const steps = SCENARIOS[currentScenario].steps;
+  if (stepIdx >= steps.length - 1) stepIdx = 0;
+  playing = true;
+  document.getElementById("btn-play").textContent = "⏸ Tạm dừng";
+  renderState(true, () => { scheduleNextAutoStep(); });
+}
+
+function stopPlay() {
+  playing = false;
+  stopCurrentMotion();
+  document.getElementById("btn-play").textContent = "▶ Chạy Animation";
+}
+
+document.addEventListener("keydown", e => {
+  if (e.key === "ArrowRight") nextStep();
+  if (e.key === "ArrowLeft")  prevStep();
+  if (e.key === " ") { e.preventDefault(); togglePlay(); }
+});
+
+buildCodeList();
+renderState(true);
+</script>
+</body>
+</html>

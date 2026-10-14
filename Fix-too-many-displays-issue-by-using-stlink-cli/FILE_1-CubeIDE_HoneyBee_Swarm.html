@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STM32CubeIDE HoneyBee Swarm — Đàn Ong Mật Cần Mẫn & Mùa Thu Hoạch Mật</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 100%; height: 100vh; overflow: hidden;
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    background: #FFFBEB; color: #0F172A;
+  }
+
+  .app {
+    display: flex; flex-direction: column;
+    width: 100%; height: 100vh; padding: 14px 20px; gap: 12px;
+  }
+
+  /* ===== HEADER & CONTROLS ===== */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    background: #FFFFFF; border: 2px solid #F59E0B; border-radius: 14px;
+    padding: 10px 18px; box-shadow: 0 4px 12px rgba(245,158,11,0.12);
+    flex-wrap: wrap; gap: 10px;
+  }
+  .brand {
+    font-size: 18.5px; font-weight: 800; color: #92400E;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .scenario-group, .ctrl-group {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .btn {
+    padding: 8px 13px; border-radius: 10px; font-size: 12.5px; font-weight: 700;
+    cursor: pointer; border: 2px solid #CBD5E1; background: #F8FAFC; color: #334155;
+    transition: background 0.15s, transform 0.1s; font-family: inherit;
+    user-select: none;
+  }
+  .btn:hover { transform: translateY(-1px); border-color: #D97706; }
+  .btn:active { transform: translateY(0); }
+  .btn.primary { background: #FEF3C7; border-color: #D97706; color: #92400E; }
+  .btn.sc-overflow.active { background: #DCFCE7; border-color: #16A34A; color: #14532D; box-shadow: 0 0 12px rgba(22,163,74,0.28); }
+  .btn.sc-manual.active   { background: #DBEAFE; border-color: #2563EB; color: #1E3A8A; box-shadow: 0 0 12px rgba(37,99,235,0.28); }
+
+  /* ===== MAIN SPLIT SCREEN ===== */
+  .workspace {
+    flex: 1; display: grid;
+    grid-template-columns: 1.38fr 1fr;
+    gap: 16px; min-height: 0;
+  }
+
+  /* ===== LEFT: BEEHIVE FARM CANVAS ===== */
+  .board-panel {
+    background: #1C1917; border: 3px solid #78350F; border-radius: 16px;
+    position: relative; overflow: hidden;
+    display: flex; flex-direction: column; justify-content: space-between;
+    box-shadow: inset 0 0 60px rgba(0,0,0,0.75);
+  }
+  .honeycomb-grid {
+    position: absolute; inset: 0;
+    background-image: 
+      radial-gradient(circle, rgba(251,191,36,0.13) 2px, transparent 2px),
+      linear-gradient(rgba(251,191,36,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(251,191,36,0.05) 1px, transparent 1px);
+    background-size: 28px 28px;
+    pointer-events: none;
+  }
+
+  .board-hud {
+    position: relative; z-index: 5;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 11px 18px; background: rgba(28,25,23,0.92);
+    border-bottom: 1px solid #78350F; color: #FEF3C7;
+  }
+  .hud-chips { display: flex; gap: 10px; font-size: 12.5px; font-weight: 700; flex-wrap: wrap; }
+  .hud-pill {
+    padding: 4px 12px; border-radius: 999px;
+    background: #292524; border: 1px solid #D97706; color: #FBBF24;
+  }
+  .hud-pill.ok    { color: #4ADE80; border-color: #22C55E; background: rgba(20,83,45,0.45); }
+  .hud-pill.sleep { color: #93C5FD; border-color: #3B82F6; background: rgba(30,58,138,0.45); }
+
+  .map-stage {
+    position: relative; flex: 1; width: 100%; height: 100%;
+  }
+
+  /* SVG Orthogonal Trails */
+  .wires-svg {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 1;
+  }
+  .wire-bg {
+    fill: none; stroke: #44403C; stroke-width: 7;
+    stroke-linecap: round; stroke-linejoin: round;
+  }
+  .wire-flow {
+    fill: none; stroke: #FBBF24; stroke-width: 7;
+    stroke-linecap: round; stroke-linejoin: round;
+    stroke-dasharray: 12 10; animation: dashFlow 0.9s linear infinite;
+    opacity: 0.15; transition: opacity 0.25s, stroke 0.25s;
+  }
+  .wire-flow.active   { opacity: 1; }
+  .wire-flow.ext-mode { stroke: #38BDF8; }
+  @keyframes dashFlow { to { stroke-dashoffset: -22; } }
+
+  .wire-joint { fill: #78350F; stroke: #FBBF24; stroke-width: 2; }
+
+  /* Stations */
+  .hw-node {
+    position: absolute; transform: translate(-50%, -50%);
+    width: 186px; padding: 10px 12px; border-radius: 12px;
+    background: #FEF3C7; border: 3px solid #D97706; color: #78350F;
+    text-align: center; z-index: 2;
+    box-shadow: 0 8px 0 #B45309, 0 12px 20px rgba(0,0,0,0.5);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  }
+  .hw-node .n-title { font-size: 13.5px; font-weight: 800; line-height: 1.2; }
+  .hw-node .n-sub   { font-size: 11px; font-weight: 600; margin-top: 4px; opacity: 0.92; font-family: Consolas, monospace; }
+
+  .hw-node.blue {
+    background: #DBEAFE; border-color: #2563EB; color: #1E3A8A;
+    box-shadow: 0 8px 0 #1D4ED8, 0 12px 20px rgba(0,0,0,0.5);
+  }
+  .hw-node.green {
+    background: #DCFCE7; border-color: #16A34A; color: #14532D;
+    box-shadow: 0 8px 0 #15803D, 0 12px 20px rgba(0,0,0,0.5);
+  }
+  .hw-node.gold-overflow {
+    background: linear-gradient(135deg, #FEF08A, #F59E0B);
+    border-color: #FFFBEB; color: #78350F;
+    box-shadow: 0 8px 0 #B45309, 0 0 35px #FBBF24;
+  }
+
+  .hw-node.current {
+    transform: translate(-50%, -55%) scale(1.06);
+    box-shadow: 0 12px 0 #FBBF24, 0 0 30px rgba(251,191,36,0.95);
+  }
+
+  /* Overflowing Honey Drops Animation on Station 7 */
+  .honey-drops {
+    position: absolute; top: -18px; right: -10px;
+    font-size: 20px; display: none;
+    animation: dripHoney 0.8s ease-in-out infinite alternate;
+  }
+  .honey-drops.show { display: block; }
+  @keyframes dripHoney {
+    from { transform: translateY(-3px) scale(0.95); }
+    to   { transform: translateY(5px) scale(1.1); }
+  }
+
+  /* ===== THE BEE SWARM (CẢ ĐÀN ONG MẬT) ===== */
+  .avatar-wrap {
+    position: absolute; left: 16%; top: 18%;
+    transform: translate(-50%, -50%);
+    z-index: 10; pointer-events: none;
+    will-change: left, top;
+  }
+  .swarm-cluster {
+    position: relative; width: 74px; height: 74px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .main-bee {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #FEF08A, #F59E0B 70%, #B45309);
+    border: 3px solid #FFFFFF;
+    box-shadow: 0 0 22px #FBBF24, 0 0 40px rgba(251,191,36,0.7);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 25px; z-index: 3;
+    animation: hoverMainBee 0.85s ease-in-out infinite alternate;
+  }
+  .main-bee.cli-mode {
+    background: radial-gradient(circle at 30% 30%, #BAE6FD, #0284C7 70%, #1E3A8A);
+    box-shadow: 0 0 22px #38BDF8, 0 0 40px rgba(56,189,248,0.7);
+  }
+  /* Escort Worker Bees in the Swarm */
+  .mini-bee {
+    position: absolute; font-size: 17px;
+    filter: drop-shadow(0 0 6px #FBBF24);
+    z-index: 4;
+  }
+  .mini-bee.b1 { top: -8px; left: -6px; animation:orbit1 0.65s ease-in-out infinite alternate; }
+  .mini-bee.b2 { top: -6px; right: -8px; animation:orbit2 0.75s ease-in-out infinite alternate; }
+  .mini-bee.b3 { bottom: -6px; left: -8px; animation:orbit2 0.6s ease-in-out infinite alternate-reverse; }
+  .mini-bee.b4 { bottom: -8px; right: -6px; animation:orbit1 0.8s ease-in-out infinite alternate-reverse; }
+
+  @keyframes hoverMainBee {
+    from { transform: translateY(-3px); }
+    to   { transform: translateY(3px); }
+  }
+  @keyframes orbit1 {
+    from { transform: translate(-3px, -4px) rotate(-8deg); }
+    to   { transform: translate(4px, 3px) rotate(8deg); }
+  }
+  @keyframes orbit2 {
+    from { transform: translate(3px, -3px) rotate(6deg); }
+    to   { transform: translate(-4px, 4px) rotate(-6deg); }
+  }
+
+  .speech-bubble {
+    position: absolute; bottom: 72px; left: 50%;
+    transform: translateX(-50%);
+    width: 275px; background: #FFFBEB; color: #78350F;
+    border: 2px solid #D97706; border-radius: 12px;
+    padding: 8px 11px; font-size: 12.5px; font-weight: 700;
+    line-height: 1.35; text-align: center;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.55);
+  }
+  .speech-bubble::after {
+    content: ""; position: absolute; top: 100%; left: 50%;
+    transform: translateX(-50%);
+    border-width: 7px; border-style: solid;
+    border-color: #D97706 transparent transparent transparent;
+  }
+  .speech-bubble.cli-bubble {
+    background: #EFF6FF; border-color: #2563EB; color: #1E3A8A;
+  }
+
+  .story-bar {
+    position: relative; z-index: 5;
+    background: rgba(28,25,23,0.95); border-top: 1px solid #78350F;
+    padding: 12px 18px; color: #FEF3C7; font-size: 13.8px; line-height: 1.45;
+  }
+  .story-bar b { color: #FBBF24; }
+
+  /* ===== RIGHT: SYNCHRONIZED CODE & LOG PANEL ===== */
+  .code-panel {
+    background: #FFFFFF; border: 2px solid #F59E0B; border-radius: 16px;
+    display: flex; flex-direction: column; overflow: hidden;
+    box-shadow: 0 4px 14px rgba(15,23,42,0.06);
+  }
+  .code-header {
+    padding: 12px 16px; background: #FEF3C7; border-bottom: 2px solid #F59E0B;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .code-header .ch-title { font-size: 14.5px; font-weight: 800; color: #92400E; }
+  .code-header .ch-sub   { font-size: 12px; font-weight: 600; color: #78350F; }
+
+  .code-list {
+    flex: 1; padding: 10px 12px; overflow-y: auto;
+    font-family: "Consolas", "Courier New", monospace; font-size: 12.6px;
+    display: flex; flex-direction: column; gap: 4px;
+    background: #1C1917; color: #E7E5E4;
+  }
+  .c-line {
+    display: flex; align-items: center; padding: 6px 8px;
+    border-radius: 8px; border-left: 4px solid transparent;
+    transition: background 0.15s; cursor: pointer;
+  }
+  .c-line:hover { background: rgba(251,191,36,0.08); }
+  .c-num { width: 26px; color: #A8A29E; font-size: 12px; user-select: none; }
+  .c-ptr { width: 24px; font-size: 14px; opacity: 0; }
+  .c-text { flex: 1; white-space: pre; }
+
+  .c-line.active {
+    background: rgba(251,191,36,0.22); border-left-color: #FBBF24;
+    color: #FEF08A; font-weight: 700;
+  }
+  .c-line.active .c-ptr { opacity: 1; }
+
+  .c-line.active-cli {
+    background: rgba(56,189,248,0.22); border-left-color: #38BDF8;
+    color: #E0F2FE; font-weight: 700;
+  }
+  .c-line.active-cli .c-ptr { opacity: 1; }
+
+  .code-footer {
+    padding: 10px 14px; background: #FFFBEB; border-top: 2px solid #F59E0B;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 12px; font-weight: 600; color: #78350F;
+  }
+  .legend-dots { display: flex; gap: 12px; align-items: center; }
+  .ld { display: flex; align-items: center; gap: 5px; }
+  .sw { width: 15px; height: 15px; border-radius: 4px; display: inline-block; }
+  .sw-y { background: #FEF3C7; border: 2px solid #D97706; }
+  .sw-b { background: #DBEAFE; border: 2px solid #2563EB; }
+  .sw-g { background: #DCFCE7; border: 2px solid #16A34A; }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ==================== TOP BAR ==================== -->
+  <div class="topbar">
+    <div class="brand">🐝🌸 Đàn Ong Mật STM32CubeIDE — Hút Mật Hoa, Nuôi Ong Chúa &amp; Thu Hoạch Mật</div>
+
+    <div class="scenario-group">
+      <button class="btn sc-overflow active" id="sc-overflow" onclick="setScenario('overflow')">🍯 1. Internal Run: Ong Chúa Lớn Nhanh, Mật Tự Trào (Không cần bấm RST)</button>
+      <button class="btn sc-manual" id="sc-manual" onclick="setScenario('manual')">👨‍🌾 2. External CLI: Tổ Đầy Mật Khi Ong Chúa Đang Ngủ (Nông dân bấm RST thu hoạch)</button>
+    </div>
+
+    <div class="ctrl-group">
+      <button class="btn primary" id="btn-play" onclick="togglePlay()">▶ Chạy Animation</button>
+      <button class="btn" onclick="prevStep()">◀ Lùi</button>
+      <button class="btn" onclick="nextStep()">Tiếp ▶</button>
+      <button class="btn" onclick="resetSim()">⟲ Đầu</button>
+    </div>
+  </div>
+
+  <!-- ==================== SPLIT WORKSPACE ==================== -->
+  <div class="workspace">
+
+    <!-- ---------- LEFT: BEEHIVE FARM MAP ---------- -->
+    <div class="board-panel">
+      <div class="honeycomb-grid"></div>
+
+      <div class="board-hud">
+        <div style="font-weight:800; font-size:14px;">🌻 HÀNH TRÌNH ĐÀN ONG MẬT CUBEIDE (CHUẨN MỰC — KHÔNG BAO GIỜ VỠ TỔ)</div>
+        <div class="hud-chips">
+          <span class="hud-pill" id="hud-mode">Chế độ: Internal Run</span>
+          <span class="hud-pill" id="hud-queen">Ong Chúa: Đang lớn (72MHz)</span>
+          <span class="hud-pill ok" id="hud-farmer">Nông dân: Ngồi hứng mật!</span>
+        </div>
+      </div>
+
+      <div class="map-stage">
+        <!-- SVG Orthogonal Trails (1000x600 coordinate space) -->
+        <svg class="wires-svg" viewBox="0 0 1000 600" preserveAspectRatio="none">
+          <path class="wire-bg" d="M 160 108 L 480 108 L 810 108" />
+          <path class="wire-bg" d="M 810 108 L 810 300 L 500 300" />
+          <path class="wire-bg" d="M 500 300 L 200 300 L 200 492 L 500 492 L 820 492" />
+
+          <circle class="wire-joint" cx="810" cy="300" r="7" />
+          <circle class="wire-joint" cx="200" cy="492" r="7" />
+
+          <path class="wire-flow active" id="w-1-2" d="M 160 108 L 480 108" />
+          <path class="wire-flow" id="w-2-3" d="M 480 108 L 810 108" />
+          <path class="wire-flow" id="w-3-4" d="M 810 108 L 810 300 L 500 300" />
+          <path class="wire-flow" id="w-4-5" d="M 500 300 L 200 300" />
+          <path class="wire-flow" id="w-5-6" d="M 200 300 L 200 492 L 500 492" />
+          <path class="wire-flow" id="w-6-7" d="M 500 492 L 820 492" />
+        </svg>
+
+        <!-- STATION 1: FLOWER TREE (16%, 18%) -->
+        <div class="hw-node" id="node-1" style="left: 16%; top: 18%;">
+          <div class="n-title">1. Cây Hoa Code (.elf)</div>
+          <div class="n-sub" id="sub-1">Đàn ong hút mật hoa GCC</div>
+        </div>
+
+        <!-- STATION 2: HIVE ENTRANCE SWD (48%, 18%) -->
+        <div class="hw-node blue" id="node-2" style="left: 48%; top: 18%;">
+          <div class="n-title">2. Cửa Tổ SWD (NOJTAG)</div>
+          <div class="n-sub" id="sub-2">Đàn ong nối đuôi về tổ</div>
+        </div>
+
+        <!-- STATION 3: CALMING & CLEANING (81%, 18%) -->
+        <div class="hw-node green" id="node-3" style="left: 81%; top: 18%;">
+          <div class="n-title">3. Trạm Dọn Tổ Êm Ái</div>
+          <div class="n-sub" id="sub-3">Reset &amp; Halt (An toàn)</div>
+        </div>
+
+        <!-- STATION 4: HONEYCOMB STORAGE (50%, 50%) -->
+        <div class="hw-node" id="node-4" style="left: 50%; top: 50%; width: 205px;">
+          <div class="n-title">4. Kho Sáp Ong Flash</div>
+          <div class="n-sub" id="sub-4">Ủ mật vào 0x08000000</div>
+        </div>
+
+        <!-- STATION 5: PURE HONEY VERIFY (20%, 50%) -->
+        <div class="hw-node green" id="node-5" style="left: 20%; top: 50%;">
+          <div class="n-title">5. Lọc Mật Tinh Khiết</div>
+          <div class="n-sub" id="sub-5">Verify OK 100% (Đầy tổ!)</div>
+        </div>
+
+        <!-- STATION 6: FEEDING QUEEN BEE (50%, 82%) -->
+        <div class="hw-node blue" id="node-6" style="left: 50%; top: 82%; width: 205px;">
+          <div class="n-title">6. Cung Điện Ong Chúa</div>
+          <div class="n-sub" id="sub-6">Nuôi Ong Chúa (PC &amp; 72MHz)</div>
+        </div>
+
+        <!-- STATION 7: HONEY HARVEST FOR FARMER (82%, 82%) -->
+        <div class="hw-node green" id="node-7" style="left: 82%; top: 82%; width: 205px;">
+          <div class="honey-drops" id="honey-drops">🍯💧✨</div>
+          <div class="n-title">7. Mùa Thu Hoạch Mật</div>
+          <div class="n-sub" id="sub-7">Mật tự trào ra ngoài!</div>
+        </div>
+
+        <!-- THE HONEYBEE SWARM AVATAR -->
+        <div class="avatar-wrap" id="avatar" style="left: 16%; top: 18%;">
+          <div class="speech-bubble" id="bubble">Cả đàn ong mật cẩn thận ghé cây hoa .elf hút từng giọt mật đem về tổ nào!</div>
+          <div class="swarm-cluster">
+            <span class="mini-bee b1">🐝</span>
+            <span class="mini-bee b2">🐝</span>
+            <div class="main-bee" id="main-bee">🐝</div>
+            <span class="mini-bee b3">🐝</span>
+            <span class="mini-bee b4">🐝</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="story-bar" id="story-bar">
+        <b>Câu chuyện:</b> Bấm <b>▶ Chạy Animation</b> để xem cả đàn ong mật cần mẫn bay theo đường vuông góc từ Cây Hoa về nuôi Ong Chúa và tạo mật cho Người Nông Dân!
+      </div>
+    </div>
+
+    <!-- ---------- RIGHT: SYNCHRONIZED CODE & LOG ---------- -->
+    <div class="code-panel">
+      <div class="code-header">
+        <div class="ch-title">📜 Nhật Ký Đàn Ong Mật &amp; Dòng Code C (STM32CubeIDE)</div>
+        <div class="ch-sub">Click dòng bất kỳ để đàn ong bay tức thì tới đó</div>
+      </div>
+
+      <div class="code-list" id="code-list"></div>
+
+      <div class="code-footer">
+        <div class="legend-dots">
+          <span class="ld"><span class="sw sw-y"></span>Cây Hoa / Kho Mật</span>
+          <span class="ld"><span class="sw sw-b"></span>Cung Điện Ong Chúa</span>
+          <span class="ld"><span class="sw sw-g"></span>Thu Hoạch Mật</span>
+        </div>
+        <div>Phím tắt: <b>Space</b> (Auto) · <b>←/→</b> (Nhảy tức thì)</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const SCENARIOS = {
+  overflow: {
+    code: [
+      { line: 1, text: "// [KỊCH BẢN 1: MẬT TỰ TRÀO — NGƯỜI NÔNG DÂN CHỈ VIỆC HỨNG MẬT]" },
+      { line: 2, text: "Build -> Cây hoa nở rộ: Debug/LED_PC13_LL_CUBEIDE.elf" },
+      { line: 3, text: "SWD Connect -> Đàn ong bay qua cửa tổ (LL_GPIO_AF_Remap_SWJ_NOJTAG)" },
+      { line: 4, text: "CubeProgrammer -> Dọn tổ êm ái (Reset & Halt về trạng thái an toàn)" },
+      { line: 5, text: "Flash Programming -> Đàn ong rót đầy mật hoa vào sáp ong 0x08000000" },
+      { line: 6, text: "Verify Flash -> Download verified successfully (Mật tinh khiết 100%!)" },
+      { line: 7, text: "Feed Queen Bee -> GDB nạp sữa chúa (PC = Reset_Handler, lên 72MHz)" },
+      { line: 8, text: "Auto Resume -> Ong Chúa đẻ nhiều, mật tự trào ra ngoài (Không cần bấm RST!)" }
+    ],
+    steps: [
+      {
+        codeIdx: 1, node: "node-1", x: 16, y: 18,
+        pathFromPrev: [{x: 16, y: 18}],
+        mode: "Chế độ: Internal Run", queen: "Ong Chúa: Đang đợi sữa", farmer: "Nông dân: Bấm nút Run xanh",
+        bubble: "Cả đàn ong cẩn thận đáp xuống Cây Hoa .elf, hút từng giọt mật ngọt ngào nhất!",
+        story: "<b>Bước 1 (Ghé Cây Hoa Hút Mật):</b> Khi Người Nông Dân bấm nút <b>Run</b> trên STM32CubeIDE, cả đàn ong mật bay tới Cây Hoa <code>LED_PC13_LL_CUBEIDE.elf</code> để hút mật hoa đem về.",
+        wires: ["w-1-2"]
+      },
+      {
+        codeIdx: 2, node: "node-2", x: 48, y: 18,
+        pathFromPrev: [{x: 16, y: 18}, {x: 48, y: 18}],
+        mode: "Chế độ: Internal Run", queen: "Ong Chúa: Đang đợi sữa", farmer: "Cửa tổ mở rộng (NOJTAG)",
+        bubble: "Bay theo hàng lối qua Cửa Tổ SWD! Nhờ hàm NOJTAG nên cửa tổ luôn mở thông thoáng!",
+        story: "<b>Bước 2 (Đem mật về Cửa Tổ SWD):</b> Đàn ong nối đuôi nhau bay ngang qua cổng <code>SWDIO/SWCLK</code> (đã được bảo vệ bởi <code>LL_GPIO_AF_Remap_SWJ_NOJTAG()</code>).",
+        wires: ["w-1-2", "w-2-3"]
+      },
+      {
+        codeIdx: 3, node: "node-3", x: 81, y: 18,
+        pathFromPrev: [{x: 48, y: 18}, {x: 81, y: 18}],
+        mode: "CubeProgrammer Core", queen: "Tổ ong: Hạ nhịp êm ái", farmer: "Không bao giờ vỡ tổ!",
+        bubble: "Đàn ong mật tụi mình rất cẩn thận: quạt cánh làm mát tổ về 8 MHz êm đềm trước khi rót mật!",
+        story: "<b>Bước 3 (Dọn tổ cẩn thận):</b> Không hung hãn như Ong Bắp Cày KeilC, đàn ong mật của CubeIDE luôn thực hiện <code>Reset &amp; Halt</code> chuẩn mực để làm dịu tổ ong trước khi cất mật.",
+        wires: ["w-1-2", "w-2-3", "w-3-4"]
+      },
+      {
+        codeIdx: 4, node: "node-4", x: 50, y: 50,
+        pathFromPrev: [{x: 81, y: 18}, {x: 81, y: 50}, {x: 50, y: 50}],
+        mode: "CubeProgrammer Core", queen: "Kho sáp: Đang nhận mật", farmer: "0x08000000: Đang làm đầy...",
+        bubble: "Rẽ vuông góc xuống Kho Sáp Ong Flash (0x08000000), rót từng giọt mật hoa vào từng ô sáp!",
+        story: "<b>Bước 4 (Luyện mật trong Kho Sáp Flash):</b> Đàn ong bay vuông góc xuống Kho Sáp Ong <code>0x08000000</code>, cần mẫn luyện mật hoa thành mật ong vàng óng.",
+        wires: ["w-1-2", "w-2-3", "w-3-4", "w-4-5"]
+      },
+      {
+        codeIdx: 5, node: "node-5", x: 20, y: 50,
+        pathFromPrev: [{x: 50, y: 50}, {x: 20, y: 50}],
+        mode: "Verify Flash", queen: "Kho mật: Đầy ắp 100%!", farmer: "Download verified!",
+        bubble: "Kiểm tra chất lượng mật: Tinh khiết 100% (Download verified successfully), đầy ắp cả tổ rồi!",
+        story: "<b>Bước 5 (Tạo ra Mật Ong Tinh Khiết 100%):</b> Toàn bộ mật trong tổ được kiểm định (Verify) đạt chuẩn tuyệt đối, không bao giờ xảy ra lỗi <code>Contents mismatch</code>!",
+        wires: ["w-1-2", "w-2-3", "w-3-4", "w-4-5", "w-5-6"]
+      },
+      {
+        codeIdx: 6, node: "node-6", x: 50, y: 82,
+        pathFromPrev: [{x: 20, y: 50}, {x: 20, y: 82}, {x: 50, y: 82}],
+        mode: "GDB Server Feed", queen: "👑 Ong Chúa: Khỏe mạnh 72MHz!", farmer: "Bất chấp cả BOOT0 = 1!",
+        bubble: "Dâng sữa chúa tận miệng cho Ong Chúa (ép thẳng PC & MSP vào Flash, bất chấp cả Jumper BOOT0=1)!",
+        story: "<b>👑 Bước 6 (Nuôi Ong Chúa Lớn Nhanh &amp; Khỏe Mạnh):</b> Đàn ong mớm sữa chúa trực tiếp vào thanh ghi <b>PC (R15)</b> và <b>MSP (R13)</b> của Ong Chúa Cortex-M3 rồi bật <code>PLL 72 MHz</code> (kể cả khi cổng <code>BOOT0 = 1</code> chưa gạt về <code>0</code>, Ong Chúa vẫn khỏe mạnh bay ngay!).",
+        wires: ["w-1-2", "w-2-3", "w-3-4", "w-4-5", "w-5-6", "w-6-7"],
+        sub6: "Ong Chúa cực khỏe (72MHz)!"
+      },
+      {
+        codeIdx: 7, node: "node-7", x: 82, y: 82,
+        pathFromPrev: [{x: 50, y: 82}, {x: 82, y: 82}],
+        mode: "Auto Resume", queen: "👑 Ong Chúa: Đẻ cực năng suất!", farmer: "🍯 Nông dân chỉ việc hứng mật!",
+        bubble: "Ong Chúa khỏe quá, tổ đẻ nhiều, mật ong tự trào ra ngoài luôn! Bác Nông Dân cứ hứng mật thôi, khỏi bấm Reset!",
+        story: "<b>🍯💧 Bước 7 (Mật Tự Trào Ra Ngoài — Không Cần Bấm Reset Vật Lý):</b> Nhờ Ong Chúa khỏe mạnh và cờ <code>Resume</code> tự động của nút Run, tổ ong hoạt động siêu năng suất làm <b>mật ong tự trào ra ngoài (LED PC13 tự chớp sáng 72 MHz ngay lập tức)</b>. Người Nông Dân không cần động tay bấm nút Reset vật lý mà chỉ việc đặt thùng hứng mật!",
+        wires: ["w-1-2", "w-2-3", "w-3-4", "w-4-5", "w-5-6", "w-6-7"],
+        overflow: true, sub7: "🍯 Mật tự trào! Khỏi bấm RST!"
+      }
+    ]
+  },
+
+  manual: {
+    code: [
+      { line: 1, text: "// [KỊCH BẢN 2: ONG CHÚA CHƯA KỊP LỚN MÀ TỔ ĐÃ ĐẦY MẬT -> BẤM RST THU HOẠCH]" },
+      { line: 2, text: "// Thiết lập tại: External Tools Configurations -> STM32_Programmer_CLI.exe" },
+      { line: 3, text: "Args: -c port=SWD -d \"C:\\...\\LED_PC13_LL_CUBEIDE.elf\" -v" },
+      { line: 4, text: "// (Chú ý: Không có cờ -rst hay -run ở cuối dòng lệnh)" },
+      { line: 5, text: "SWD Connect -> Đàn ong thợ CLI âm thầm bay từ cây hoa .elf vào tổ" },
+      { line: 6, text: "Flash & Verify -> Đàn ong làm đầy ắp mật vào kho 0x08000000 (Verify OK!)" },
+      { line: 7, text: "Queen Sleeping -> Ong Chúa vẫn đang ngủ yên trong kén (CPU Halted)" },
+      { line: 8, text: "👨‍🌾 Farmer Action -> Người Nông Dân tự tay bấm nút RESET vật lý để thu hoạch mật!" }
+    ],
+    steps: [
+      {
+        codeIdx: 2, node: "node-1", x: 16, y: 18,
+        pathFromPrev: [{x: 16, y: 18}],
+        mode: "External Tools CLI", queen: "Ong Chúa: Còn nhỏ / Đang ngủ", farmer: "Nông dân: Gọi đàn ong CLI",
+        bubble: "Chuyến này tụi mình là Đàn Ong Thợ CLI! Đi gom mật về tích trữ đầy tổ trước khi Ong Chúa thức dậy!",
+        story: "<b>Bước 1 (Gom mật theo lệnh External Tools CLI):</b> Người Nông Dân bấm vào biểu tượng <i>Chiếc Vali Xanh</i>, gọi đàn ong <code>STM32_Programmer_CLI.exe</code> với đường dẫn tuyệt đối tới Cây Hoa <code>.elf</code>.",
+        wires: ["w-1-2"], cliStyle: true
+      },
+      {
+        codeIdx: 4, node: "node-2", x: 48, y: 18,
+        pathFromPrev: [{x: 16, y: 18}, {x: 48, y: 18}],
+        mode: "Cờ: -c port=SWD", queen: "Ong Chúa: Đang ngủ yên", farmer: "Vào tổ êm ái",
+        bubble: "Bay qua cửa tổ SWD nhẹ nhàng để không làm Ong Chúa thức giấc sớm!",
+        story: "<b>Bước 2 (Vào Cửa Tổ bằng cờ <code>-c port=SWD</code>):</b> Đàn ong bay ngang vào cổng SWD một cách trật tự.",
+        wires: ["w-1-2", "w-2-3"], cliStyle: true
+      },
+      {
+        codeIdx: 4, node: "node-3", x: 81, y: 18,
+        pathFromPrev: [{x: 48, y: 18}, {x: 81, y: 18}],
+        mode: "Halt Core", queen: "Ong Chúa: Ngủ trong kén", farmer: "Dọn kho sáp ong",
+        bubble: "Giữ yên tĩnh toàn bộ tổ ong (Halt CPU) để chuẩn bị rót mật vào kho dự trữ!",
+        story: "<b>Bước 3 (Giữ tổ ong yên tĩnh):</b> Công cụ CLI giữ vi điều khiển ở trạng thái nghỉ an toàn.",
+        wires: ["w-1-2", "w-2-3", "w-3-4"], cliStyle: true
+      },
+      {
+        codeIdx: 5, node: "node-4", x: 50, y: 50,
+        pathFromPrev: [{x: 81, y: 18}, {x: 81, y: 50}, {x: 50, y: 50}],
+        mode: "Cờ: -d \"...elf\"", queen: "Ong Chúa: Chưa kịp lớn", farmer: "Kho mật: Đang rót đầy...",
+        bubble: "Ong Chúa chưa kịp lớn mà tụi mình đã chăm chỉ đổ đầy ắp mật vào kho Flash 0x08000000 rồi!",
+        story: "<b>Bước 4 (Đổ đầy mật vào Kho Sáp <code>0x08000000</code>):</b> Cờ <code>-d</code> đưa toàn bộ mật mới từ file <code>.elf</code> vào kho Flash.",
+        wires: ["w-1-2", "w-2-3", "w-3-4", "w-4-5"], cliStyle: true
+      },
+      {
+        codeIdx: 5, node: "node-5", x: 20, y: 50,
+        pathFromPrev: [{x: 50, y: 50}, {x: 20, y: 50}],
+        mode: "Cờ: -v (Verify)", queen: "Ong Chúa: Vẫn đang ngủ", farmer: "Tổ ong: ĐÃ ĐẦY ẮP MẬT!",
+        bubble: "Kiểm định hoàn tất (Download verified successfully)! Tổ ong đã căng tràn mật vàng rồi!",
+        story: "<b>Bước 5 (Tổ Ong Đã Đầy Ắp Mật Tinh Khiết):</b> Cờ <code>-v</code> xác nhận mật trong tổ đã đầy 100% và sẵn sàng thu hoạch.",
+        wires: ["w-1-2", "w-2-3", "w-3-4", "w-4-5", "w-5-6"], cliStyle: true
+      },
+      {
+        codeIdx: 6, node: "node-6", x: 50, y: 82,
+        pathFromPrev: [{x: 20, y: 50}, {x: 20, y: 82}, {x: 50, y: 82}],
+        mode: "Không có -rst / -run", queen: "💤 Ong Chúa: Chưa thức dậy", farmer: "Mật khóa kín trong tổ",
+        bubble: "Vì Ong Chúa chưa kịp lớn (không có cờ -rst/-run), mật chưa tự trào ra mà nằm im trong tổ chờ Bác Nông Dân!",
+        story: "<b>💤 Bước 6 (Ong Chúa Chưa Kịp Lớn — Giữ Mật Nằm Im Trong Tổ):</b> Vì trong câu lệnh CLI không có cờ <code>-rst</code> hay <code>-run</code>, Ong Chúa (CPU) vẫn nằm ngủ yên (Halted), mật được niêm phong kín trong tổ chờ lệnh của Người Nông Dân.",
+        wires: ["w-1-2", "w-2-3", "w-3-4", "w-4-5", "w-5-6", "w-6-7"],
+        cliStyle: true, sub6: "💤 Ong Chúa đang ngủ yên"
+      },
+      {
+        codeIdx: 7, node: "node-7", x: 82, y: 82,
+        pathFromPrev: [{x: 50, y: 82}, {x: 82, y: 82}],
+        mode: "Chờ tay Nông Dân", queen: "Đợi xung Reset vật lý", farmer: "👨‍🌾 Bấm nút RST để thu hoạch!",
+        bubble: "Tổ đầy mật rồi Bác Nông Dân ơi! Bác hãy tự tay bấm nút RESET vật lý trên board để mở vòi thu hoạch mật nhé!",
+        story: "<b>👨‍🌾🍯 Bước 7 (Người Nông Dân Bấm RST Thủ Công Để Thu Hoạch):</b> Khi nào Người Nông Dân sẵn sàng, chỉ cần đưa tay <b>bấm nút RESET vật lý trên bo mạch</b>, toàn bộ kho mật lập tức bung ra cho chip chạy 72 MHz!",
+        wires: ["w-1-2", "w-2-3", "w-3-4", "w-4-5", "w-5-6", "w-6-7"],
+        cliStyle: true, sub7: "👨‍🌾 Bấm RST vật lý để lấy mật!"
+      }
+    ]
+  }
+};
+
+let currentScenario = "overflow";
+let stepIdx = 0;
+let playing = false;
+let autoDwellTimer = null;
+let animFrameId = null;
+
+function buildCodeList() {
+  const listEl = document.getElementById("code-list");
+  const lines = SCENARIOS[currentScenario].code;
+  listEl.innerHTML = lines.map((item, idx) => `
+    <div class="c-line" id="cline-${idx}" onclick="jumpToCode(${idx})">
+      <span class="c-num">${item.line}</span>
+      <span class="c-ptr">🐝</span>
+      <span class="c-text">${item.text}</span>
+    </div>
+  `).join("");
+}
+
+function stopCurrentMotion() {
+  if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
+  if (autoDwellTimer) { clearTimeout(autoDwellTimer); autoDwellTimer = null; }
+}
+
+function moveSwarmAlongWaypoints(waypoints, instant, onArrived) {
+  const avatar = document.getElementById("avatar");
+  if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
+
+  if (instant || !waypoints || waypoints.length < 2) {
+    const dest = waypoints ? waypoints[waypoints.length - 1] : {x: 16, y: 18};
+    avatar.style.left = dest.x + "%";
+    avatar.style.top  = dest.y + "%";
+    if (onArrived) onArrived();
+    return;
+  }
+
+  let segIdx = 0;
+  const segDuration = 650; // 650ms mỗi đoạn thẳng vuông góc
+  let segStartTime = null;
+
+  function stepFrame(timestamp) {
+    if (!segStartTime) segStartTime = timestamp;
+    const p0 = waypoints[segIdx];
+    const p1 = waypoints[segIdx + 1];
+    const elapsed = timestamp - segStartTime;
+    const t = Math.min(1, elapsed / segDuration);
+    const ease = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+    avatar.style.left = (p0.x + (p1.x - p0.x) * ease) + "%";
+    avatar.style.top  = (p0.y + (p1.y - p0.y) * ease) + "%";
+
+    if (t < 1) {
+      animFrameId = requestAnimationFrame(stepFrame);
+    } else {
+      segIdx++;
+      if (segIdx < waypoints.length - 1) {
+        segStartTime = null;
+        animFrameId = requestAnimationFrame(stepFrame);
+      } else {
+        animFrameId = null;
+        if (onArrived) onArrived();
+      }
+    }
+  }
+  animFrameId = requestAnimationFrame(stepFrame);
+}
+
+function renderState(instant = true, onArrivedCallback = null) {
+  const sc = SCENARIOS[currentScenario];
+  const st = sc.steps[stepIdx];
+
+  const mainBee = document.getElementById("main-bee");
+  const bubble  = document.getElementById("bubble");
+  bubble.textContent = st.bubble;
+
+  mainBee.className = "main-bee" + (st.cliStyle ? " cli-mode" : "");
+  bubble.className  = "speech-bubble" + (st.cliStyle ? " cli-bubble" : "");
+
+  document.querySelectorAll(".hw-node").forEach(n => n.classList.remove("current"));
+  const activeNode = document.getElementById(st.node);
+  if (activeNode) activeNode.classList.add("current");
+
+  const node7 = document.getElementById("node-7");
+  node7.className = "hw-node " + (st.overflow ? "gold-overflow" : "green") + (st.node === "node-7" ? " current" : "");
+  document.getElementById("honey-drops").className = "honey-drops" + (st.overflow ? " show" : "");
+
+  document.getElementById("sub-6").textContent = st.sub6 || "Nuôi Ong Chúa (PC & 72MHz)";
+  document.getElementById("sub-7").textContent = st.sub7 || "Mật tự trào ra ngoài!";
+
+  document.querySelectorAll(".wire-flow").forEach(w => {
+    w.classList.remove("active", "ext-mode");
+    if (st.wires && st.wires.includes(w.id)) {
+      w.classList.add("active");
+      if (st.cliStyle) w.classList.add("ext-mode");
+    }
+  });
+
+  document.getElementById("hud-mode").textContent   = st.mode;
+  document.getElementById("hud-queen").textContent  = st.queen;
+  const hudFarmer = document.getElementById("hud-farmer");
+  hudFarmer.textContent = st.farmer;
+  hudFarmer.className   = "hud-pill " + (st.cliStyle ? "sleep" : "ok");
+
+  document.getElementById("story-bar").innerHTML = st.story;
+
+  document.querySelectorAll(".c-line").forEach((el, idx) => {
+    el.className = "c-line";
+    if (idx === st.codeIdx) {
+      el.classList.add(st.cliStyle ? "active-cli" : "active");
+    }
+  });
+
+  moveSwarmAlongWaypoints(st.pathFromPrev, instant, onArrivedCallback);
+}
+
+function setScenario(scName) {
+  stopPlay();
+  currentScenario = scName;
+  stepIdx = 0;
+  document.querySelectorAll(".scenario-group .btn").forEach(b => b.classList.remove("active"));
+  document.getElementById("sc-" + scName).classList.add("active");
+  buildCodeList();
+  renderState(true);
+  togglePlay();
+}
+
+function nextStep() {
+  stopPlay();
+  const steps = SCENARIOS[currentScenario].steps;
+  if (stepIdx < steps.length - 1) stepIdx++;
+  renderState(true);
+}
+
+function prevStep() {
+  stopPlay();
+  if (stepIdx > 0) stepIdx--;
+  renderState(true);
+}
+
+function resetSim() {
+  stopPlay();
+  stepIdx = 0;
+  renderState(true);
+}
+
+function jumpToCode(cIdx) {
+  stopPlay();
+  const steps = SCENARIOS[currentScenario].steps;
+  const found = steps.findIndex(s => s.codeIdx === cIdx);
+  if (found !== -1) {
+    stepIdx = found;
+    renderState(true);
+  }
+}
+
+function scheduleNextAutoStep() {
+  if (!playing) return;
+  const steps = SCENARIOS[currentScenario].steps;
+  autoDwellTimer = setTimeout(() => {
+    if (!playing) return;
+    if (stepIdx < steps.length - 1) {
+      stepIdx++;
+      renderState(false, () => { scheduleNextAutoStep(); });
+    } else {
+      stopPlay();
+    }
+  }, 2800);
+}
+
+function togglePlay() {
+  if (playing) { stopPlay(); return; }
+  const steps = SCENARIOS[currentScenario].steps;
+  if (stepIdx >= steps.length - 1) stepIdx = 0;
+  playing = true;
+  document.getElementById("btn-play").textContent = "⏸ Tạm dừng";
+  renderState(true, () => { scheduleNextAutoStep(); });
+}
+
+function stopPlay() {
+  playing = false;
+  stopCurrentMotion();
+  document.getElementById("btn-play").textContent = "▶ Chạy Animation";
+}
+
+document.addEventListener("keydown", e => {
+  if (e.key === "ArrowRight") nextStep();
+  if (e.key === "ArrowLeft")  prevStep();
+  if (e.key === " ") { e.preventDefault(); togglePlay(); }
+});
+
+buildCodeList();
+renderState(true);
+</script>
+</body>
+</html>
